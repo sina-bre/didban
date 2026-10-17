@@ -3,10 +3,9 @@ import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
 import { recordAudit } from "../audit/record-audit.js";
 import { AuthSessionRepository } from "./auth-session.repository.js";
-import { truncateIp, uaLabel } from "./client-meta.js";
 import { LoginLimiter } from "./login-limiter.js";
 import { dummyHash, hashPassword, needsRehash, verifyPassword } from "./password-hasher.js";
-import { hashSessionToken, isWellFormedToken, newSessionToken } from "./session-token.js";
+import { startSession } from "./start-session.js";
 
 export type LoginInput = {
   email: string;
@@ -51,28 +50,13 @@ export class Login {
     this.limiter.recordSuccess(input.ip, input.email);
     if (needsRehash(row.passwordHash)) await this.rehash(row.id, input.password);
     const user = { id: row.id, email: row.email, isPlatformAdmin: row.isPlatformAdmin };
-    const token = await this.rotate(row.id, input);
+    const token = await startSession(this.sessions, { ...input, userId: row.id });
     await recordAudit(this.sql, {
       action: "auth.login_succeeded",
       actorUserId: row.id,
       target: { type: "user", id: row.id },
     });
     return { token, user };
-  }
-
-  /** Rotation on login: a session the browser already had is dropped, a new token is issued. */
-  private async rotate(userId: string, input: LoginInput): Promise<string> {
-    if (isWellFormedToken(input.currentToken)) {
-      await this.sessions.deleteByToken(hashSessionToken(input.currentToken));
-    }
-    const token = newSessionToken();
-    await this.sessions.create({
-      userId,
-      tokenHash: hashSessionToken(token),
-      uaLabel: uaLabel(input.userAgent),
-      ipPrefix: truncateIp(input.ip),
-    });
-    return token;
   }
 
   private async rehash(userId: string, password: string): Promise<void> {
