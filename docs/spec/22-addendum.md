@@ -77,3 +77,14 @@ The SDK runs on other people's sites (React, Next.js, plain HTML). It must never
 
 ### A8. No ORM (overrides the ORM row of §2 and §9.1 "Prisma-managed")
 - Plain SQL with postgres.js and forward-only `.sql` migrations (ADR 0016). Same tables, same constraints.
+
+### A9. Accounts without invites (owner decision 2026-10-17; overrides parts of §11, §16, §19)
+- **No invites, no signup.** The first owner comes from `pnpm cli create-owner`. Owners create users
+  of any role, admins create `member`s, platform admins create an organization's owner. The server
+  generates a one-time temporary password (shown once, Argon2-hashed); the user must set their own
+  at first login and reaches nothing else before that (ADR 0024).
+- **Password reset** = the same mechanism: owners reset accounts that belong only to their
+  organization; anything else via `pnpm cli reset-password <email>`. Replaces §11 reset links.
+- **TOTP** (§11) moves out of Stage 2: optional per user, built before the first public release.
+- §11 public allowlist loses `accept-invite`; §19 step 3 reads "create a user" instead of
+  "invite a member"; audit "invite create/accept" becomes "user create / password reset".
