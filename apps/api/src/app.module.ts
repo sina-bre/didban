@@ -7,13 +7,14 @@ import { AuditModule } from "./modules/audit/audit.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { EnvironmentsModule } from "./modules/environments/environments.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
+import { IngestionModule } from "./modules/ingestion/ingestion.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
 import { ProjectsModule } from "./modules/projects/projects.module.js";
 import { UsersModule } from "./modules/users/users.module.js";
 
 /**
  * INSTANCE_ROLE (spec §14.0) decides which feature modules are mounted. Health is always on.
- * Ingestion modules join for `all|ingest` (Stage 3), management modules for `all|management` (Stage 2).
+ * Ingestion joins for `all|ingest`, management modules for `all|management`.
  */
 @Module({})
 export class AppModule {
@@ -30,9 +31,16 @@ export class AppModule {
             AuditModule,
             UsersModule,
           ];
+    const ingestion = env.INSTANCE_ROLE === "management" ? [] : [IngestionModule];
     return {
       module: AppModule,
-      imports: [ConfigModule.register(env), DbModule.register(env), HealthModule, ...management],
+      imports: [
+        ConfigModule.register(env),
+        DbModule.register(env),
+        HealthModule,
+        ...ingestion,
+        ...management,
+      ],
     };
   }
 }

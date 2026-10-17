@@ -7,8 +7,8 @@ import { testEnv } from "./test-env.js";
 export const ORIGIN = "http://localhost:5173";
 
 /** A booted app plus helpers that send what the dashboard sends (same Origin, JSON). */
-export async function startTestApp() {
-  const app: NestFastifyApplication = await createApp(testEnv());
+export async function startTestApp(envOverrides: Record<string, string> = {}) {
+  const app: NestFastifyApplication = await createApp(testEnv(envOverrides));
   await app.init();
   const fastify = app.getHttpAdapter().getInstance();
   await fastify.ready();

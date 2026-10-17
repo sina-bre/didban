@@ -7,6 +7,8 @@ import { AppModule } from "../app.module.js";
 import type { Env } from "../config/env.js";
 import { csrfHook } from "./csrf-hook.js";
 import { ErrorFilter } from "./error-filter.js";
+import { ingestCorsHook } from "./ingest-cors.js";
+import { useJsonBodyParser } from "./json-body-parser.js";
 import { loggerOptions } from "./logger-options.js";
 import { requestContextHook } from "./request-context.js";
 
@@ -37,11 +39,13 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
   adapter.getInstance().addHook("onRequest", async (request, reply) => {
     reply.header("x-request-id", request.id);
   });
+  adapter.getInstance().addHook("onRequest", ingestCorsHook);
   adapter.getInstance().addHook("onRequest", csrfHook(env));
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule.register(env), adapter, {
     logger: nestLogger(env),
   });
+  useJsonBodyParser(app, LIMITS.maxBodyBytes);
   app.setGlobalPrefix("api/v1");
   app.useGlobalFilters(new ErrorFilter());
   app.enableShutdownHooks();

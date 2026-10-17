@@ -9,7 +9,13 @@ import { REQUIRED_PERMISSION } from "./requires.decorator.js";
 
 // Spec §11 route-coverage test: every registered route declares a permission or is on the
 // explicit public allowlist. Adding a route without either fails this test (and CI).
-const PUBLIC_ALLOWLIST = ["GET health/live", "GET health/ready", "POST auth/login"];
+const PUBLIC_ALLOWLIST = [
+  "GET health/live",
+  "GET health/ready",
+  "POST auth/login",
+  "POST ingest/batch",
+  "OPTIONS ingest/batch",
+];
 
 type Route = { route: string; isPublic: boolean; permission: unknown };
 let routes: Route[] = [];

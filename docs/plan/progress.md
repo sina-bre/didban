@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 3a (ingestion pipeline steps 1–5)
+- `POST /api/v1/ingest/batch` + `OPTIONS` (public; write key is the credential). Order: body limit → JSON →
+  key (shape check, LRU 60 s / 10 s) → Origin (browser keys) → rate limit (key, IP) → quota → envelope → events.
+- `migrations/0008`: `organizations.daily_event_quota`, `project_usage_daily`, `ingestion_diagnostics`,
+  `ingestion_rejected_origins` (≤ 20/env/day). Flusher writes counters + `last_used_at` once a minute. ADR 0025.
+- Valid batches get **503 until 3c** (200 = committed). `application/json` errors now say `INVALID_JSON`.
+- Checks: lint, typecheck, build ok; tests 25 + 134 passed; mutation (skip origin / rate check) fails 3 / 2 tests;
+  dev DB migrated; live: ready 200, bad key 401, bad JSON 400, 200 KB 413, preflight 204 + CORS.
+- Owner: `.env` still has `PORT=3000` (ADR 0021 says 5100). No way to set quotas over HTTP yet (SQL only).
+- **Next:** 3b enrichment (trusted-proxy IP, UA parser, geo, bots, PII, URL, referrer/channel, route templates).
+
 ## 2026-10-17 — Stage 2 gate met
 - Gate checks: lint, typecheck, build ok; tests 25 + 111 passed (two-org isolation 404s, route coverage,
   login/session/CSRF, forced password change).
