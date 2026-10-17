@@ -7,6 +7,8 @@ export const AUDIT_ACTIONS = [
   "auth.logout",
   "auth.sessions_revoked",
   "auth.password_changed",
+  "user.created",
+  "user.password_reset",
   "user.platform_admin_granted",
   "user.platform_admin_revoked",
   "organization.created",
