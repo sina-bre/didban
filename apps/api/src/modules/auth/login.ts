@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { AuthSessionRepository } from "./auth-session.repository.js";
 import { truncateIp, uaLabel } from "./client-meta.js";
 import { LoginLimiter } from "./login-limiter.js";
@@ -39,12 +40,24 @@ export class Login {
     const valid = await verifyPassword(row?.passwordHash ?? (await dummyHash()), input.password);
     if (!row || !valid) {
       this.limiter.recordFailure(input.ip, input.email);
+      // The typed email is never stored: people paste passwords into it (ADR 0022).
+      await recordAudit(this.sql, {
+        action: "auth.login_failed",
+        actorUserId: null,
+        ...(row && { target: { type: "user" as const, id: row.id } }),
+      });
       throw invalidCredentials();
     }
     this.limiter.recordSuccess(input.ip, input.email);
     if (needsRehash(row.passwordHash)) await this.rehash(row.id, input.password);
     const user = { id: row.id, email: row.email, isPlatformAdmin: row.isPlatformAdmin };
-    return { token: await this.rotate(row.id, input), user };
+    const token = await this.rotate(row.id, input);
+    await recordAudit(this.sql, {
+      action: "auth.login_succeeded",
+      actorUserId: row.id,
+      target: { type: "user", id: row.id },
+    });
+    return { token, user };
   }
 
   /** Rotation on login: a session the browser already had is dropped, a new token is issued. */

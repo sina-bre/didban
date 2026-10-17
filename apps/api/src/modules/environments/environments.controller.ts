@@ -13,7 +13,8 @@ import { UuidPipe } from "../../http/uuid-pipe.js";
 import { ZodPipe } from "../../http/zod-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
-import { createEnvironment, listEnvironments, updateEnvironment } from "./environments.js";
+import { createEnvironment } from "./create-environment.js";
+import { listEnvironments, updateEnvironment } from "./environments.js";
 
 @Controller("projects/:projectId/environments")
 export class EnvironmentsController {

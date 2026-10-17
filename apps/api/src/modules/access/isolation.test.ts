@@ -33,6 +33,7 @@ function routesOfA(): [string, string, object][] {
   const { orgA, memberA, projectA } = tenants.ids;
   const project = `/projects/${projectA}`;
   return [
+    ["GET", `/organizations/${orgA}/audit-log`, {}],
     ["GET", `/organizations/${orgA}/projects`, {}],
     ["POST", `/organizations/${orgA}/projects`, { name: "Stolen" }],
     ["PATCH", `/organizations/${orgA}/projects/${projectA}`, { archived: true }],

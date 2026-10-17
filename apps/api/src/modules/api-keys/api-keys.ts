@@ -9,6 +9,7 @@ import type { Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { AppError, notFound } from "../../http/app-error.js";
 import { projectInScope } from "../access/in-scope.js";
+import { projectAudit, recordAudit } from "../audit/record-audit.js";
 import { newApiKeyToken } from "./api-key-token.js";
 
 // Write keys of a project (`project:manage`). Revocation reaches ingestion within the key cache
@@ -64,6 +65,12 @@ export async function createApiKey(
       VALUES (${projectId}, ${input.environmentId}, ${input.kind}, ${prefix}, ${secretHash}, ${scope.userId})
       RETURNING id, environment_id, kind, prefix, created_at, last_used_at, revoked_at`;
     if (!row) throw new Error("insert returned no row");
+    await recordAudit(tx, {
+      ...projectAudit(scope, projectId),
+      action: "api_key.created",
+      target: { type: "api_key", id: row.id },
+      details: { kind: input.kind, prefix },
+    });
     return { ...toApiKey(row), token };
   });
 }
@@ -74,9 +81,19 @@ export async function revokeApiKey(
   scope: AccessScope,
   input: { projectId: string; keyId: string },
 ): Promise<void> {
-  const rows = await sql`
-    UPDATE api_keys SET revoked_at = coalesce(revoked_at, now())
-    WHERE id = ${input.keyId} AND project_id = ${projectInScope(scope, input.projectId)}
-    RETURNING id`;
-  if (rows.length === 0) throw notFound();
+  const projectId = projectInScope(scope, input.projectId);
+  await sql.begin(async (tx) => {
+    // now() is the transaction start, so equality means "revoked by this statement".
+    const [row] = await tx<{ newlyRevoked: boolean }[]>`
+      UPDATE api_keys SET revoked_at = coalesce(revoked_at, now())
+      WHERE id = ${input.keyId} AND project_id = ${projectId}
+      RETURNING revoked_at = now() AS newly_revoked`;
+    if (!row) throw notFound();
+    if (!row.newlyRevoked) return;
+    await recordAudit(tx, {
+      ...projectAudit(scope, projectId),
+      action: "api_key.revoked",
+      target: { type: "api_key", id: input.keyId },
+    });
+  });
 }

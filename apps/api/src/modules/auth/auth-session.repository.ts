@@ -45,18 +45,7 @@ export class AuthSessionRepository {
       WHERE id = ${sessionId} AND last_seen_at < now() - interval '5 minutes'`;
   }
 
-  async delete(sessionId: string): Promise<void> {
-    await this.sql`DELETE FROM auth_sessions WHERE id = ${sessionId}`;
-  }
-
   async deleteByToken(tokenHash: Buffer): Promise<void> {
     await this.sql`DELETE FROM auth_sessions WHERE token_hash = ${tokenHash}`;
-  }
-
-  /** "Log out everywhere" (no exception) and password change (keeps the current session). */
-  async deleteAllForUser(userId: string, exceptSessionId?: string): Promise<void> {
-    await this.sql`
-      DELETE FROM auth_sessions
-      WHERE user_id = ${userId} AND id IS DISTINCT FROM ${exceptSessionId ?? null}::uuid`;
   }
 }

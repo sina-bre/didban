@@ -2,6 +2,16 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 2d-2 (audit log) + dev ports
+- Ports (ADR 0021): API default 5100, dashboard 5173 (strictPort, `/api` proxy), PostgreSQL 5432.
+- `migrations/0005_audit_logs.sql`: append-only (app role lacks UPDATE/DELETE/TRUNCATE + trigger). ADR 0022.
+- `recordAudit(tx, …)` in the same transaction for auth, org, project, member, environment, key and CLI
+  actions; request ID + truncated IP from `http/request-context.ts` (AsyncLocalStorage). Logout → `logout.ts`.
+- `GET /organizations/:organizationId/audit-log` (`org:audit`, owner/admin), keyset pages ≤ 100.
+- Checks: lint, typecheck, build ok; tests 25 + 104 passed (rollback leaves no row, owner-level trigger,
+  no passwords/typed emails stored); live server on 5100: ready 200, audit-log 401. EXPLAIN in ADR 0022.
+- Owner: set `PORT=5100` in `.env` (I cannot read it). **Next:** 2d-3 invites (single-use, 72 h, hashed).
+
 ## 2026-10-17 — Stage 2d-1 (projects, environments, API keys)
 - `migrations/0004_*`: project settings columns, `environments`, `api_keys` (composite FK env→project,
   SHA-256 only, token shown once). Contracts: `projects.ts`, `environments.ts`, `api-keys.ts`. ADR 0020.

@@ -27,3 +27,7 @@ src/
 - No shadcn/ui, no Radix kits. Accessible primitives per ADR 0004.
 - Charts: Recharts, lazy-loaded, each with a data-table fallback.
 - No external URLs in `index.html` or CSS (build check fails otherwise).
+
+## Dev ports (ADR 0021)
+Vite on **5173** with `strictPort: true`; proxy `/api` → `http://127.0.0.1:5100` (the API) so the
+dashboard and API stay same-origin (spec §11 CSRF rule). PostgreSQL is 5432.

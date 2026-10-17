@@ -1,6 +1,7 @@
 import type { Sql } from "../../db/db.module.js";
 import { checkMemberChange } from "../../domain/org-roles.js";
 import { notFound } from "../../http/app-error.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { countOwners, lockOrganizationAs, orgRoleOf, refusalError } from "./org-lock.js";
 
 export type RemoveMemberInput = { actorUserId: string; organizationId: string; userId: string };
@@ -28,5 +29,12 @@ export async function removeMember(sql: Sql, input: RemoveMemberInput): Promise<
     await tx`
       DELETE FROM memberships
       WHERE organization_id = ${input.organizationId} AND user_id = ${input.userId}`;
+    await recordAudit(tx, {
+      action: "organization.member_removed",
+      actorUserId: input.actorUserId,
+      organizationId: input.organizationId,
+      target: { type: "user", id: input.userId },
+      details: { role: targetRole },
+    });
   });
 }
