@@ -3,6 +3,7 @@ import type { Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { notFound } from "../../http/app-error.js";
 import { organizationInScope } from "../access/in-scope.js";
+import { recordAudit } from "../audit/record-audit.js";
 
 // Org owners/admins (`org:projects`): the organization's project list including archived ones,
 // and archive / restore. Archived projects drop out of every AccessScope (ADR 0019).
@@ -29,11 +30,20 @@ export async function setProjectArchived(
   scope: AccessScope,
   input: SetArchivedInput,
 ): Promise<void> {
-  const rows = await sql`
-    UPDATE projects
-    SET archived_at = CASE WHEN ${input.archived} THEN coalesce(archived_at, now()) END
-    WHERE id = ${input.projectId}
-      AND organization_id = ${organizationInScope(scope, input.organizationId)}
-    RETURNING id`;
-  if (rows.length === 0) throw notFound();
+  const organizationId = organizationInScope(scope, input.organizationId);
+  await sql.begin(async (tx) => {
+    const rows = await tx`
+      UPDATE projects
+      SET archived_at = CASE WHEN ${input.archived} THEN coalesce(archived_at, now()) END
+      WHERE id = ${input.projectId} AND organization_id = ${organizationId}
+      RETURNING id`;
+    if (rows.length === 0) throw notFound();
+    await recordAudit(tx, {
+      action: input.archived ? "project.archived" : "project.restored",
+      actorUserId: scope.userId,
+      organizationId,
+      projectId: input.projectId,
+      target: { type: "project", id: input.projectId },
+    });
+  });
 }

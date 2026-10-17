@@ -9,12 +9,14 @@ import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from "@nestjs
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ENV } from "../../config/config.module.js";
 import type { Env } from "../../config/env.js";
+import { SQL, type Sql } from "../../db/db.module.js";
 import { ZodPipe } from "../../http/zod-pipe.js";
 import { Requires } from "../access/requires.decorator.js";
-import { AuthSessionRepository, type SessionPrincipal } from "./auth-session.repository.js";
+import type { SessionPrincipal } from "./auth-session.repository.js";
 import { ChangePassword } from "./change-password.js";
 import { CurrentPrincipal } from "./current-principal.js";
 import { Login } from "./login.js";
+import { logout } from "./logout.js";
 import { Public } from "./public.decorator.js";
 import { clearedSessionCookie, cookieName, readCookie, sessionCookie } from "./session-cookie.js";
 
@@ -30,7 +32,7 @@ export class AuthController {
   constructor(
     private readonly login: Login,
     private readonly changePassword: ChangePassword,
-    private readonly sessions: AuthSessionRepository,
+    @Inject(SQL) private readonly sql: Sql,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -65,7 +67,7 @@ export class AuthController {
     @CurrentPrincipal() principal: SessionPrincipal,
     @Res({ passthrough: true }) reply: Reply,
   ) {
-    await this.sessions.delete(principal.sessionId);
+    await logout(this.sql, principal, false);
     reply.header("set-cookie", clearedSessionCookie(this.env));
   }
 
@@ -76,7 +78,7 @@ export class AuthController {
     @CurrentPrincipal() principal: SessionPrincipal,
     @Res({ passthrough: true }) reply: Reply,
   ) {
-    await this.sessions.deleteAllForUser(principal.userId);
+    await logout(this.sql, principal, true);
     reply.header("set-cookie", clearedSessionCookie(this.env));
   }
 

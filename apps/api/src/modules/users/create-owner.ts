@@ -1,5 +1,6 @@
 import { emailSchema } from "@didban/contracts";
 import type { Sql } from "../../db/db.module.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { hashPassword } from "../auth/password-hasher.js";
 import { checkPassword } from "../auth/password-policy.js";
 import { insertOrganization } from "../organizations/insert-organization.js";
@@ -28,6 +29,14 @@ export async function createOwner(sql: Sql, input: CreateOwnerInput): Promise<Cr
     if (!user) throw new Error("insert returned no row");
     await tx`INSERT INTO memberships (user_id, organization_id, role)
              VALUES (${user.id}, ${organizationId}, 'owner')`;
+    // CLI: no request, no actor. The operator with shell access is trusted by definition (spec Â§11).
+    await recordAudit(tx, {
+      action: "organization.created",
+      actorUserId: null,
+      organizationId,
+      target: { type: "user", id: user.id },
+      details: { role: "owner" },
+    });
     return { userId: user.id, organizationId, slug };
   });
 }

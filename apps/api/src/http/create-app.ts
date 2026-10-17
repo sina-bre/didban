@@ -8,6 +8,7 @@ import type { Env } from "../config/env.js";
 import { csrfHook } from "./csrf-hook.js";
 import { ErrorFilter } from "./error-filter.js";
 import { loggerOptions } from "./logger-options.js";
+import { requestContextHook } from "./request-context.js";
 
 /** Hop count -> the same predicate Fastify builds for numbers (its types only accept functions). */
 function trustProxyOption(setting: Env["TRUST_PROXY"]) {
@@ -32,6 +33,7 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
     genReqId: () => randomUUID(),
     requestIdHeader: false, // never trust a client-supplied request id
   });
+  adapter.getInstance().addHook("onRequest", requestContextHook);
   adapter.getInstance().addHook("onRequest", async (request, reply) => {
     reply.header("x-request-id", request.id);
   });

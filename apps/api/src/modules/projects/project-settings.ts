@@ -3,6 +3,7 @@ import type { Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { notFound } from "../../http/app-error.js";
 import { projectInScope } from "../access/in-scope.js";
+import { changedFields, recordAudit } from "../audit/record-audit.js";
 import { PROJECT_COLUMNS, type ProjectRow, toProject } from "./project-row.js";
 
 /** One project with its settings (`project:view`). */
@@ -25,10 +26,20 @@ export async function updateProject(
 ): Promise<Project> {
   const id = projectInScope(scope, input.projectId);
   const columns = Object.keys(input.changes) as (keyof UpdateProjectRequest)[];
-  const [row] = await sql<ProjectRow[]>`
-    UPDATE projects SET ${sql(input.changes, columns)}
-    WHERE id = ${id} AND archived_at IS NULL
-    RETURNING ${sql(PROJECT_COLUMNS)}`;
-  if (!row) throw notFound();
-  return toProject(row);
+  return sql.begin(async (tx) => {
+    const [row] = await tx<ProjectRow[]>`
+      UPDATE projects SET ${tx(input.changes, columns)}
+      WHERE id = ${id} AND archived_at IS NULL
+      RETURNING ${tx(PROJECT_COLUMNS)}`;
+    if (!row) throw notFound();
+    await recordAudit(tx, {
+      action: "project.updated",
+      actorUserId: scope.userId,
+      organizationId: row.organizationId,
+      projectId: id,
+      target: { type: "project", id },
+      details: { fields: changedFields(input.changes) },
+    });
+    return toProject(row);
+  });
 }

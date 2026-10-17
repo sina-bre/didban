@@ -3,6 +3,7 @@ import type { Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { nextFreeSlug, slugify } from "../../domain/slug.js";
 import { organizationInScope } from "../access/in-scope.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { PROJECT_COLUMNS, type ProjectRow, toProject } from "./project-row.js";
 
 export type CreateProjectInput = CreateProjectRequest & { organizationId: string };
@@ -28,6 +29,13 @@ export async function createProject(
               ${input.reportingTimezone ?? "UTC"})
       RETURNING ${tx(PROJECT_COLUMNS)}`;
     if (!row) throw new Error("insert returned no row");
+    await recordAudit(tx, {
+      action: "project.created",
+      actorUserId: scope.userId,
+      organizationId,
+      projectId: row.id,
+      target: { type: "project", id: row.id },
+    });
     return toProject(row);
   });
 }

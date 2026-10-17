@@ -41,12 +41,12 @@ describe("platform admin (spec §9.1, §11)", () => {
   });
 
   it("only platform admins create and suspend organizations; they do not become members", async () => {
-    const admin = { isPlatformAdmin: true };
-    await expect(createOrganization(sql, { isPlatformAdmin: false }, "Acme")).rejects.toMatchObject(
-      {
-        status: 403,
-      },
-    );
+    const admin = { userId: crypto.randomUUID(), isPlatformAdmin: true };
+    await expect(
+      createOrganization(sql, { ...admin, isPlatformAdmin: false }, "Acme"),
+    ).rejects.toMatchObject({
+      status: 403,
+    });
     const created = await createOrganization(sql, admin, "Acme");
     expect(created.slug).toBe("acme");
     const [members] = await sql`SELECT count(*)::int AS n FROM memberships`;

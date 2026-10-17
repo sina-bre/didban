@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
+import { recordAudit } from "../audit/record-audit.js";
 import type { SessionPrincipal } from "./auth-session.repository.js";
 import { invalidCredentials, rateLimited } from "./login.js";
 import { LoginLimiter } from "./login-limiter.js";
@@ -39,6 +40,11 @@ export class ChangePassword {
                WHERE id = ${principal.userId}`;
       await tx`DELETE FROM auth_sessions
                WHERE user_id = ${principal.userId} AND id <> ${principal.sessionId}`;
+      await recordAudit(tx, {
+        action: "auth.password_changed",
+        actorUserId: principal.userId,
+        target: { type: "user", id: principal.userId },
+      });
     });
   }
 }
