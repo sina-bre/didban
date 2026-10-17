@@ -9,6 +9,7 @@ import { AppError } from "../../http/app-error.js";
 import { authorize } from "../access/authorize.js";
 import { REQUIRED_PERMISSION } from "../access/requires.decorator.js";
 import { AuthSessionRepository, TOUCH_INTERVAL_MS } from "./auth-session.repository.js";
+import { ALLOWED_BEFORE_PASSWORD_CHANGE } from "./password-change.decorator.js";
 import { IS_PUBLIC } from "./public.decorator.js";
 import { cookieName, readCookie } from "./session-cookie.js";
 import { hashSessionToken, isWellFormedToken } from "./session-token.js";
@@ -40,8 +41,18 @@ export class SessionGuard implements CanActivate {
       await this.sessions.touch(principal.sessionId);
     }
     request.principal = principal;
+    if (principal.mustChangePassword && !this.allowedBeforeChange(context)) {
+      throw new AppError(403, "PASSWORD_CHANGE_REQUIRED", "Set a new password first");
+    }
     const permission = this.reflector.getAllAndOverride<Permission>(REQUIRED_PERMISSION, targets);
     await authorize(this.sql, request, principal, permission);
     return true;
+  }
+
+  private allowedBeforeChange(context: ExecutionContext): boolean {
+    const targets = [context.getHandler(), context.getClass()];
+    return (
+      this.reflector.getAllAndOverride<boolean>(ALLOWED_BEFORE_PASSWORD_CHANGE, targets) === true
+    );
   }
 }

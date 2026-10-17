@@ -19,6 +19,12 @@ export const changePasswordRequestSchema = z.object({
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 
 export const meResponseSchema = z.object({
-  user: z.object({ id: z.uuid(), email: z.string(), isPlatformAdmin: z.boolean() }),
+  user: z.object({
+    id: z.uuid(),
+    email: z.string(),
+    isPlatformAdmin: z.boolean(),
+    /** True after creation or reset: only me, logout and password change work until it is done. */
+    mustChangePassword: z.boolean(),
+  }),
 });
 export type MeResponse = z.infer<typeof meResponseSchema>;

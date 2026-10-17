@@ -34,7 +34,7 @@ export function canManageProjectMembers(
   return orgRole === "owner" || orgRole === "admin" || projectRole === "project_admin";
 }
 
-/** Owners invite any role. Admins invite plain members only: they cannot grant owner or admin. */
-export function canInviteAs(actorRole: OrgRole, inviteRole: OrgRole): boolean {
-  return actorRole === "owner" || (actorRole === "admin" && inviteRole === "member");
+/** ADR 0024: owners create users with any role; admins create plain members only. */
+export function canCreateUserAs(actorRole: OrgRole, role: OrgRole): boolean {
+  return actorRole === "owner" || (actorRole === "admin" && role === "member");
 }

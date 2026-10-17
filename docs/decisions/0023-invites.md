@@ -1,6 +1,6 @@
 # 0023 — Invites
 
-- Status: Accepted
+- Status: Superseded by 0024 (owner decision: no invites; owners create users)
 - Date: 2026-10-17
 
 ## Context

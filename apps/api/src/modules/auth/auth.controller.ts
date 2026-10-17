@@ -17,6 +17,7 @@ import { ChangePassword } from "./change-password.js";
 import { CurrentPrincipal } from "./current-principal.js";
 import { Login } from "./login.js";
 import { logout } from "./logout.js";
+import { AllowedBeforePasswordChange } from "./password-change.decorator.js";
 import { Public } from "./public.decorator.js";
 import { clearedSessionCookie, cookieName, readCookie, sessionCookie } from "./session-cookie.js";
 
@@ -25,6 +26,7 @@ const userOf = (p: SessionPrincipal) => ({
   id: p.userId,
   email: p.email,
   isPlatformAdmin: p.isPlatformAdmin,
+  mustChangePassword: p.mustChangePassword,
 });
 
 @Controller("auth")
@@ -55,12 +57,14 @@ export class AuthController {
   }
 
   @Requires("self")
+  @AllowedBeforePasswordChange()
   @Get("me")
   me(@CurrentPrincipal() principal: SessionPrincipal): MeResponse {
     return { user: userOf(principal) };
   }
 
   @Requires("self")
+  @AllowedBeforePasswordChange()
   @Post("logout")
   @HttpCode(204)
   async logout(
@@ -72,6 +76,7 @@ export class AuthController {
   }
 
   @Requires("self")
+  @AllowedBeforePasswordChange()
   @Post("logout-all")
   @HttpCode(204)
   async logoutAll(
@@ -83,6 +88,7 @@ export class AuthController {
   }
 
   @Requires("self")
+  @AllowedBeforePasswordChange()
   @Post("password")
   @HttpCode(204)
   async password(

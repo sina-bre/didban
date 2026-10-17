@@ -12,6 +12,7 @@ export type SessionPrincipal = {
   userId: string;
   email: string;
   isPlatformAdmin: boolean;
+  mustChangePassword: boolean;
   lastSeenAt: Date;
 };
 
@@ -30,7 +31,8 @@ export class AuthSessionRepository {
 
   async findValid(tokenHash: Buffer): Promise<SessionPrincipal | undefined> {
     const [row] = await this.sql<SessionPrincipal[]>`
-      SELECT s.id AS session_id, s.user_id, s.last_seen_at, u.email, u.is_platform_admin
+      SELECT s.id AS session_id, s.user_id, s.last_seen_at, u.email, u.is_platform_admin,
+             u.must_change_password
       FROM auth_sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = ${tokenHash}
         AND s.expires_at > now()
