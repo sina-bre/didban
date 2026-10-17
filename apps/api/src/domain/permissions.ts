@@ -23,6 +23,7 @@ export const PERMISSIONS = [
   "platform", // instance operator: create/suspend organizations
   "org:roles", // change org roles, remove users
   "org:projects", // create or archive projects
+  "org:audit", // read the organization's audit log
   "project:view", // read a project's stats
   "project:manage", // environments, goals, routes, keys, shares, deletions
   "project:members", // assign project access to existing org members
@@ -36,6 +37,7 @@ export type Target = { organizationId?: string; projectId?: string };
 const ORG_RULES: Record<string, readonly OrgRole[]> = {
   "org:roles": ["owner"],
   "org:projects": ["owner", "admin"],
+  "org:audit": ["owner", "admin"],
 };
 
 export function decide(scope: AccessScope, permission: Permission, target: Target): Decision {

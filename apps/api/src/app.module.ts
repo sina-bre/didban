@@ -3,6 +3,7 @@ import { ConfigModule } from "./config/config.module.js";
 import type { Env } from "./config/env.js";
 import { DbModule } from "./db/db.module.js";
 import { ApiKeysModule } from "./modules/api-keys/api-keys.module.js";
+import { AuditModule } from "./modules/audit/audit.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { EnvironmentsModule } from "./modules/environments/environments.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
@@ -19,7 +20,14 @@ export class AppModule {
     const management =
       env.INSTANCE_ROLE === "ingest"
         ? []
-        : [AuthModule, OrganizationsModule, ProjectsModule, EnvironmentsModule, ApiKeysModule];
+        : [
+            AuthModule,
+            OrganizationsModule,
+            ProjectsModule,
+            EnvironmentsModule,
+            ApiKeysModule,
+            AuditModule,
+          ];
     return {
       module: AppModule,
       imports: [ConfigModule.register(env), DbModule.register(env), HealthModule, ...management],
