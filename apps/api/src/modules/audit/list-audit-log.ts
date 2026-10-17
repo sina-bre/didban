@@ -3,6 +3,9 @@ import type { Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { organizationInScope } from "../access/in-scope.js";
 
+// A constant bound (not `$x IS NULL OR ...`) keeps the cursor inside the index condition.
+const MAX_BIGINT = "9223372036854775807";
+
 type Row = Omit<AuditEntry, "createdAt" | "actor" | "target"> & {
   createdAt: Date;
   actorUserId: string | null;
@@ -32,7 +35,7 @@ export async function listAuditLog(
            a.target_type, a.target_id, a.details, a.request_id, a.ip_prefix
     FROM audit_logs a LEFT JOIN users u ON u.id = a.actor_user_id
     WHERE a.organization_id = ${organizationInScope(scope, input.organizationId)}
-      AND (${input.before ?? null}::bigint IS NULL OR a.id < ${input.before ?? null}::bigint)
+      AND a.id < ${input.before ?? MAX_BIGINT}::bigint
     ORDER BY a.id DESC
     LIMIT ${input.limit + 1}`;
   const page = rows.slice(0, input.limit);
