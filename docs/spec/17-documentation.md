@@ -1,0 +1,3 @@
+## 17. Documentation (must describe only implemented behavior)
+
+`README.md` · `docs/architecture.md` · `docs/metrics.md` · `docs/database.md` · `docs/sdk.md` · `docs/api.md` (including the full error code table and OpenAPI link) · `docs/security.md` · `docs/tenancy.md` · `docs/integration.md` (installing the SDK in a React/Next.js site, same-origin proxying, CSP, server-side events, the capability table) · `docs/privacy.md` · `docs/ui-template.md` · `docs/deployment.md` · `docs/operations.md` · `docs/licenses.md` · `docs/decisions/NNNN-*.md` (ADRs: stack/versions, cookieless default, server-derived sessions, session auth, same-origin topology, no partitioning at launch with the dedupe-table plan, flat properties).

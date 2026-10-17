@@ -1,0 +1,33 @@
+## 11. Authentication and authorization (simple, strong)
+
+**Model: server-side sessions. Nothing clever.**
+
+- **Accounts:** email (lowercased, unique) + password. **No public signup.** The first owner is created via CLI (`pnpm cli create-owner`, prompts for password, never takes it as an argument). Other users join via single-use invite tokens (≥ 256-bit random, stored hashed, 72 h expiry).
+- **Password hashing:** Argon2id with parameters at or above the current OWASP minimums for the library used (record the chosen parameters and the reasoning in an ADR). Per-hash random salt. Min length 12, max 128, no composition rules, rejected if present in a bundled offline list of the top common passwords. Rehash on login if parameters changed.
+- **Login:** constant-time path. Verify against a dummy hash when the account does not exist. Identical error and timing for unknown account vs. wrong password. Rate limits: per IP, per account, and per (IP, account). Account gets progressive delay after repeated failures. Hard lockout is avoided because it enables denial of service against owners.
+- **Sessions:** 256-bit random opaque token. Only `SHA-256(token)` is stored in `auth_sessions` with `user_id`, `created_at`, `last_seen_at`, `expires_at`, coarse UA label, and truncated IP. Idle timeout 7 days (sliding, `last_seen_at` write throttled to once per 5 min), absolute lifetime 30 days. **Rotate the session ID on login and on privilege change.** Logout revokes the row. "Log out everywhere" and password change revoke all other sessions.
+- **Cookie:** `__Host-sid` in production (`Secure; HttpOnly; SameSite=Lax; Path=/`, no `Domain`). In local HTTP dev, use plain `sid` with `Secure` off; the config switch is explicit and validated at startup.
+- **CSRF:** the dashboard and API are same-origin. For every state-changing method, require JSON content type, **verify `Origin` (or `Sec-Fetch-Site: same-origin`) against the configured public origin**, and reject otherwise. No separate CSRF token is needed in this topology. If the human later splits origins across different sites, switch to double-submit tokens; record that in the ADR.
+- **TOTP (optional per user, enforceable per organization):** RFC 6238, 30 s step, ±1 window, replay-protected (store last used step). Secrets encrypted at rest with AES-256-GCM using a key from env. 10 single-use recovery codes, shown once, stored hashed. Enrollment requires confirming one valid code.
+- **Password reset:** no email infrastructure in v1. An owner generates a one-time reset link for a member (shown once, 1 h expiry, stored hashed). The owner can also reset via CLI (`pnpm cli reset-password <email>`). All the user's sessions are revoked on reset.
+- **Tenancy model:** `Organization (customer/team) → Projects → Environments`. A user may belong to several organizations. Example that must be tested with real IDs: User A (owner of Organization A, which owns the `HeliumPark` project) and User B (owner of Organization B, which owns `Another Website`). B must not see, list, or reach anything of A's.
+- **Access rule:** a principal can access a project if and only if they are an `owner` or `admin` of the project's organization, **or** they have a `project_members` row for it. An org `member` with no `project_members` row sees nothing.
+- **Platform admin** (the instance operator, `users.is_platform_admin`): can create and suspend organizations, create an organization's first owner invite, set quotas, and see instance health and per-organization usage counts. **A platform admin who is not a member of an organization cannot read its analytics or project data.** There is no impersonation feature. State in `docs/security.md` that anyone with database or server access is trusted by definition.
+- **Existence hiding:** any resource the principal cannot access returns `404` with a body identical to a genuinely missing resource. `403` is only for actions on resources the principal can already see (for example a viewer attempting an admin action). A request such as `GET /api/v1/projects/<A's project id>/stats/overview` from User B returns `404`.
+- **Enforcement mechanics:** one guard resolves the principal and produces an `AccessScope` (organization IDs, accessible project IDs, roles). Every repository method that touches tenant data **requires** an `AccessScope` and filters by it. No repository method accepts a bare project ID without one. One decorator declares the required permission on each route. Row-level security is deliberately not used in v1 (record as an ADR; trigger in section 20).
+- **Route-coverage test:** a test enumerates every registered route. Each must declare a permission decorator or be on an explicit public allowlist (`ingest`, `health`, `login`, `accept-invite`, `share view`). A missing declaration fails the build.
+- **Share links** are scoped to one project, read-only, and may reach only an enumerated set of stats endpoints. They never reach management routes.
+- **Last owner rule:** the final `owner` of an organization cannot be removed or demoted.
+
+| Action | Org owner | Org admin | Project admin (member) | Viewer (member) | Platform admin (non-member) |
+|---|---|---|---|---|---|
+| View stats of a project they can access | ✓ | ✓ | ✓ (assigned) | ✓ (assigned) | ✗ (404) |
+| Manage a project's environments, goals, route templates, keys, shares, deletions | ✓ | ✓ | ✓ (assigned project) | ✗ (403) | ✗ (404) |
+| Create or archive projects | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Assign project access to existing org members | ✓ | ✓ | ✓ (own project) | ✗ | ✗ |
+| Invite org members, view the organization's audit log | ✓ | ✓ (members only; cannot grant or remove `owner`) | ✗ | ✗ | ✗ |
+| Change org roles, remove users, enforce TOTP, delete organization data | ✓ | ✗ | ✗ | ✗ | ✗ |
+| Create or suspend organizations, set quotas, view instance health | ✗ | ✗ | ✗ | ✗ | ✓ |
+
+- **Ingestion is a separate security boundary.** A write key authorizes only `POST /ingest/batch` for its own environment. It cannot read stats, list projects, or touch credentials. Management endpoints never accept a write key. Keys are never logged.
+- **Audit log** (append-only, no update/delete code path): login success/failure, logout, session revocation, password change, TOTP enable/disable, invite create/accept, role change, user removal, project member add/remove/role change, organization create/suspend, route template change, project create/update/archive, environment change, key create/revoke, share-link create/revoke, data deletion, retention change. Record actor, action, target, request ID, truncated IP, timestamp. Never record secrets.

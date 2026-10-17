@@ -1,0 +1,26 @@
+## 4. Metric definitions (these are the spec; implement exactly and document in `docs/metrics.md`)
+
+- **Page view:** an accepted `page` event that passed bot filter, internal-IP exclusion, and deduplication.
+- **Identity modes (per environment):**
+  - `cookieless` (default): `visitor_id = first 16 bytes of SHA-256(daily_salt || project_id || client_ip || normalized_user_agent)`. Nothing is stored in the browser. The salt rotates at 00:00 UTC; the previous salt is deleted after 48 h so old IDs cannot be recomputed. **Consequence: a returning person gets a new `visitor_id` each UTC day.** Multi-day "visitors" therefore means "daily-unique visitors summed by distinct ID" and overcounts returning people. The dashboard must label it exactly that way in cookieless mode.
+  - `persistent`: SDK stores a random `anonymousId` in first-party storage (requires consent when `requireConsent` is on). `visitor_id` = `anonymousId`. Stable until storage is cleared.
+- **Visit (session):** consecutive events from one `visitor_id` with gaps ≤ `session_timeout` (default 30 min, configurable 5–120). A gap above it starts a new visit. Sessions are **server-derived** (section 7, step 8), not client-supplied. In cookieless mode, visits split at 00:00 UTC because the visitor ID changes. Document this.
+- **Bounce:** a visit with exactly one `page` event and zero `track` events.
+- **Visit duration:** `last_seen_at − started_at`. Single-event visits are 0 s unless the engaged-time module reported more. The average includes zero-duration visits. Say so in the UI tooltip.
+- **Entry / exit page:** pathname of the first / last `page` event in the visit.
+- **Source attribution:** first-touch within the visit: the first `page` event's UTM parameters, else its referrer.
+- **Channel grouping** (rules in `data/channels.json`, covered by tests):
+  - Direct: no referrer, no UTM.
+  - Organic Search: known search host, or `utm_medium=organic`.
+  - Paid Search: `utm_medium` in `cpc, ppc, paidsearch`.
+  - Social: known social host, or `utm_medium=social`.
+  - Email: `utm_medium=email`.
+  - Referral: any other external referrer.
+  - Self-referrals (referrer host equals current host or an environment's allowed host) are treated as no referrer.
+- **Goal conversion rate:** `visitors with ≥1 matching event / visitors` in range, with the same filters applied. Only browser-sourced events (`source = 1`) count toward visitors, visits, bounce, and conversion rate. **Server-sourced events** (`source = 2`) appear in event counts, goal conversion *counts*, and revenue, because they carry no browser visitor ID and cannot be joined to a visit. Never blend the two in one rate.
+- **Revenue:** sum of `$revenue` on matching events, **grouped by currency. Never summed across currencies, never converted.**
+- **Cross-domain:** in cookieless mode, one person on several domains registered in the same project hashes to the same `visitor_id` when IP and UA match, so those domains are counted together. Different projects never share IDs (the project ID is in the hash). No other cross-domain stitching is attempted.
+- **Time attribution:** an event belongs to the bucket of its effective `occurred_at`, converted to the project's reporting time zone (IANA, DST-correct). A visit belongs to the bucket of its `started_at`.
+- **Per-bucket vs. total uniques:** bucket visitors sum to more than range visitors. Totals are always computed as a distinct count over the whole range, never as a sum of buckets.
+- **Comparison:** the immediately preceding range of identical length. Percent change is `null` (not 0, not ∞) when the previous value is 0.
+- **Range semantics:** `from` inclusive, `to` exclusive, ISO-8601 UTC in the API.

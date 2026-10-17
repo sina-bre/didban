@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm build*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(pnpm format*)",
+      "Bash(pnpm exec biome*)"
+    ],
+    "deny": [
+      "Read(./**/coverage/**)",
+      "Read(./pnpm-lock.yaml)",
+      "Read(./.env)",
+      "Read(./.env.*.local)",
+      "Read(./.claude/skills/ui-ux-pro-max/data/**)",
+      "Read(./apps/*/dist/**)",
+      "Read(./packages/*/dist/**)",
+      "Read(./examples/*/dist/**)"
+    ]
+  },
+  "enableAllProjectMcpServers": false,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/format-hook.mjs",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

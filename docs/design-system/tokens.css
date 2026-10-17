@@ -1,0 +1,96 @@
+/*
+ * Design tokens extracted from design/reference/*.webp (ADR 0003).
+ * Source of truth. Stage 5a moves this file to apps/dashboard/src/shared/ui/tokens.css (git mv, one copy only).
+ * Tailwind 4: @theme turns these into utilities (bg-canvas, text-ink, rounded-card, ...).
+ * Rule: components use semantic tokens only. Never raw hex in components.
+ */
+@theme {
+  /* ---- primitives ---- */
+  --color-orange-500: #ff6a1a; /* fills, lines, active marks. NOT for text on white (2.8:1) */
+  --color-orange-700: #c2410c; /* orange text/links on white: 5.2:1 */
+  --color-orange-50: #fff3eb;
+  --color-navy-900: #14213d; /* ink, dark bars, tooltip, active segment */
+  --color-navy-700: #2b3a5c;
+  --color-slate-400: #8e99ae; /* third series, inactive marks */
+  --color-slate-500: #6b7385; /* muted text: 4.7:1 on white */
+  --color-gray-50: #f6f7f9;
+  --color-gray-100: #f2f3f5;
+  --color-gray-200: #e7e9ee;
+  --color-white: #ffffff;
+  --color-green-600: #12805c;
+  --color-green-50: #e6f6ef;
+  --color-red-600: #c62f35;
+  --color-red-50: #fdecec;
+
+  /* ---- semantic ---- */
+  --color-canvas: var(--color-gray-100); /* app background behind cards */
+  --color-surface: var(--color-white); /* cards */
+  --color-subtle: var(--color-gray-50); /* segmented track, inset panels, table hover */
+  --color-line: var(--color-gray-200); /* borders, dashed row separators */
+  --color-ink: var(--color-navy-900); /* primary text, numbers */
+  --color-muted: var(--color-slate-500); /* labels, captions, axis ticks */
+  --color-accent: var(--color-orange-500);
+  --color-accent-text: var(--color-orange-700);
+  --color-accent-soft: var(--color-orange-50);
+  --color-inverse: var(--color-navy-900); /* tooltip, active pill */
+  --color-on-inverse: var(--color-white);
+  --color-up: var(--color-green-600);
+  --color-up-soft: var(--color-green-50);
+  --color-down: var(--color-red-600);
+  --color-down-soft: var(--color-red-50);
+  --color-focus: var(--color-orange-500);
+
+  /* chart series: order matters; never rely on color alone (hatch / dash too) */
+  --color-series-1: var(--color-orange-500);
+  --color-series-2: var(--color-navy-900);
+  --color-series-3: var(--color-slate-400);
+  --color-series-compare: var(--color-slate-400); /* previous period, dashed */
+
+  /* ---- type ---- */
+  --font-sans: "Inter Variable", "Vazirmatn Variable", system-ui, sans-serif;
+  --text-caption: 0.75rem; /* 12 */
+  --text-caption--line-height: 1rem;
+  --text-body: 0.875rem; /* 14 */
+  --text-body--line-height: 1.375rem;
+  --text-title: 1rem; /* 16: card titles */
+  --text-title--line-height: 1.5rem;
+  --text-heading: 1.25rem; /* 20: page titles */
+  --text-heading--line-height: 1.75rem;
+  --text-metric: 2rem; /* 32: stat cards */
+  --text-metric--line-height: 2.5rem;
+  --text-display: 3.5rem; /* 56: hero number, desktop only */
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+
+  /* ---- shape ---- */
+  --radius-card: 1.5rem; /* 24 desktop cards */
+  --radius-card-sm: 1.25rem; /* 20 mobile cards */
+  --radius-panel: 1rem; /* 16 inner panels (chart frame, mini stat) */
+  --radius-control: 0.75rem; /* 12 inputs, small buttons */
+  --radius-pill: 9999px; /* segmented, chips, delta badges */
+
+  /* ---- elevation (the reference is almost flat) ---- */
+  --shadow-card: 0 1px 2px rgb(20 33 61 / 0.04);
+  --shadow-pop: 0 12px 32px rgb(20 33 61 / 0.18); /* tooltip, menus, dialogs */
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+}
+
+/* hatched fill used for bars, gauge and "remaining" tracks (reference shots 01–03) */
+@utility hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.22) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}
