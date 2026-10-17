@@ -20,7 +20,7 @@ const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     HOST: z.string().default("127.0.0.1"),
-    PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+    PORT: z.coerce.number().int().min(1).max(65_535).default(5100),
     PUBLIC_ORIGIN: z.url({ protocol: /^https?$/ }),
     INSTANCE_ROLE: z.enum(["all", "ingest", "management"]).default("all"),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),

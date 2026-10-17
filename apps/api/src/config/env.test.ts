@@ -10,7 +10,7 @@ const base = {
 describe("loadEnv", () => {
   it("applies defaults for development", () => {
     const env = loadEnv(base);
-    expect(env).toMatchObject({ NODE_ENV: "development", PORT: 3000, INSTANCE_ROLE: "all" });
+    expect(env).toMatchObject({ NODE_ENV: "development", PORT: 5100, INSTANCE_ROLE: "all" });
     expect(env.TRUST_PROXY).toBe(0);
   });
 
