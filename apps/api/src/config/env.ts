@@ -29,6 +29,9 @@ const envSchema = z
     DB_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
     // Spec §11: `secure` = __Host-sid (https only); `insecure-dev` = plain sid over local http.
     SESSION_COOKIE: z.enum(["secure", "insecure-dev"]).default("secure"),
+    // Spec §7 step 4 (ADR 0025): ingest requests per minute and process; IP bucket = browser keys.
+    INGEST_RATE_PER_KEY: z.coerce.number().int().min(1).default(6000),
+    INGEST_RATE_PER_IP: z.coerce.number().int().min(1).default(600),
   })
   .superRefine((env, ctx) => {
     const url = new URL(env.PUBLIC_ORIGIN);
