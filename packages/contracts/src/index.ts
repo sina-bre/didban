@@ -1,4 +1,5 @@
 export * from "./api-keys.js";
+export * from "./audit.js";
 export * from "./auth.js";
 export * from "./envelope.js";
 export * from "./environments.js";
