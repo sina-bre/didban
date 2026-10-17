@@ -5,7 +5,6 @@ export * from "./envelope.js";
 export * from "./environments.js";
 export * from "./error-codes.js";
 export * from "./event.js";
-export * from "./invites.js";
 export * from "./limits.js";
 export * from "./organizations.js";
 export * from "./projects.js";

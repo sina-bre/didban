@@ -16,7 +16,5 @@ import { SessionGuard } from "./session.guard.js";
     { provide: LoginLimiter, useFactory: () => new LoginLimiter() },
     { provide: APP_GUARD, useClass: SessionGuard },
   ],
-  // Invites sign the user in after accepting (same limiter, same session store).
-  exports: [AuthSessionRepository, LoginLimiter],
 })
 export class AuthModule {}
