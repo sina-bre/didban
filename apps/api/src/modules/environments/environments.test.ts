@@ -58,7 +58,9 @@ describe("environments (spec §9.1)", () => {
     expect(list.json().environments.map((e: { name: string }) => e.name)).toEqual(["production"]);
     expect(await statusOf(t, "POST", url, tenants.cookies.viewerA, { name: "x" })).toBe(403);
   });
+});
 
+describe("environments: tenant isolation (spec §11)", () => {
   it("A's environment cannot be changed through B's own project", async () => {
     const created = await call(t, "POST", envsOf(tenants.ids.projectA), tenants.cookies.ownerA, {
       name: "production",

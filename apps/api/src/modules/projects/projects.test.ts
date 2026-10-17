@@ -15,7 +15,7 @@ afterEach(() => t.close());
 
 const orgProjects = () => `/organizations/${tenants.ids.orgA}/projects`;
 
-describe("projects (spec §9.1, §11)", () => {
+describe("project creation (spec §9.1, §11)", () => {
   it("an org admin creates a project with a unique slug and DB defaults", async () => {
     const res = await call(t, "POST", orgProjects(), tenants.cookies.adminA, {
       name: "HeliumPark",
@@ -43,7 +43,9 @@ describe("projects (spec §9.1, §11)", () => {
     expect(await statusOf(t, "POST", orgProjects(), viewerA, { name: "X" })).toBe(403);
     expect(await statusOf(t, "POST", orgProjects(), memberA, { name: "X" })).toBe(403);
   });
+});
 
+describe("project settings and archive (spec §9.1, §11)", () => {
   it("a viewer reads settings but cannot change them; the owner can", async () => {
     const url = `/projects/${tenants.ids.projectA}`;
     const { viewerA, ownerA } = tenants.cookies;
