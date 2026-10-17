@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 2d-3 (invites)
+- `migrations/0006_invites.sql` (hashed token, one open invite per org+email). Contracts `invites.ts`. ADR 0023.
+- Routes: `GET|POST /organizations/:id/invites`, `DELETE .../:inviteId` (`org:invite`; admins → member only),
+  `POST /admin/organizations/:id/invites` (owner invite), public `POST /auth/accept-invite[/preview]`.
+- Link `PUBLIC_ORIGIN/accept-invite#<token>` shown once. Existing accounts must give their password.
+  `auth/start-session.ts` extracted from login (rotation shared).
+- Tests: role limits, replace/revoke, platform admin stays non-member, uniform INVITE_INVALID,
+  parallel accepts → one wins, isolation covers invite routes. Lint, typecheck, build ok; 25 + 114 passed.
+  Live on 5100: preview 400 INVITE_INVALID, foreign Origin 403, list 401.
+- **Next:** 2d-4 TOTP + recovery codes (needs a `TOTP_ENCRYPTION_KEY` env var), then reset links.
+
 ## 2026-10-17 — Stage 2d-2 (audit log) + dev ports
 - Ports (ADR 0021): API default 5100, dashboard 5173 (strictPort, `/api` proxy), PostgreSQL 5432.
 - `migrations/0005_audit_logs.sql`: append-only (app role lacks UPDATE/DELETE/TRUNCATE + trigger). ADR 0022.
