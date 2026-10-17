@@ -1,5 +1,6 @@
 import { emailSchema } from "@didban/contracts";
 import type { Sql } from "../../db/db.module.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { revokeAllSessions } from "../auth/revoke-sessions.js";
 
 export class PlatformAdminError extends Error {}
@@ -23,6 +24,11 @@ export async function setPlatformAdmin(
     if (user.isPlatformAdmin === value) return false;
     await tx`UPDATE users SET is_platform_admin = ${value}, updated_at = now() WHERE id = ${user.id}`;
     await revokeAllSessions(tx, user.id);
+    await recordAudit(tx, {
+      action: value ? "user.platform_admin_granted" : "user.platform_admin_revoked",
+      actorUserId: null, // CLI only (spec Â§9.1)
+      target: { type: "user", id: user.id },
+    });
     return true;
   });
 }

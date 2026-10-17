@@ -12,6 +12,7 @@ export type SessionPrincipal = {
   userId: string;
   email: string;
   isPlatformAdmin: boolean;
+  mustChangePassword: boolean;
   lastSeenAt: Date;
 };
 
@@ -30,7 +31,8 @@ export class AuthSessionRepository {
 
   async findValid(tokenHash: Buffer): Promise<SessionPrincipal | undefined> {
     const [row] = await this.sql<SessionPrincipal[]>`
-      SELECT s.id AS session_id, s.user_id, s.last_seen_at, u.email, u.is_platform_admin
+      SELECT s.id AS session_id, s.user_id, s.last_seen_at, u.email, u.is_platform_admin,
+             u.must_change_password
       FROM auth_sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = ${tokenHash}
         AND s.expires_at > now()
@@ -45,18 +47,7 @@ export class AuthSessionRepository {
       WHERE id = ${sessionId} AND last_seen_at < now() - interval '5 minutes'`;
   }
 
-  async delete(sessionId: string): Promise<void> {
-    await this.sql`DELETE FROM auth_sessions WHERE id = ${sessionId}`;
-  }
-
   async deleteByToken(tokenHash: Buffer): Promise<void> {
     await this.sql`DELETE FROM auth_sessions WHERE token_hash = ${tokenHash}`;
-  }
-
-  /** "Log out everywhere" (no exception) and password change (keeps the current session). */
-  async deleteAllForUser(userId: string, exceptSessionId?: string): Promise<void> {
-    await this.sql`
-      DELETE FROM auth_sessions
-      WHERE user_id = ${userId} AND id IS DISTINCT FROM ${exceptSessionId ?? null}::uuid`;
   }
 }

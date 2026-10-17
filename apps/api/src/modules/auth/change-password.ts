@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
+import { recordAudit } from "../audit/record-audit.js";
 import type { SessionPrincipal } from "./auth-session.repository.js";
 import { invalidCredentials, rateLimited } from "./login.js";
 import { LoginLimiter } from "./login-limiter.js";
@@ -31,14 +32,26 @@ export class ChangePassword {
       this.limiter.recordFailure(ip, principal.email);
       throw invalidCredentials();
     }
+    if (newPassword === currentPassword) {
+      throw new AppError(
+        400,
+        "PASSWORD_UNCHANGED",
+        "Choose a password different from the current one",
+      );
+    }
     const problem = checkPassword(newPassword);
     if (problem) throw new AppError(400, `PASSWORD_${problem}`, "Password rejected");
     const passwordHash = await hashPassword(newPassword);
     await this.sql.begin(async (tx) => {
-      await tx`UPDATE users SET password_hash = ${passwordHash}, updated_at = now()
+      await tx`UPDATE users SET password_hash = ${passwordHash}, must_change_password = false, updated_at = now()
                WHERE id = ${principal.userId}`;
       await tx`DELETE FROM auth_sessions
                WHERE user_id = ${principal.userId} AND id <> ${principal.sessionId}`;
+      await recordAudit(tx, {
+        action: "auth.password_changed",
+        actorUserId: principal.userId,
+        target: { type: "user", id: principal.userId },
+      });
     });
   }
 }

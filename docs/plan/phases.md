@@ -17,11 +17,12 @@ Skills installed, MCP config, CLAUDE.md files, spec split by section, addendum, 
 - **Gate:** clean DB migrates; `pnpm typecheck lint test` green; API starts and `/health/ready` answers 200.
 - Skills: `supabase-postgres-best-practices`, `nestjs-best-practices`, `vitest`.
 
-## Stage 2 — Backend core + auth
+## Stage 2 — Backend core + auth ✅ (2026-10-17)
 - 2a Users, Argon2id, sessions, cookie, CSRF origin check, login rate limits, CLI `create-owner`.
 - 2b Organizations, memberships, project members, platform-admin flag + CLI, last-owner rule.
 - 2c `AccessScope` guard, permission decorator, route-coverage test, 404 existence hiding.
-- 2d Projects, environments, API keys, audit log, invites, TOTP + recovery codes, password-reset links.
+- 2d Projects, environments, API keys, audit log, owner-created users + temporary-password reset (A9).
+  TOTP + recovery codes: optional, before the first public release (A9).
 - **Gate:** two-org isolation tests (404 everywhere), route-coverage, login/session/CSRF tests green.
 
 ## Stage 3 — Ingestion + SDK

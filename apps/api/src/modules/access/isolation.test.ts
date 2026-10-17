@@ -11,18 +11,42 @@ import { startTestApp } from "../../test-support/test-app.js";
 
 let t: Awaited<ReturnType<typeof startTestApp>>;
 let tenants: Awaited<ReturnType<typeof seedTwoTenants>>;
+let envA: string;
+let keyA: string;
+let tokenA: string;
 
 beforeEach(async () => {
   await resetDb();
   t = await startTestApp();
   tenants = await seedTwoTenants(t.sql);
+  const envs = `/projects/${tenants.ids.projectA}/environments`;
+  envA = (await call(t, "POST", envs, tenants.cookies.ownerA, { name: "production" })).json().id;
+  const key = await call(t, "POST", `${envs}/${envA}/keys`, tenants.cookies.ownerA, {
+    kind: "write_server",
+  });
+  ({ id: keyA, token: tokenA } = key.json());
 });
 afterEach(() => t.close());
 
 /** Every route that touches one of A's resources, as [method, url, body]. */
 function routesOfA(): [string, string, object][] {
   const { orgA, memberA, projectA } = tenants.ids;
+  const project = `/projects/${projectA}`;
   return [
+    ["GET", `/organizations/${orgA}/audit-log`, {}],
+    ["POST", `/organizations/${orgA}/users`, { email: "x@evil.test", role: "owner" }],
+    ["POST", `/organizations/${orgA}/members/${memberA}/password-reset`, {}],
+    ["GET", `/organizations/${orgA}/projects`, {}],
+    ["POST", `/organizations/${orgA}/projects`, { name: "Stolen" }],
+    ["PATCH", `/organizations/${orgA}/projects/${projectA}`, { archived: true }],
+    ["GET", project, {}],
+    ["PATCH", project, { retentionDays: 7 }],
+    ["GET", `${project}/environments`, {}],
+    ["POST", `${project}/environments`, { name: "staging" }],
+    ["PATCH", `${project}/environments/${envA}`, { trackLocalhost: true }],
+    ["GET", `${project}/keys`, {}],
+    ["POST", `${project}/environments/${envA}/keys`, { kind: "write_server" }],
+    ["DELETE", `${project}/keys/${keyA}`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
@@ -50,6 +74,12 @@ describe("tenant isolation (spec §11, §16)", () => {
     await expectHidden(tenants.cookies.ownerB);
     const [members] = await t.sql`SELECT count(*)::int AS n FROM memberships`;
     expect(members?.n).toBe(5); // nothing of A changed
+    const [state] = await t.sql`
+      SELECT (SELECT count(*)::int FROM projects) AS projects,
+             (SELECT count(*)::int FROM environments) AS envs,
+             (SELECT count(revoked_at)::int FROM api_keys) AS revoked,
+             (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived`;
+    expect(state).toEqual({ projects: 2, envs: 1, revoked: 0, archived: 0 });
   });
 
   it("a platform admin who is not a member gets 404 on A's routes", async () => {
@@ -78,6 +108,17 @@ describe("tenant isolation (spec §11, §16)", () => {
       id: tenants.ids.projectA,
       role: "viewer",
     });
+  });
+
+  it("a write key opens no management route (spec §11 separate boundary)", async () => {
+    for (const headers of [{ "x-write-key": tokenA }, { authorization: `Bearer ${tokenA}` }]) {
+      const res = await t.send({
+        method: "GET",
+        url: `/api/v1/projects/${tenants.ids.projectA}/keys`,
+        headers,
+      });
+      expect(res.statusCode).toBe(401);
+    }
   });
 
   it("malformed IDs are a plain 404, never a 500", async () => {

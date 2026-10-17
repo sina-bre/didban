@@ -1,6 +1,7 @@
 import type { Sql } from "../../db/db.module.js";
 import { checkMemberChange, type OrgRole } from "../../domain/org-roles.js";
 import { notFound } from "../../http/app-error.js";
+import { recordAudit } from "../audit/record-audit.js";
 import { revokeAllSessions } from "../auth/revoke-sessions.js";
 import { countOwners, lockOrganizationAs, orgRoleOf, refusalError } from "./org-lock.js";
 
@@ -29,5 +30,12 @@ export async function changeMemberRole(sql: Sql, input: ChangeMemberRoleInput): 
       UPDATE memberships SET role = ${input.role}
       WHERE organization_id = ${input.organizationId} AND user_id = ${input.userId}`;
     await revokeAllSessions(tx, input.userId);
+    await recordAudit(tx, {
+      action: "organization.member_role_changed",
+      actorUserId: input.actorUserId,
+      organizationId: input.organizationId,
+      target: { type: "user", id: input.userId },
+      details: { from: targetRole, to: input.role },
+    });
   });
 }

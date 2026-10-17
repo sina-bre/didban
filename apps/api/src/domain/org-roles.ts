@@ -33,3 +33,8 @@ export function canManageProjectMembers(
 ): boolean {
   return orgRole === "owner" || orgRole === "admin" || projectRole === "project_admin";
 }
+
+/** ADR 0024: owners create users with any role; admins create plain members only. */
+export function canCreateUserAs(actorRole: OrgRole, role: OrgRole): boolean {
+  return actorRole === "owner" || (actorRole === "admin" && role === "member");
+}

@@ -2,6 +2,46 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 2 gate met
+- Gate checks: lint, typecheck, build ok; tests 25 + 111 passed (two-org isolation 404s, route coverage,
+  login/session/CSRF, forced password change).
+- Live walkthrough on the test DB (port 5199): owner → project → environment → key → user → viewer,
+  temp-password block, viewer 403, foreign Origin 403, other org + non-member platform admin 404,
+  suspend → 404, reset revokes session, logout 401. All as expected.
+- New `docs/guides/manual-testing.md`: diagrams + curl steps for the owner to repeat the flow by hand.
+- **Next:** Stage 3a ingestion (new session).
+
+## 2026-10-17 — Stage 2d-3 (owner-created users, replaces invites)
+- Owner decision (spec addendum A9, ADR 0024): no invites/signup. Invites merge reverted; `0007` drops
+  `invites`, adds `users.must_change_password`. TOTP moved to "optional, before first public release".
+- `POST /organizations/:id/users` (`org:users`; admins → members only), `POST /admin/organizations/:id/owners`,
+  owner reset `POST .../members/:userId/password-reset` (single-org, non-admin accounts), `pnpm cli reset-password`.
+- One-time temporary password (~115 bits, shown once); until changed only me/logout/password work (403).
+- Checks: lint, typecheck, build ok; tests 25 + 111 passed; dev DB migrated; CLI unknown email → exit 1.
+- **Next:** Stage 2 gate review (two-org isolation, route coverage, auth tests) → release `develop` → `main`;
+  then Stage 3a ingestion.
+
+## 2026-10-17 — Stage 2d-2 (audit log) + dev ports
+- Ports (ADR 0021): API default 5100, dashboard 5173 (strictPort, `/api` proxy), PostgreSQL 5432.
+- `migrations/0005_audit_logs.sql`: append-only (app role lacks UPDATE/DELETE/TRUNCATE + trigger). ADR 0022.
+- `recordAudit(tx, …)` in the same transaction for auth, org, project, member, environment, key and CLI
+  actions; request ID + truncated IP from `http/request-context.ts` (AsyncLocalStorage). Logout → `logout.ts`.
+- `GET /organizations/:organizationId/audit-log` (`org:audit`, owner/admin), keyset pages ≤ 100.
+- Checks: lint, typecheck, build ok; tests 25 + 104 passed (rollback leaves no row, owner-level trigger,
+  no passwords/typed emails stored); live server on 5100: ready 200, audit-log 401. EXPLAIN in ADR 0022.
+- Owner: set `PORT=5100` in `.env` (I cannot read it). **Next:** 2d-3 invites (single-use, 72 h, hashed).
+
+## 2026-10-17 — Stage 2d-1 (projects, environments, API keys)
+- `migrations/0004_*`: project settings columns, `environments`, `api_keys` (composite FK env→project,
+  SHA-256 only, token shown once). Contracts: `projects.ts`, `environments.ts`, `api-keys.ts`. ADR 0020.
+- Routes: org projects list/create/archive, project get/patch, environments list/create/patch,
+  keys list/create/revoke. Use cases re-check the scope (`access/in-scope.ts`). `domain/slug.ts`, `cidr.ts`.
+- Tests: isolation now covers all 11 new routes (identical 404 + nothing changed), write key → 401 on
+  management, mixed-ID attacks (A's env/key via B's project) 404. Removing one `@Requires` fails 5 tests.
+- Checks: lint, typecheck, build ok; tests 25 + 95 passed; dev DB migrated; live: ready 200, new routes 401,
+  foreign Origin 403. EXPLAIN for the key index in ADR 0020. Git: baseline on `main`, git flow from here.
+- **Next:** 2d-2 audit log (also for 2d-1 actions), then invites, TOTP + recovery codes, reset links.
+
 ## 2026-10-17 — Stage 2c (AccessScope guard, permissions, routes)
 - `domain/permissions.ts` (pure `decide()` → allow/404/403), `modules/access/*`: scope loader (skips suspended
   orgs, archived projects), `@Requires(permission)`, `authorize()` called by the one global guard (fails closed). ADR 0019.
