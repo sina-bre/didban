@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canManageProjectMembers, checkMemberChange } from "./org-roles.js";
+import { canInviteAs, canManageProjectMembers, checkMemberChange, ORG_ROLES } from "./org-roles.js";
 
 describe("checkMemberChange (spec §11 last-owner rule)", () => {
   it("lets an owner demote or remove another owner while one remains", () => {
@@ -41,5 +41,13 @@ describe("canManageProjectMembers", () => {
     expect(canManageProjectMembers("member", "project_admin")).toBe(true);
     expect(canManageProjectMembers("member", "viewer")).toBe(false);
     expect(canManageProjectMembers("member", null)).toBe(false);
+  });
+});
+
+describe("canInviteAs (spec §11 invites)", () => {
+  it("owners invite any role, admins only members, members nobody", () => {
+    for (const role of ORG_ROLES) expect(canInviteAs("owner", role)).toBe(true);
+    expect(ORG_ROLES.filter((role) => canInviteAs("admin", role))).toEqual(["member"]);
+    expect(ORG_ROLES.some((role) => canInviteAs("member", role))).toBe(false);
   });
 });
