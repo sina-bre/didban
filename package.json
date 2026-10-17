@@ -1,0 +1,26 @@
+{
+  "name": "didban",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11"
+  },
+  "scripts": {
+    "lint": "biome check . && node scripts/check-file-size.mjs && node scripts/check-logical-css.mjs",
+    "format": "biome check --write .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build",
+    "cli": "pnpm --silent -C apps/api cli",
+    "db:setup": "node scripts/dev-db.mjs",
+    "db:migrate": "pnpm -C apps/api migrate",
+    "db:migrate:test": "pnpm -C apps/api migrate:test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "typescript": "6.0.3"
+  }
+}
