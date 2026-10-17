@@ -1,9 +1,9 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createSql } from "../../db/db.module.js";
+import { slugify } from "../../domain/slug.js";
 import { AppError } from "../../http/app-error.js";
 import { resetDb } from "../../test-support/reset-db.js";
 import { testEnv } from "../../test-support/test-env.js";
-import { slugify } from "../organizations/insert-organization.js";
 import { CreateOwnerError, createOwner } from "./create-owner.js";
 
 const sql = createSql(testEnv());
@@ -63,8 +63,8 @@ describe("createOwner (spec §11: first owner via CLI)", () => {
   });
 
   it("slugifies Latin names and falls back for other scripts", () => {
-    expect(slugify("Acme Analytics GmbH")).toBe("acme-analytics-gmbh");
-    expect(slugify("Café Déjà Vu")).toBe("cafe-deja-vu");
-    expect(slugify("دیدبان")).toBe("org");
+    expect(slugify("Acme Analytics GmbH", "org")).toBe("acme-analytics-gmbh");
+    expect(slugify("Café Déjà Vu", "org")).toBe("cafe-deja-vu");
+    expect(slugify("دیدبان", "org")).toBe("org");
   });
 });

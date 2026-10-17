@@ -2,7 +2,9 @@ import { type DynamicModule, Module } from "@nestjs/common";
 import { ConfigModule } from "./config/config.module.js";
 import type { Env } from "./config/env.js";
 import { DbModule } from "./db/db.module.js";
+import { ApiKeysModule } from "./modules/api-keys/api-keys.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
+import { EnvironmentsModule } from "./modules/environments/environments.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
 import { ProjectsModule } from "./modules/projects/projects.module.js";
@@ -15,7 +17,9 @@ import { ProjectsModule } from "./modules/projects/projects.module.js";
 export class AppModule {
   static register(env: Env): DynamicModule {
     const management =
-      env.INSTANCE_ROLE === "ingest" ? [] : [AuthModule, OrganizationsModule, ProjectsModule];
+      env.INSTANCE_ROLE === "ingest"
+        ? []
+        : [AuthModule, OrganizationsModule, ProjectsModule, EnvironmentsModule, ApiKeysModule];
     return {
       module: AppModule,
       imports: [ConfigModule.register(env), DbModule.register(env), HealthModule, ...management],

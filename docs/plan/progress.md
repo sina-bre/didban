@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 2d-1 (projects, environments, API keys)
+- `migrations/0004_*`: project settings columns, `environments`, `api_keys` (composite FK env→project,
+  SHA-256 only, token shown once). Contracts: `projects.ts`, `environments.ts`, `api-keys.ts`. ADR 0020.
+- Routes: org projects list/create/archive, project get/patch, environments list/create/patch,
+  keys list/create/revoke. Use cases re-check the scope (`access/in-scope.ts`). `domain/slug.ts`, `cidr.ts`.
+- Tests: isolation now covers all 11 new routes (identical 404 + nothing changed), write key → 401 on
+  management, mixed-ID attacks (A's env/key via B's project) 404. Removing one `@Requires` fails 5 tests.
+- Checks: lint, typecheck, build ok; tests 25 + 95 passed; dev DB migrated; live: ready 200, new routes 401,
+  foreign Origin 403. EXPLAIN for the key index in ADR 0020. Git: baseline on `main`, git flow from here.
+- **Next:** 2d-2 audit log (also for 2d-1 actions), then invites, TOTP + recovery codes, reset links.
+
 ## 2026-10-17 — Stage 2c (AccessScope guard, permissions, routes)
 - `domain/permissions.ts` (pure `decide()` → allow/404/403), `modules/access/*`: scope loader (skips suspended
   orgs, archived projects), `@Requires(permission)`, `authorize()` called by the one global guard (fails closed). ADR 0019.
