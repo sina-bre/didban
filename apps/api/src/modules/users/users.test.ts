@@ -103,3 +103,19 @@ describe("pnpm cli reset-password (spec §11 operator reset)", () => {
     expect(row).toEqual({ actorUserId: null, organizationId: null });
   });
 });
+
+describe("platform admin creates an owner (spec §11)", () => {
+  it("only platform admins, only live organizations, without becoming a member", async () => {
+    const url = `/admin/organizations/${tenants.ids.orgA}/owners`;
+    const body = { email: "second-owner@helium.test" };
+    expect(await statusOf(t, "POST", url, tenants.cookies.ownerA, body)).toBe(403);
+    await t.sql`UPDATE users SET is_platform_admin = true WHERE id = ${tenants.ids.ownerB}`;
+    const res = await call(t, "POST", url, tenants.cookies.ownerB, body);
+    expect([res.statusCode, res.json().role]).toEqual([201, "owner"]);
+    expect(
+      await statusOf(t, "GET", `/projects/${tenants.ids.projectA}`, tenants.cookies.ownerB),
+    ).toBe(404);
+    await t.sql`UPDATE organizations SET suspended_at = now() WHERE id = ${tenants.ids.orgA}`;
+    expect(await statusOf(t, "POST", url, tenants.cookies.ownerB, { email: "z@h.test" })).toBe(404);
+  });
+});

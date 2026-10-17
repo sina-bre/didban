@@ -2,18 +2,14 @@ import type { CreatedUser, CreateUserRequest } from "@didban/contracts";
 import type { Sql } from "../../db/db.module.js";
 import { canCreateUserAs } from "../../domain/org-roles.js";
 import type { AccessScope } from "../../domain/permissions.js";
-import { AppError } from "../../http/app-error.js";
+import { AppError, notFound } from "../../http/app-error.js";
 import { organizationInScope } from "../access/in-scope.js";
-import { recordAudit } from "../audit/record-audit.js";
-import { hashPassword } from "../auth/password-hasher.js";
-import { newTemporaryPassword } from "../auth/temporary-password.js";
 import { lockOrganizationAs } from "../organizations/org-lock.js";
+import { insertUser, temporaryCredentials } from "./insert-user.js";
 
 /**
- * ADR 0024 (`org:users`): an owner or admin creates an account in their organization. The server
- * picks a temporary password, returned once; the user must replace it at first login. An email
- * that already has an account is refused: attaching an existing account to another organization
- * is an operator action, so an org admin cannot pull in people from other organizations.
+ * ADR 0024 (`org:users`): an owner or admin creates an account in their organization; admins
+ * create plain members only. The role is re-read under the organization row lock.
  */
 export async function createUser(
   sql: Sql,
@@ -21,27 +17,34 @@ export async function createUser(
   input: CreateUserRequest & { organizationId: string },
 ): Promise<CreatedUser> {
   const organizationId = organizationInScope(scope, input.organizationId);
-  const temporaryPassword = newTemporaryPassword();
-  const passwordHash = await hashPassword(temporaryPassword); // before any lock is taken
+  const credentials = await temporaryCredentials();
   return sql.begin(async (tx) => {
     const actorRole = await lockOrganizationAs(tx, organizationId, scope.userId);
     if (!canCreateUserAs(actorRole, input.role)) {
       throw new AppError(403, "FORBIDDEN", "Not allowed");
     }
-    const [user] = await tx<{ id: string }[]>`
-      INSERT INTO users (email, password_hash, must_change_password)
-      VALUES (${input.email}, ${passwordHash}, true)
-      ON CONFLICT (email) DO NOTHING RETURNING id`;
-    if (!user) throw new AppError(409, "EMAIL_TAKEN", "An account with this email already exists");
-    await tx`INSERT INTO memberships (user_id, organization_id, role)
-             VALUES (${user.id}, ${organizationId}, ${input.role})`;
-    await recordAudit(tx, {
-      action: "user.created",
-      actorUserId: scope.userId,
-      organizationId,
-      target: { type: "user", id: user.id },
-      details: { role: input.role },
-    });
-    return { userId: user.id, email: input.email, role: input.role, temporaryPassword };
+    const actorUserId = scope.userId;
+    return insertUser(tx, { ...input, ...credentials, organizationId, actorUserId });
+  });
+}
+
+/**
+ * Spec §11: a platform admin gives an organization an owner (e.g. one they created). They do
+ * not become a member themselves. Suspended organizations get no new users.
+ */
+export async function createOwnerAsPlatformAdmin(
+  sql: Sql,
+  actor: { userId: string; isPlatformAdmin: boolean },
+  input: { organizationId: string; email: string },
+): Promise<CreatedUser> {
+  if (!actor.isPlatformAdmin) throw new AppError(403, "FORBIDDEN", "Not allowed");
+  const credentials = await temporaryCredentials();
+  return sql.begin(async (tx) => {
+    const [org] = await tx`
+      SELECT 1 FROM organizations
+      WHERE id = ${input.organizationId} AND suspended_at IS NULL FOR UPDATE`;
+    if (!org) throw notFound();
+    const owner = { ...input, ...credentials, role: "owner" as const, actorUserId: actor.userId };
+    return insertUser(tx, owner);
   });
 }

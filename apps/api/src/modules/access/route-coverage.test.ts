@@ -44,7 +44,7 @@ afterAll(() => close());
 
 describe("route coverage (spec §11)", () => {
   it("finds the routes (guards against a scanner that silently sees nothing)", () => {
-    expect(routes.length).toBeGreaterThanOrEqual(26);
+    expect(routes.length).toBeGreaterThanOrEqual(27);
   });
 
   it("public routes are exactly the allowlist", () => {

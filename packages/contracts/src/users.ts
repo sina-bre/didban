@@ -8,6 +8,10 @@ import { orgRoleSchema } from "./organizations.js";
 export const createUserRequestSchema = z.object({ email: emailSchema, role: orgRoleSchema });
 export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
 
+/** Platform admins create an organization's owner. */
+export const createOwnerRequestSchema = z.object({ email: emailSchema });
+export type CreateOwnerRequest = z.infer<typeof createOwnerRequestSchema>;
+
 /** The only response with the temporary password. Only its Argon2 hash is stored. */
 export const createdUserSchema = z.object({
   userId: z.uuid(),
