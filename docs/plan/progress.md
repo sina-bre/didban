@@ -2,6 +2,15 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-17 — Stage 2 gate met
+- Gate checks: lint, typecheck, build ok; tests 25 + 111 passed (two-org isolation 404s, route coverage,
+  login/session/CSRF, forced password change).
+- Live walkthrough on the test DB (port 5199): owner → project → environment → key → user → viewer,
+  temp-password block, viewer 403, foreign Origin 403, other org + non-member platform admin 404,
+  suspend → 404, reset revokes session, logout 401. All as expected.
+- New `docs/guides/manual-testing.md`: diagrams + curl steps for the owner to repeat the flow by hand.
+- **Next:** Stage 3a ingestion (new session).
+
 ## 2026-10-17 — Stage 2d-3 (owner-created users, replaces invites)
 - Owner decision (spec addendum A9, ADR 0024): no invites/signup. Invites merge reverted; `0007` drops
   `invites`, adds `users.must_change_password`. TOTP moved to "optional, before first public release".
