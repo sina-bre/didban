@@ -14,6 +14,9 @@ export const AUDIT_ACTIONS = [
   "organization.unsuspended",
   "organization.member_role_changed",
   "organization.member_removed",
+  "invite.created",
+  "invite.revoked",
+  "invite.accepted",
   "project.created",
   "project.updated",
   "project.archived",
@@ -33,6 +36,7 @@ export const AUDIT_TARGET_TYPES = [
   "project",
   "environment",
   "api_key",
+  "invite",
 ] as const;
 export type AuditTargetType = (typeof AUDIT_TARGET_TYPES)[number];
 
