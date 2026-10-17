@@ -15,7 +15,12 @@ export type LoginInput = {
   userAgent: string | undefined;
   currentToken: string | undefined;
 };
-export type PublicUser = { id: string; email: string; isPlatformAdmin: boolean };
+export type PublicUser = {
+  id: string;
+  email: string;
+  isPlatformAdmin: boolean;
+  mustChangePassword: boolean;
+};
 type UserRow = PublicUser & { passwordHash: string };
 
 export const rateLimited = (seconds: number) =>
@@ -36,7 +41,7 @@ export class Login {
     const wait = this.limiter.retryAfter(input.ip, input.email);
     if (wait > 0) throw rateLimited(wait);
     const [row] = await this.sql<UserRow[]>`
-      SELECT id, email, password_hash, is_platform_admin FROM users WHERE email = ${input.email}`;
+      SELECT id, email, password_hash, is_platform_admin, must_change_password FROM users WHERE email = ${input.email}`;
     const valid = await verifyPassword(row?.passwordHash ?? (await dummyHash()), input.password);
     if (!row || !valid) {
       this.limiter.recordFailure(input.ip, input.email);
@@ -50,7 +55,7 @@ export class Login {
     }
     this.limiter.recordSuccess(input.ip, input.email);
     if (needsRehash(row.passwordHash)) await this.rehash(row.id, input.password);
-    const user = { id: row.id, email: row.email, isPlatformAdmin: row.isPlatformAdmin };
+    const { passwordHash: _hash, ...user } = row;
     const token = await this.rotate(row.id, input);
     await recordAudit(this.sql, {
       action: "auth.login_succeeded",
