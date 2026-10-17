@@ -9,7 +9,13 @@ import { REQUIRED_PERMISSION } from "./requires.decorator.js";
 
 // Spec §11 route-coverage test: every registered route declares a permission or is on the
 // explicit public allowlist. Adding a route without either fails this test (and CI).
-const PUBLIC_ALLOWLIST = ["GET health/live", "GET health/ready", "POST auth/login"];
+const PUBLIC_ALLOWLIST = [
+  "GET health/live",
+  "GET health/ready",
+  "POST auth/login",
+  "POST auth/accept-invite",
+  "POST auth/accept-invite/preview",
+];
 
 type Route = { route: string; isPublic: boolean; permission: unknown };
 let routes: Route[] = [];
@@ -44,7 +50,7 @@ afterAll(() => close());
 
 describe("route coverage (spec §11)", () => {
   it("finds the routes (guards against a scanner that silently sees nothing)", () => {
-    expect(routes.length).toBeGreaterThanOrEqual(24);
+    expect(routes.length).toBeGreaterThanOrEqual(30);
   });
 
   it("public routes are exactly the allowlist", () => {

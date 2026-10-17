@@ -14,6 +14,7 @@ let tenants: Awaited<ReturnType<typeof seedTwoTenants>>;
 let envA: string;
 let keyA: string;
 let tokenA: string;
+let inviteA: string;
 
 beforeEach(async () => {
   await resetDb();
@@ -25,6 +26,12 @@ beforeEach(async () => {
     kind: "write_server",
   });
   ({ id: keyA, token: tokenA } = key.json());
+  const invites = `/organizations/${tenants.ids.orgA}/invites`;
+  const invite = await call(t, "POST", invites, tenants.cookies.ownerA, {
+    email: "invitee@helium.test",
+    role: "member",
+  });
+  inviteA = invite.json().id;
 });
 afterEach(() => t.close());
 
@@ -34,6 +41,9 @@ function routesOfA(): [string, string, object][] {
   const project = `/projects/${projectA}`;
   return [
     ["GET", `/organizations/${orgA}/audit-log`, {}],
+    ["GET", `/organizations/${orgA}/invites`, {}],
+    ["POST", `/organizations/${orgA}/invites`, { email: "x@evil.test", role: "owner" }],
+    ["DELETE", `/organizations/${orgA}/invites/${inviteA}`, {}],
     ["GET", `/organizations/${orgA}/projects`, {}],
     ["POST", `/organizations/${orgA}/projects`, { name: "Stolen" }],
     ["PATCH", `/organizations/${orgA}/projects/${projectA}`, { archived: true }],

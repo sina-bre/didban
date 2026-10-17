@@ -33,3 +33,8 @@ export function canManageProjectMembers(
 ): boolean {
   return orgRole === "owner" || orgRole === "admin" || projectRole === "project_admin";
 }
+
+/** Owners invite any role. Admins invite plain members only: they cannot grant owner or admin. */
+export function canInviteAs(actorRole: OrgRole, inviteRole: OrgRole): boolean {
+  return actorRole === "owner" || (actorRole === "admin" && inviteRole === "member");
+}
