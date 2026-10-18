@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3d (SDK core)
+
+- `packages/sdk` (`@didban/analytics` 0.1.0, zero deps): queue, batching, fetch transport (keepalive,
+  timeout), full-jitter retry + Retry-After + 413 halving, sendBeacon on hide (< 60 KB chunks),
+  consent/GPC/DNT/opt-out (`?no_track=1`), cookieless/persistent identity, SPA history patch, prerender,
+  bfcache, gates (file://, cross-origin iframe, localhost, allowlist), singleton, SSR no-op. ADR 0029, `docs/sdk.md`.
+- tsdown ESM + d.ts; size-limit (gzip) **4.88 kB / 5 kB**. SDK copies 9 constants (ADR 0029 amends 0010), tests check them.
+- Checks: typecheck, build ok; tests 25 + 53 + 193 passed; 4 mutations (dedupe, 413, dispose, consent) fail tests.
+  Lint: SDK clean; `pnpm lint` fails only on the owner's uncommitted `scripts/check-file-size.mjs` reflow (80 cols).
+- Open: uncommitted ADR 0021 edit reads "`PORT=5100` keep working; set `PORT=5100`" (looks like a bad replace).
+- **Next (new session):** 3e modules (separate entries, ≤ 1 KB each), React adapter, IIFE script build, examples, proxy docs.
+
 ## 2026-10-18 — Stage 3c (identity, visits, event writer)
 
 - `migrations/0011`: `daily_salts`, `events`, `visits`, `pages_seen` (spec §9). Ingest now answers
