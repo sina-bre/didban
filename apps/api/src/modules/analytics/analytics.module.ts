@@ -4,6 +4,7 @@ import { ExportController } from "./export.controller.js";
 import { LiveController } from "./live.controller.js";
 import { PagesController } from "./pages.controller.js";
 import { ReportsController } from "./reports.controller.js";
+import { ShareViewController } from "./share-view.controller.js";
 import { StatsGate } from "./stats-gate.js";
 
 /** Read-only reports (spec §10). Never imported by ingestion; never writes. */
@@ -14,6 +15,7 @@ import { StatsGate } from "./stats-gate.js";
     ReportsController,
     LiveController,
     ExportController,
+    ShareViewController,
   ],
   providers: [{ provide: StatsGate, useFactory: () => new StatsGate() }],
 })

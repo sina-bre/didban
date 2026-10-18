@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 4c-2 (goals, share links) → Stage 4c done
+
+- `migrations/0012`: `goals` (event | page pattern, ≤ 50) and `share_links` (SHA-256 token, expiry, revoke, ≤ 20
+  active). CRUD under `project:manage`, audited (`goal.*`, `share_link.*`). ADR 0036, `docs/metrics.md`.
+- `stats/goals`: conversions + revenue per currency (both sources), rate = browser visitors only; page goals via
+  `templateRegex` (bound, proven equal to ingestion's matcher on 7 patterns × 14 paths).
+- Public `GET /share` + `/share/stats/:report` (`X-Share-Token` header, redacted; 8 enumerated reports; synthetic
+  viewer scope; revoked/expired/archived/suspended → 404). Route-coverage allowlist + isolation updated.
+- Checks: lint, typecheck, build ok; tests 30 + 63 + 228 + 5; e2e 9; mutations (page goal by equality, revoked
+  token accepted) fail 1 each; live: goals 201, stats ok, share 200, data-health via share 404.
+- **Next:** 4d 10 M-event seed script, `EXPLAIN (ANALYZE, BUFFERS)` per stats query in `docs/database.md`, gate.
+
 ## 2026-10-18 — Stage 4c-1 (stats gate, realtime, data health, CSV export)
 
 - `StatsGate`: ≤ 3 stats queries per project, 2 s wait then 429 + Retry-After; 15 s per-process LRU (500) keyed by
