@@ -84,6 +84,9 @@ importers:
       '@types/node':
         specifier: 24.19.2
         version: 24.19.2
+      postgres:
+        specifier: 3.4.9
+        version: 3.4.9
       typescript:
         specifier: 6.0.3
         version: 6.0.3

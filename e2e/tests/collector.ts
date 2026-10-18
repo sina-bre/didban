@@ -12,6 +12,8 @@ export interface Recorded {
   forwardedFor: string | null;
   socket: string;
   origin: string | null;
+  /** What the real API answered. */
+  status: number;
   batch: { writeKey: string; events: SentEvent[] };
 }
 
@@ -21,7 +23,7 @@ export async function clearRecords(): Promise<void> {
 
 export async function records(writeKey: string): Promise<Recorded[]> {
   const all = (await (await fetch(COLLECTOR)).json()) as Recorded[];
-  return all.filter((r) => r.batch.writeKey === writeKey);
+  return all.filter((r) => r.batch?.writeKey === writeKey);
 }
 
 export async function events(writeKey: string): Promise<SentEvent[]> {
