@@ -15,6 +15,7 @@ let envA: string;
 let keyA: string;
 let tokenA: string;
 let routeA: string;
+let goalA: string;
 
 beforeEach(async () => {
   await resetDb();
@@ -36,6 +37,18 @@ beforeEach(async () => {
     },
   );
   routeA = route.json().id;
+  const goal = await call(
+    t,
+    "POST",
+    `/projects/${tenants.ids.projectA}/goals`,
+    tenants.cookies.ownerA,
+    {
+      kind: "event",
+      name: "Signup",
+      eventName: "signup",
+    },
+  );
+  goalA = goal.json().id;
 });
 afterEach(() => t.close());
 
@@ -65,23 +78,42 @@ function routesOfA(): [string, string, object][] {
     ["POST", `${project}/routes/preview`, { paths: ["/products/1"] }],
     ["PATCH", `${project}/routes/${routeA}`, { position: 1 }],
     ["DELETE", `${project}/routes/${routeA}`, {}],
-    ["GET", `${project}/stats/overview?${STATS_RANGE}`, {}],
-    ["GET", `${project}/stats/timeseries?${STATS_RANGE}`, {}],
-    ...["pages", "sources", "geo", "devices", "events", "events/signup/properties"].map(
-      (report): [string, string, object] => [
-        "GET",
-        `${project}/stats/${report}?${STATS_RANGE}`,
-        {},
-      ],
-    ),
-    ["GET", `${project}/stats/realtime`, {}],
-    ["GET", `${project}/stats/data-health`, {}],
-    ["GET", `${project}/stats/export.csv?report=pages&${STATS_RANGE}`, {}],
-    ["GET", `${project}/stats/pages/detail?${STATS_RANGE}&hostname=a.example&route=/`, {}],
+    ["GET", `${project}/goals`, {}],
+    ["POST", `${project}/goals`, { kind: "event", name: "Stolen", eventName: "x" }],
+    ["PATCH", `${project}/goals/${goalA}`, { name: "Stolen" }],
+    ["DELETE", `${project}/goals/${goalA}`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
     ["DELETE", `/projects/${projectA}/members/${memberA}`, {}],
+    ...statsRoutesOf(project),
+  ];
+}
+
+const STATS_REPORTS = [
+  "overview",
+  "timeseries",
+  "pages",
+  "sources",
+  "geo",
+  "devices",
+  "events",
+  "events/signup/properties",
+  "goals",
+  "export.csv?report=pages",
+  "pages/detail?hostname=a.example&route=/",
+];
+
+/** Every `…/stats/*` route (each needs `project:view`). */
+function statsRoutesOf(project: string): [string, string, object][] {
+  const ranged = STATS_REPORTS.map((report): [string, string, object] => {
+    const glue = report.includes("?") ? "&" : "?";
+    return ["GET", `${project}/stats/${report}${glue}${STATS_RANGE}`, {}];
+  });
+  return [
+    ...ranged,
+    ["GET", `${project}/stats/realtime`, {}],
+    ["GET", `${project}/stats/data-health`, {}],
   ];
 }
 
@@ -110,9 +142,17 @@ describe("tenant isolation (spec §11, §16)", () => {
              (SELECT count(*)::int FROM environments) AS envs,
              (SELECT count(revoked_at)::int FROM api_keys) AS revoked,
              (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived,
-             (SELECT string_agg(pattern, ',') FROM route_templates) AS routes`;
+             (SELECT string_agg(pattern, ',') FROM route_templates) AS routes,
+             (SELECT string_agg(name, ',') FROM goals) AS goals`;
     const routes = "/products/:id";
-    expect(state).toEqual({ projects: 2, envs: 1, revoked: 0, archived: 0, routes });
+    expect(state).toEqual({
+      projects: 2,
+      envs: 1,
+      revoked: 0,
+      archived: 0,
+      routes,
+      goals: "Signup",
+    });
   });
 
   it("a platform admin who is not a member gets 404 on A's routes", async () => {

@@ -8,6 +8,7 @@ import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
 import { getEventProperties, getEvents } from "./events-report.js";
 import { getDevices, getGeo } from "./geo-devices.js";
+import { getGoalStats } from "./goals-report.js";
 import { getSources } from "./sources.js";
 import { queryKey, StatsGate } from "./stats-gate.js";
 
@@ -75,5 +76,16 @@ export class ReportsController {
   ): Rows<c.EventRow> {
     const work = () => getEventProperties(this.sql, scope, { projectId, query, name });
     return this.gate.run(projectId, queryKey(`events/${name}/properties`, query), work);
+  }
+
+  @Requires("project:view")
+  @Get("goals")
+  goals(
+    @CurrentScope() scope: AccessScope,
+    @Param("projectId", UuidPipe) projectId: string,
+    @Query(new ZodPipe(c.statsQuerySchema)) query: c.StatsQuery,
+  ): Promise<c.GoalStatsResponse> {
+    const work = () => getGoalStats(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("goals", query), work);
   }
 }

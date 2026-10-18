@@ -8,6 +8,7 @@ import { AuditModule } from "./modules/audit/audit.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { DiagnosticsModule } from "./modules/diagnostics/diagnostics.module.js";
 import { EnvironmentsModule } from "./modules/environments/environments.module.js";
+import { GoalsModule } from "./modules/goals/goals.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IngestionModule } from "./modules/ingestion/ingestion.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
@@ -35,6 +36,7 @@ export class AppModule {
             AuditModule,
             UsersModule,
             AnalyticsModule,
+            GoalsModule,
           ];
     const ingestion = env.INSTANCE_ROLE === "management" ? [] : [IngestionModule];
     return {

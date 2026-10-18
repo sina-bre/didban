@@ -34,3 +34,18 @@ export function findRoute(templates: readonly RouteTemplate[], pathname: string)
 /** What ingestion stores in `route`: the matching template, else the pathname itself. */
 export const matchRoute = (templates: readonly RouteTemplate[], pathname: string): string =>
   findRoute(templates, pathname) ?? pathname;
+
+const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * The same match as `findRoute` as an anchored POSIX regex for SQL (`pathname ~ $1`, bound):
+ * `:name` = one segment, a final `*` = zero or more segments, an optional trailing slash. Only
+ * `[^/]+` and one optional tail, so the regex cannot backtrack badly.
+ */
+export function templateRegex(template: RouteTemplate): string {
+  const body = template.segments
+    .map((s) => (s.startsWith(":") ? "/[^/]+" : `/${escapeRegex(s)}`))
+    .join("");
+  if (template.rest) return `^${body}(/.*)?$`;
+  return body === "" ? "^/$" : `^${body}/?$`;
+}
