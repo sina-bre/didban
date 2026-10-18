@@ -32,6 +32,8 @@ const envSchema = z
     // Spec §7 step 4 (ADR 0025): ingest requests per minute and process; IP bucket = browser keys.
     INGEST_RATE_PER_KEY: z.coerce.number().int().min(1).default(6000),
     INGEST_RATE_PER_IP: z.coerce.number().int().min(1).default(600),
+    // Spec §7 step 6: optional GeoLite2 Country/City `.mmdb`; unset = no geo (ADR 0026).
+    GEOIP_DB_PATH: z.string().min(1).optional(),
   })
   .superRefine((env, ctx) => {
     const url = new URL(env.PUBLIC_ORIGIN);

@@ -40,6 +40,13 @@ export const updateProjectRequestSchema = z
       .max(20)
       .transform((names) => [...new Set(names)]),
     trailingSlashPolicy: z.enum(["strip", "keep"]),
+    hashRouting: z.boolean(),
+    storeCity: z.boolean(),
+    /** Site search (spec §23.1): the value of the first present parameter becomes `search_term`. */
+    siteSearchParams: z
+      .array(queryParamName)
+      .max(3)
+      .transform((names) => [...new Set(names)]),
   })
   .partial()
   .refine((body) => Object.keys(body).length > 0, "Nothing to update");
@@ -57,6 +64,9 @@ export const projectSchema = z.object({
   piiGuard: z.enum(["strip", "off"]),
   urlParamAllowlist: z.array(z.string()),
   trailingSlashPolicy: z.enum(["strip", "keep"]),
+  hashRouting: z.boolean(),
+  storeCity: z.boolean(),
+  siteSearchParams: z.array(z.string()),
   archivedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
 });

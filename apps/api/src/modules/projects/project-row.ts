@@ -13,6 +13,9 @@ export const PROJECT_COLUMNS = [
   "pii_guard",
   "url_param_allowlist",
   "trailing_slash_policy",
+  "hash_routing",
+  "store_city",
+  "site_search_params",
   "archived_at",
   "created_at",
 ] as const;

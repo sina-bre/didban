@@ -1,4 +1,5 @@
 import type { ApiKeyKind } from "@didban/contracts";
+import type { IngestSettings } from "./ingest-settings.js";
 
 // Spec §7 step 2: per-process LRU of resolved write keys. Known keys live 60 s, unknown ones
 // 10 s, so a revocation takes effect within 60 s on every process (ADR 0025).
@@ -14,6 +15,7 @@ export type ResolvedKey = {
   kind: ApiKeyKind;
   revoked: boolean;
   allowedOrigins: readonly string[];
+  settings: IngestSettings;
 };
 
 type Entry = { value: ResolvedKey | null; expiresAt: number };
