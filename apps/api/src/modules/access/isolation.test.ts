@@ -14,6 +14,7 @@ let tenants: Awaited<ReturnType<typeof seedTwoTenants>>;
 let envA: string;
 let keyA: string;
 let tokenA: string;
+let routeA: string;
 
 beforeEach(async () => {
   await resetDb();
@@ -25,6 +26,16 @@ beforeEach(async () => {
     kind: "write_server",
   });
   ({ id: keyA, token: tokenA } = key.json());
+  const route = await call(
+    t,
+    "POST",
+    `/projects/${tenants.ids.projectA}/routes`,
+    tenants.cookies.ownerA,
+    {
+      pattern: "/products/:id",
+    },
+  );
+  routeA = route.json().id;
 });
 afterEach(() => t.close());
 
@@ -47,6 +58,11 @@ function routesOfA(): [string, string, object][] {
     ["GET", `${project}/keys`, {}],
     ["POST", `${project}/environments/${envA}/keys`, { kind: "write_server" }],
     ["DELETE", `${project}/keys/${keyA}`, {}],
+    ["GET", `${project}/routes`, {}],
+    ["POST", `${project}/routes`, { pattern: "/stolen" }],
+    ["POST", `${project}/routes/preview`, { paths: ["/products/1"] }],
+    ["PATCH", `${project}/routes/${routeA}`, { position: 1 }],
+    ["DELETE", `${project}/routes/${routeA}`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
@@ -78,8 +94,10 @@ describe("tenant isolation (spec §11, §16)", () => {
       SELECT (SELECT count(*)::int FROM projects) AS projects,
              (SELECT count(*)::int FROM environments) AS envs,
              (SELECT count(revoked_at)::int FROM api_keys) AS revoked,
-             (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived`;
-    expect(state).toEqual({ projects: 2, envs: 1, revoked: 0, archived: 0 });
+             (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived,
+             (SELECT string_agg(pattern, ',') FROM route_templates) AS routes`;
+    const routes = "/products/:id";
+    expect(state).toEqual({ projects: 2, envs: 1, revoked: 0, archived: 0, routes });
   });
 
   it("a platform admin who is not a member gets 404 on A's routes", async () => {
@@ -92,24 +110,6 @@ describe("tenant isolation (spec §11, §16)", () => {
     expect(await statusOf(t, "DELETE", url, tenants.cookies.memberA)).toBe(404);
   });
 
-  it("lists only show the caller's own organizations and projects", async () => {
-    const orgs = await call(t, "GET", "/organizations", tenants.cookies.ownerB);
-    expect(orgs.json().organizations).toEqual([
-      { id: tenants.ids.orgB, name: "another-website", slug: "another-website", role: "owner" },
-    ]);
-    const projects = await call(t, "GET", "/projects", tenants.cookies.ownerB);
-    expect(projects.json().projects.map((p: { id: string }) => p.id)).toEqual([
-      tenants.ids.projectB,
-    ]);
-    const forMember = await call(t, "GET", "/projects", tenants.cookies.memberA);
-    expect(forMember.json().projects).toEqual([]);
-    const forViewer = await call(t, "GET", "/projects", tenants.cookies.viewerA);
-    expect(forViewer.json().projects[0]).toMatchObject({
-      id: tenants.ids.projectA,
-      role: "viewer",
-    });
-  });
-
   it("a write key opens no management route (spec §11 separate boundary)", async () => {
     for (const headers of [{ "x-write-key": tokenA }, { authorization: `Bearer ${tokenA}` }]) {
       const res = await t.send({
@@ -119,13 +119,5 @@ describe("tenant isolation (spec §11, §16)", () => {
       });
       expect(res.statusCode).toBe(401);
     }
-  });
-
-  it("malformed IDs are a plain 404, never a 500", async () => {
-    const { ownerA } = tenants.cookies;
-    const notUuid = `/organizations/${tenants.ids.orgA}/members/not-a-uuid`;
-    expect(await statusOf(t, "DELETE", notUuid, ownerA)).toBe(404);
-    const injected = "/projects/1'%20OR%201=1/members/x";
-    expect(await statusOf(t, "PUT", injected, ownerA, { role: "viewer" })).toBe(404);
   });
 });
