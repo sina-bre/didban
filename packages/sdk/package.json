@@ -26,9 +26,12 @@
       "types": "./dist/engaged-time.d.ts",
       "default": "./dist/engaged-time.js"
     },
+    "./didban.iife.js": "./dist/didban.iife.js",
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/didban.iife.js",
+  "jsdelivr": "./dist/didban.iife.js",
   "files": [
     "dist"
   ],
@@ -91,6 +94,12 @@
       "path": "dist/engaged-time.js",
       "import": "{ engagedTime }",
       "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "script-tag (core + all modules)",
+      "path": "dist/didban.iife.js",
+      "limit": "6.5 KB",
       "gzip": true
     }
   ],
