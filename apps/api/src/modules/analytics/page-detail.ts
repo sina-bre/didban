@@ -22,11 +22,12 @@ function forPage(context: StatsContext, hostname: string, route: string): StatsC
 async function moduleStats(sql: Sql, context: StatsContext) {
   const scope = eventScope(sql, context, context.range);
   const scroll = await sql<{ percent: number; visitors: number }[]>`
-    SELECT round((e.properties ->> 'percent')::numeric)::int AS percent,
-           count(DISTINCT e.visitor_id)::int AS visitors
-    FROM events e
-    WHERE ${scope} AND e.type = 2 AND e.name = 'scroll_depth'
-      AND jsonb_typeof(e.properties -> 'percent') = 'number'
+    SELECT percent, count(*)::int AS visitors
+    FROM (SELECT round((e.properties ->> 'percent')::numeric)::int AS percent, e.visitor_id
+          FROM events e
+          WHERE ${scope} AND e.type = 2 AND e.name = 'scroll_depth'
+            AND jsonb_typeof(e.properties -> 'percent') = 'number'
+          GROUP BY 1, 2) AS s
     GROUP BY 1 ORDER BY 1`;
   const [engaged] = await sql<{ seconds: number | null }[]>`
     SELECT round(avg((e.properties ->> 'seconds')::numeric), 1)::float8 AS seconds
