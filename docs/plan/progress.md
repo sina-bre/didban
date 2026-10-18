@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3f (load baseline) + **Stage 3 gate met**
+
+- `tools/load` (`pnpm load`, autocannon 8 + postgres.js, ADR 0031): SDK-shaped batches → built API on the
+  local test DB; exact p50/p95/p99, DB rows/rollbacks/deadlocks, busy conns + lock waiters, API RSS/CPU.
+  Baseline (i5-8400, one API process, pool 10): sustained **3196 events/s**, p95 48 / p99 62 ms; burst 9065
+  events/s, p99 579 ms; 0 errors/deadlocks. Budgets in `budgets.mjs` (exit 1 if broken), `docs/load-baseline.md`.
+- Bottleneck (not optimized): API main thread CPU-bound (postgres.js ~37 %), then hot `pages_seen` row locks.
+- Gate (ADR 0032): e2e now runs through the **real API + test DB** (rows asserted: one view per Next nav,
+  revenue server event, retry = duplicate); curl server event → row with revenue 129.50 USD; `pnpm check:packages`
+  (publint strict, attw, pack + tarball install smoke) ok. Checks: lint, typecheck, build ok; tests 25+63+193+5; e2e 9.
+- Open: SDK idle-start task 2.2–5.3 ms vs 5 ms (perf test = median of 3); mixed ingest+stats load in Stage 4.
+- **Next:** Stage 4a (query builder, overview + timeseries + comparison).
+
 ## 2026-10-18 — Stage 3e (SDK modules, script tag, React adapter, examples)
 
 - SDK: 4 module entries via `autoCapture` factories (0.24–0.52 kB gz), `notFound()`, IIFE
