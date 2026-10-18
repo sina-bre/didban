@@ -20,11 +20,12 @@ export type PagesRow = PageRow | VisitRow | DiscoveredPageRow;
 
 async function topPages(sql: Sql, context: StatsContext, limit: number): Promise<Rows<PageRow>> {
   const rows = await sql<PageRow[]>`
-    SELECT e.hostname, e.route,
-           count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors,
-           count(*)::int AS pageviews
-    FROM events e WHERE ${eventScope(sql, context, context.range)} AND e.type = 1
-    GROUP BY 1, 2 ORDER BY pageviews DESC, visitors DESC, e.route LIMIT ${limit + 1}`;
+    SELECT hostname, route, count(*) FILTER (WHERE browser)::int AS visitors,
+           sum(n)::int AS pageviews
+    FROM (SELECT e.hostname, e.route, e.visitor_id, e.source = 1 AS browser, count(*) AS n
+          FROM events e WHERE ${eventScope(sql, context, context.range)} AND e.type = 1
+          GROUP BY 1, 2, 3, 4) AS g
+    GROUP BY 1, 2 ORDER BY pageviews DESC, visitors DESC, route LIMIT ${limit + 1}`;
   return { rows: rows.slice(0, limit), truncated: rows.length > limit };
 }
 

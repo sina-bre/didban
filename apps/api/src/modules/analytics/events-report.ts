@@ -28,11 +28,12 @@ export function getEvents(sql: Sql, scope: AccessScope, input: ReportInput<Event
 
 async function propertyKeys(sql: Sql, context: StatsContext, name: string, limit: number) {
   const rows = await sql<EventRow[]>`
-    SELECT k AS value,
-           count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors,
-           0 AS pageviews, count(*)::int AS events
-    FROM events e CROSS JOIN LATERAL jsonb_object_keys(e.properties) AS k
-    WHERE ${eventScope(sql, context, context.range)} AND e.type = 2 AND e.name = ${name}
+    SELECT value, count(*) FILTER (WHERE browser)::int AS visitors, 0 AS pageviews,
+           sum(n)::int AS events
+    FROM (SELECT k AS value, e.visitor_id, e.source = 1 AS browser, count(*) AS n
+          FROM events e CROSS JOIN LATERAL jsonb_object_keys(e.properties) AS k
+          WHERE ${eventScope(sql, context, context.range)} AND e.type = 2 AND e.name = ${name}
+          GROUP BY 1, 2, 3) AS g
     GROUP BY 1 ORDER BY events DESC, value LIMIT ${limit + 1}`;
   return { rows: rows.slice(0, limit), truncated: rows.length > limit } satisfies Rows<EventRow>;
 }

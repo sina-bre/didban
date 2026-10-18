@@ -8,7 +8,8 @@ import type { StatsContext } from "./stats-context.js";
 // Spec §4 counts for one range, either as one total row (`bucket` = null) or one row per bucket of
 // the reporting time zone (`date_trunc(unit, ts, tz)`: DST-correct, PostgreSQL ≥ 16).
 // Events: visitors = distinct browser visitor IDs, page views = all `page` events (both sources).
-// Visits: see scope-sql.ts.
+// Visits: see scope-sql.ts. Distinct visitors are counted as "group by visitor, then count": on
+// 10 M events that runs as a parallel hash aggregate instead of one disk sort (ADR 0037).
 
 export type CountRow = RawCounts & { start: Date | null };
 type Counts = { context: StatsContext; range: Range; bucket: StatsInterval | null };
@@ -28,10 +29,12 @@ export async function countRange(sql: Sql, input: Counts): Promise<CountRow[]> {
   const visitBucket = bucket ? sql`date_trunc(${bucket}, v.started_at, ${tz})` : sql`NULL`;
   const [events, visits] = await Promise.all([
     sql<{ start: Date | null; visitors: number; pageviews: number }[]>`
-      SELECT ${eventBucket}::timestamptz AS start,
-             count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors,
-             count(*) FILTER (WHERE e.type = 1)::int AS pageviews
-      FROM events e WHERE ${eventScope(sql, context, range)} GROUP BY 1`,
+      SELECT start, count(*) FILTER (WHERE browser)::int AS visitors,
+             coalesce(sum(pv), 0)::int AS pageviews
+      FROM (SELECT ${eventBucket}::timestamptz AS start, e.visitor_id, e.source = 1 AS browser,
+                   count(*) FILTER (WHERE e.type = 1) AS pv
+            FROM events e WHERE ${eventScope(sql, context, range)} GROUP BY 1, 2, 3) AS g
+      GROUP BY 1`,
     sql<Omit<CountRow, "visitors" | "pageviews">[]>`
       SELECT ${visitBucket}::timestamptz AS start, ${visitAggregates(sql)}
       FROM visits v WHERE ${visitScope(sql, context, range)} GROUP BY 1`,

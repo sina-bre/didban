@@ -37,15 +37,16 @@ export function getGoalStats(
         (g.kind = 'event' AND e.type = 2 AND e.name = g.event_name) OR
         (g.kind = 'page' AND e.type = 1 AND e.pathname ~ g.regex))`;
     const counts = await tx<Counts[]>`
-      SELECT g.id AS goal_id, count(*)::int AS conversions,
-             count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors
-      ${matches} GROUP BY g.id`;
+      SELECT goal_id, sum(n)::int AS conversions, count(*) FILTER (WHERE browser)::int AS visitors
+      FROM (SELECT g.id AS goal_id, e.visitor_id, e.source = 1 AS browser, count(*) AS n
+            ${matches} GROUP BY 1, 2, 3) AS x
+      GROUP BY 1`;
     const revenue = await tx<Revenue[]>`
       SELECT g.id AS goal_id, e.currency, sum(e.revenue)::text AS amount
       ${matches} AND e.revenue IS NOT NULL GROUP BY g.id, e.currency ORDER BY e.currency`;
     const [total] = await tx<{ visitors: number }[]>`
-      SELECT count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors
-      FROM events e WHERE ${scopeSql}`;
+      SELECT count(*)::int AS visitors
+      FROM (SELECT e.visitor_id FROM events e WHERE ${scopeSql} AND e.source = 1 GROUP BY 1) AS v`;
     const all = total?.visitors ?? 0;
     const stats: GoalStats[] = goals.map((goal) => {
       const c = counts.find((row) => row.goalId === goal.id);

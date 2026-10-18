@@ -26,12 +26,13 @@ const cut = <Row>(rows: Row[], limit: number): Rows<Row> => ({
 
 export async function eventBreakdown(sql: Sql, context: StatsContext, b: Breakdown) {
   const rows = await sql<EventRow[]>`
-    SELECT ${b.dimension}::text AS value,
-           count(DISTINCT e.visitor_id) FILTER (WHERE e.source = 1)::int AS visitors,
-           count(*) FILTER (WHERE e.type = 1)::int AS pageviews,
-           count(*)::int AS events
-    FROM events e
-    WHERE ${eventScope(sql, context, context.range)} ${b.where ? sql`AND ${b.where}` : sql``}
+    SELECT value, count(*) FILTER (WHERE browser)::int AS visitors,
+           sum(pv)::int AS pageviews, sum(ev)::int AS events
+    FROM (SELECT ${b.dimension}::text AS value, e.visitor_id, e.source = 1 AS browser,
+                 count(*) FILTER (WHERE e.type = 1) AS pv, count(*) AS ev
+          FROM events e
+          WHERE ${eventScope(sql, context, context.range)} ${b.where ? sql`AND ${b.where}` : sql``}
+          GROUP BY 1, 2, 3) AS g
     GROUP BY 1 ORDER BY visitors DESC, events DESC, value ASC NULLS LAST
     LIMIT ${b.limit + 1}`;
   const label = b.label ?? ((raw) => raw);
