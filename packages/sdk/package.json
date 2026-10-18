@@ -1,0 +1,55 @@
+{
+  "name": "@didban/analytics",
+  "version": "0.1.0",
+  "description": "Privacy-friendly browser SDK for didban, a self-hosted web analytics server.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sina-bre/didban.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown && size-limit",
+    "size": "size-limit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "size-limit": [
+    {
+      "name": "core",
+      "path": "dist/index.js",
+      "import": "{ createAnalytics }",
+      "limit": "5 KB",
+      "gzip": true
+    }
+  ],
+  "devDependencies": {
+    "@didban/contracts": "workspace:*",
+    "@size-limit/preset-small-lib": "14.2.0",
+    "jsdom": "30.1.3",
+    "size-limit": "14.2.0",
+    "tsdown": "0.23.1",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}
