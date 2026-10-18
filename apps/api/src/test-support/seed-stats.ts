@@ -11,12 +11,18 @@ export type SeedVisit = {
   visitor: number;
   at: string;
   pages: string[];
-  tracks?: string[];
+  /** Custom events after the page views; an object carries its own properties. */
+  tracks?: (string | { name: string; properties: Record<string, unknown> })[];
   channel?: number;
+  utmSource?: string;
   country?: string;
   browser?: string;
-  properties?: Record<string, string>;
+  deviceType?: number;
+  /** Properties of every event of the visit (unless a track brings its own). */
+  properties?: Record<string, unknown>;
 };
+
+type Step = { type: number; path?: string; name?: string; properties?: Record<string, unknown> };
 
 const MINUTE = 60_000;
 const visitorId = (n: number) => Buffer.from(n.toString(16).padStart(32, "0"), "hex");
@@ -24,21 +30,25 @@ const visitorId = (n: number) => Buffer.from(n.toString(16).padStart(32, "0"), "
 export async function seedVisit(sql: Sql, target: Target, v: SeedVisit): Promise<string> {
   const start = Date.parse(v.at);
   const visitId = uuidV7(start);
-  const steps = [
-    ...v.pages.map((p) => ({ type: 1, path: p })),
-    ...(v.tracks ?? []).map((n) => ({ type: 2, name: n })),
+  const steps: Step[] = [
+    ...v.pages.map((path) => ({ type: 1, path })),
+    ...(v.tracks ?? []).map((t) =>
+      typeof t === "string" ? { type: 2, name: t } : { type: 2, ...t },
+    ),
   ];
   const last = start + (steps.length - 1) * MINUTE;
   const pages = v.pages.length;
   await sql`
     INSERT INTO visits (project_id, visit_id, environment_id, visitor_id, started_at, last_seen_at,
-      entry_pathname, exit_pathname, pageviews, events, channel, country, browser)
+      entry_pathname, exit_pathname, pageviews, events, channel, utm_source, country, browser,
+      device_type)
     VALUES (${target.projectId}, ${visitId}, ${target.environmentId}, ${visitorId(v.visitor)},
       ${new Date(start)}, ${new Date(last)}, ${v.pages[0] ?? null}, ${v.pages.at(-1) ?? null},
-      ${pages}, ${steps.length}, ${v.channel ?? 0}, ${v.country ?? null}, ${v.browser ?? null})`;
+      ${pages}, ${steps.length}, ${v.channel ?? 0}, ${v.utmSource ?? null}, ${v.country ?? null},
+      ${v.browser ?? null}, ${v.deviceType ?? null})`;
   const rows = steps.map((step, i) => {
     const at = start + i * MINUTE;
-    const path = "path" in step ? step.path : (v.pages.at(-1) ?? "/");
+    const path = step.path ?? v.pages.at(-1) ?? "/";
     return {
       projectId: target.projectId,
       environmentId: target.environmentId,
@@ -49,14 +59,16 @@ export async function seedVisit(sql: Sql, target: Target, v: SeedVisit): Promise
       visitorId: visitorId(v.visitor),
       source: 1,
       visitId,
-      name: "name" in step ? step.name : null,
+      name: step.name ?? null,
       hostname: "heliumpark.example",
       pathname: path,
       route: path,
       channel: v.channel ?? 0,
       country: v.country ?? null,
       browser: v.browser ?? null,
-      properties: sql.json(v.properties ?? {}),
+      deviceType: v.deviceType ?? null,
+      utmSource: v.utmSource ?? null,
+      properties: sql.json((step.properties ?? v.properties ?? {}) as Record<string, string>),
     };
   });
   await sql`INSERT INTO events ${sql(rows)}`;

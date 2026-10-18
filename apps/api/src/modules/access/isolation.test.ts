@@ -67,6 +67,14 @@ function routesOfA(): [string, string, object][] {
     ["DELETE", `${project}/routes/${routeA}`, {}],
     ["GET", `${project}/stats/overview?${STATS_RANGE}`, {}],
     ["GET", `${project}/stats/timeseries?${STATS_RANGE}`, {}],
+    ...["pages", "sources", "geo", "devices", "events", "events/signup/properties"].map(
+      (report): [string, string, object] => [
+        "GET",
+        `${project}/stats/${report}?${STATS_RANGE}`,
+        {},
+      ],
+    ),
+    ["GET", `${project}/stats/pages/detail?${STATS_RANGE}&hostname=a.example&route=/`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],

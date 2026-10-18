@@ -12,5 +12,6 @@ export * from "./projects.js";
 export * from "./properties.js";
 export * from "./route-templates.js";
 export * from "./stats.js";
+export * from "./stats-breakdowns.js";
 export * from "./stats-filters.js";
 export * from "./users.js";
