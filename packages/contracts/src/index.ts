@@ -10,4 +10,5 @@ export * from "./limits.js";
 export * from "./organizations.js";
 export * from "./projects.js";
 export * from "./properties.js";
+export * from "./route-templates.js";
 export * from "./users.js";

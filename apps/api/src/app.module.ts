@@ -10,6 +10,7 @@ import { HealthModule } from "./modules/health/health.module.js";
 import { IngestionModule } from "./modules/ingestion/ingestion.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
 import { ProjectsModule } from "./modules/projects/projects.module.js";
+import { RoutesModule } from "./modules/routes/routes.module.js";
 import { UsersModule } from "./modules/users/users.module.js";
 
 /**
@@ -27,6 +28,7 @@ export class AppModule {
             OrganizationsModule,
             ProjectsModule,
             EnvironmentsModule,
+            RoutesModule,
             ApiKeysModule,
             AuditModule,
             UsersModule,
