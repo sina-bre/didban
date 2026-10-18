@@ -85,6 +85,24 @@ then events or visits, then value. All honour the range and filters.
 
 `value: null` means the dimension was not recorded (no referrer, no geo database, unknown device).
 
+## Goals (`stats/goals`, managed under `projects/:id/goals`)
+
+- A goal matches an **event name** (`signup`) or a **page path pattern** in route-template syntax
+  (`/pricing`, `/products/:id`, `/blog/*`, matched against the stored pathname). ≤ 50 per project.
+- **Conversions**: matching events in the range, browser and server. **Visitors**: distinct browser
+  visitors with ≥ 1 match. **Conversion rate** = those visitors ÷ all browser visitors in the range,
+  same filters (server events never enter a rate).
+- **Revenue**: `$revenue` of matching events, one amount per currency (exact decimal strings),
+  never summed across currencies, never converted.
+
+## Share links
+
+A project admin creates a read-only link (label, optional expiry; ≤ 20 active per project). The
+token is shown once and stored as SHA-256. The public view sends it in the `X-Share-Token` header
+(never in a URL) and reaches only `overview`, `timeseries`, `pages`, `sources`, `geo`, `devices`,
+`events` and `goals` of that project. Revoked or expired links, archived projects and suspended
+organizations answer `404` like a missing resource.
+
 ## Realtime, Data Health, export
 
 - **Realtime** (`stats/realtime`, poll every 10 s): window = the last 30 minutes. Active visitors =
