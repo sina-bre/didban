@@ -24,12 +24,13 @@ function matches(template: RouteTemplate, parts: readonly string[]): boolean {
   return segments.every((segment, i) => segment.startsWith(":") || segment === parts[i]);
 }
 
-/** First matching template in the given order (by `position`), else the pathname itself. */
-export function matchRoute(templates: readonly RouteTemplate[], pathname: string): string {
+/** The first matching template in the given order (by `position`), or `null`. */
+export function findRoute(templates: readonly RouteTemplate[], pathname: string): string | null {
   const trimmed = pathname.replace(/^\/+|\/+$/g, "");
   const parts = trimmed === "" ? [] : trimmed.split("/");
-  for (const template of templates) {
-    if (matches(template, parts)) return template.pattern;
-  }
-  return pathname;
+  return templates.find((template) => matches(template, parts))?.pattern ?? null;
 }
+
+/** What ingestion stores in `route`: the matching template, else the pathname itself. */
+export const matchRoute = (templates: readonly RouteTemplate[], pathname: string): string =>
+  findRoute(templates, pathname) ?? pathname;

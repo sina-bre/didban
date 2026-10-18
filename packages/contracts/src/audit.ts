@@ -26,6 +26,9 @@ export const AUDIT_ACTIONS = [
   "environment.updated",
   "api_key.created",
   "api_key.revoked",
+  "route_template.created",
+  "route_template.updated",
+  "route_template.deleted",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -35,6 +38,7 @@ export const AUDIT_TARGET_TYPES = [
   "project",
   "environment",
   "api_key",
+  "route_template",
 ] as const;
 export type AuditTargetType = (typeof AUDIT_TARGET_TYPES)[number];
 
