@@ -14,6 +14,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm -C e2e test:e2e",
+    "load": "pnpm -C tools/load load",
     "build": "pnpm -r --if-present build",
     "cli": "pnpm --silent -C apps/api cli",
     "db:setup": "node scripts/dev-db.mjs",

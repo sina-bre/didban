@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-18T14:43:43.577Z",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz (6 logical)",
+    "memoryGb": 16,
+    "os": "Windows_NT 10.0.19045",
+    "node": "v24.18.0",
+    "postgres": {
+      "fsync": "on",
+      "max_connections": "100",
+      "server_version": "18.4",
+      "shared_buffers": "16384 8kB",
+      "synchronous_commit": "on",
+      "wal_level": "replica",
+      "work_mem": "4096 kB"
+    },
+    "note": "client (autocannon), API and PostgreSQL share this machine"
+  },
+  "api": {
+    "TRUST_PROXY": "1",
+    "DB_POOL_MAX": "10",
+    "INGEST_RATE_PER_KEY": "1000000",
+    "INGEST_INSERT_CHUNK": "500 (default)",
+    "NODE_ENV": "production"
+  },
+  "results": {
+    "sustained": {
+      "about": "steady SDK traffic: 20 connections, 5-event batches, 5000 visitors",
+      "http": {
+        "durationS": 60.05,
+        "connections": 20,
+        "requests": 38384,
+        "requestsPerS": 639.2006661115737,
+        "batchesOkPerS": 639.2006661115737,
+        "eventsOkPerS": 3196.0033305578686,
+        "latencyMs": {
+          "p50": 29.0166,
+          "p95": 47.7079,
+          "p99": 62.1187,
+          "max": 1079.6571
+        },
+        "statuses": {
+          "200": 38384
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 76774,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 192020,
+        "visits": 4999,
+        "busyMax": 10,
+        "busyAvg": 9.903765690376568,
+        "lockWaitMax": 8,
+        "lockWaitSamples": 238,
+        "samples": 239,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 1140,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 19,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 4,
+          "transactionid:  INSERT INTO project_usage_daily (project_id, day, events) V": 1
+        }
+      },
+      "api": {
+        "rssMaxMb": 302.64453125,
+        "cpuAvg": 105.87007308152548
+      }
+    },
+    "burst": {
+      "about": "burst: 200 connections, full 20-event batches (SDK default batch size)",
+      "http": {
+        "durationS": 20.08,
+        "connections": 200,
+        "requests": 9101,
+        "requestsPerS": 453.2370517928287,
+        "batchesOkPerS": 453.2370517928287,
+        "eventsOkPerS": 9064.741035856574,
+        "latencyMs": {
+          "p50": 418.3249,
+          "p95": 528.5307,
+          "p99": 578.5012,
+          "max": 1051.2521
+        },
+        "statuses": {
+          "200": 9101
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 19227,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 186020,
+        "visits": 1,
+        "busyMax": 10,
+        "busyAvg": 9.6125,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 79,
+        "samples": 80,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 397,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 15,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 1
+        }
+      },
+      "api": {
+        "rssMaxMb": 361.25,
+        "cpuAvg": 103.05099535331702
+      }
+    },
+    "abusive": {
+      "about": "abusive: malformed JSON, unknown key, one-IP flood past INGEST_RATE_PER_IP",
+      "http": {
+        "durationS": 20.01,
+        "connections": 50,
+        "requests": 95258,
+        "requestsPerS": 4760.519740129935,
+        "batchesOkPerS": 29.98500749625187,
+        "eventsOkPerS": 149.92503748125935,
+        "latencyMs": {
+          "p50": 9.336,
+          "p95": 10.6174,
+          "p99": 12.2912,
+          "max": 3174.3689
+        },
+        "statuses": {
+          "200": 600,
+          "400": 31753,
+          "401": 31753,
+          "429": 31152
+        },
+        "errorRate": 0.9937013164248673,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 1558,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 3000,
+        "visits": 1,
+        "busyMax": 10,
+        "busyAvg": 2.1,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 18,
+        "samples": 80,
+        "blockedOn": {
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 142
+        }
+      },
+      "api": {
+        "rssMaxMb": 369.484375,
+        "cpuAvg": 89.76072831543526
+      }
+    }
+  }
+}
