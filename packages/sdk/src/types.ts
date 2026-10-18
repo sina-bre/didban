@@ -33,7 +33,15 @@ export interface AnalyticsOptions {
   respectDoNotTrack?: boolean;
   trackLocalhost?: boolean;
   hostAllowlist?: string[];
-  autoCapture?: { pageviews?: boolean; spa?: SpaMode };
+  /** Optional modules take their factory instead of `true`, so unused ones cost zero bytes. */
+  autoCapture?: {
+    pageviews?: boolean;
+    spa?: SpaMode;
+    outboundLinks?: Module;
+    fileDownloads?: Module;
+    scrollDepth?: Module;
+    engagedTime?: Module;
+  };
   /** Glob list matched against the path: `*` stays inside one segment, `**` crosses segments. */
   excludePaths?: string[];
   flushIntervalMs?: number;
@@ -48,6 +56,26 @@ export interface AnalyticsOptions {
   onError?: (error: AnalyticsError) => void;
   debug?: boolean;
 }
+
+/** Queues one custom event from a module. `url` defaults to the current page. */
+export type ModuleEmit = (event: {
+  type: "track";
+  name: string;
+  properties: Properties;
+  url?: string;
+}) => void;
+/** Adds a listener that `shutdown()` removes. */
+export type ModuleOn = (
+  target: EventTarget,
+  type: string,
+  fn: EventListener,
+  options?: AddEventListenerOptions,
+) => void;
+/**
+ * An optional auto-capture module (`@didban/analytics/scroll-depth`, …). Runs once when tracking
+ * starts and may return a callback that runs before each page view with that page's URL.
+ */
+export type Module = (emit: ModuleEmit, on: ModuleOn) => ((url: string) => void) | undefined;
 
 export interface Analytics {
   page(properties?: Properties): void;

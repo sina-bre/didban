@@ -14,6 +14,8 @@ export interface Config {
   hostAllowlist: string[] | null;
   pageviews: boolean;
   spa: SpaMode;
+  /** `autoCapture` values; the functions among them are modules. */
+  modules: unknown[];
   excludePaths: RegExp[];
   flushIntervalMs: number;
   maxBatchSize: number;
@@ -54,6 +56,7 @@ export function resolveConfig(o: AnalyticsOptions): Config {
     hostAllowlist: o.hostAllowlist ? o.hostAllowlist.map((h) => h.toLowerCase()) : null,
     pageviews: o.autoCapture?.pageviews !== false,
     spa: o.autoCapture?.spa ?? "auto",
+    modules: Object.values(o.autoCapture ?? {}),
     excludePaths: (o.excludePaths ?? []).map(globToRegExp),
     flushIntervalMs: clamp(o.flushIntervalMs, 5000, 100, 60_000),
     maxBatchSize: clamp(o.maxBatchSize, DEFAULT_BATCH_SIZE, 1, MAX_EVENTS_PER_BATCH),

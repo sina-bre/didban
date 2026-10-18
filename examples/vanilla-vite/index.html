@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>didban · vanilla Vite example</title>
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <nav>
+      <a href="/" data-route>Home</a>
+      <a href="/pricing" data-route>Pricing</a>
+      <a href="/docs?tab=api" data-route>Docs</a>
+    </nav>
+    <main>
+      <h1 id="title">Home</h1>
+      <p><button id="signup" type="button">Sign up (custom event)</button></p>
+      <p><a id="outbound" href="https://example.org/partner?ref=demo">Partner site (outbound)</a></p>
+      <p><a id="download" href="/files/brochure.pdf">Brochure (download)</a></p>
+      <div style="block-size: 300vh">Long content for scroll depth.</div>
+    </main>
+  </body>
+</html>

@@ -10,9 +10,27 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./outbound-links": {
+      "types": "./dist/outbound-links.d.ts",
+      "default": "./dist/outbound-links.js"
+    },
+    "./file-downloads": {
+      "types": "./dist/file-downloads.d.ts",
+      "default": "./dist/file-downloads.js"
+    },
+    "./scroll-depth": {
+      "types": "./dist/scroll-depth.d.ts",
+      "default": "./dist/scroll-depth.js"
+    },
+    "./engaged-time": {
+      "types": "./dist/engaged-time.d.ts",
+      "default": "./dist/engaged-time.js"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/didban.iife.js",
+  "jsdelivr": "./dist/didban.iife.js",
   "files": [
     "dist"
   ],
@@ -40,6 +58,47 @@
       "path": "dist/index.js",
       "import": "{ createAnalytics }",
       "limit": "5 KB",
+      "gzip": true
+    },
+    {
+      "name": "notFound",
+      "path": "dist/index.js",
+      "import": "{ notFound }",
+      "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "outbound-links",
+      "path": "dist/outbound-links.js",
+      "import": "{ outboundLinks }",
+      "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "file-downloads",
+      "path": "dist/file-downloads.js",
+      "import": "{ fileDownloads }",
+      "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "scroll-depth",
+      "path": "dist/scroll-depth.js",
+      "import": "{ scrollDepth }",
+      "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "engaged-time",
+      "path": "dist/engaged-time.js",
+      "import": "{ engagedTime }",
+      "limit": "1 KB",
+      "gzip": true
+    },
+    {
+      "name": "script-tag (core + all modules)",
+      "path": "dist/didban.iife.js",
+      "limit": "6.5 KB",
       "gzip": true
     }
   ],

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>didban · script-tag example</title>
+    <!-- No inline script: all settings are data attributes, so a strict CSP works. -->
+    <script
+      defer
+      src="/didban.iife.js"
+      integrity="__SRI__"
+      crossorigin="anonymous"
+      data-endpoint="/a/e"
+      data-write-key="__WRITE_KEY__"
+      data-track-localhost="true"
+      data-modules="outbound-links file-downloads scroll-depth engaged-time"
+    ></script>
+  </head>
+  <body>
+    <h1>Script-tag example</h1>
+    <p><a href="https://example.org/partner">Partner site (outbound)</a></p>
+    <p><a href="/files/price-list.pdf">Price list (download)</a></p>
+  </body>
+</html>
