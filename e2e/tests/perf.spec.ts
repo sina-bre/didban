@@ -10,7 +10,7 @@ interface TraceEvent {
   name: string;
   ph: string;
   dur?: number;
-  args?: { data?: { url?: string } };
+  args?: { data?: { url?: string; functionName?: string } };
 }
 
 async function traceSdkTasks(browser: Browser, page: Page, run: () => Promise<void>, url: RegExp) {
@@ -21,7 +21,19 @@ async function traceSdkTasks(browser: Browser, page: Page, run: () => Promise<vo
   };
   return trace.traceEvents
     .filter((e) => e.ph === "X" && SCRIPT_EVENTS.has(e.name) && url.test(e.args?.data?.url ?? ""))
-    .map((e) => (e.dur ?? 0) / 1000);
+    .map((e) => ({
+      name: `${e.name}(${e.args?.data?.functionName ?? ""})`,
+      ms: (e.dur ?? 0) / 1000,
+    }));
+}
+
+function report(label: string, tasks: { name: string; ms: number }[]) {
+  const top = tasks.toSorted((a, b) => b.ms - a.ms).slice(0, 3);
+  console.log(
+    `${label}: ${tasks.length} tasks; longest ${top.map((t) => `${t.name} ${t.ms} ms`).join(", ")}`,
+  );
+  expect(tasks.length).toBeGreaterThan(0);
+  expect(top[0]?.ms).toBeLessThanOrEqual(LIMIT_MS);
 }
 
 async function exercise(page: Page, site: string) {
@@ -43,9 +55,7 @@ test("script-tag build: no SDK task over 5 ms", async ({ browser }) => {
     () => exercise(page, "http://localhost:5304/"),
     /didban\.iife\.js/,
   );
-  console.log(`script-tag: ${tasks.length} SDK tasks, max ${Math.max(...tasks).toFixed(2)} ms`);
-  expect(tasks.length).toBeGreaterThan(0);
-  expect(Math.max(...tasks)).toBeLessThanOrEqual(LIMIT_MS);
+  report("script-tag", tasks);
 });
 
 test("vanilla Vite build: no task of the bundle over 5 ms", async ({ browser }) => {
@@ -56,7 +66,5 @@ test("vanilla Vite build: no task of the bundle over 5 ms", async ({ browser }) 
     () => exercise(page, "http://localhost:5302/"),
     /\/assets\/index-.*\.js/,
   );
-  console.log(`vanilla: ${tasks.length} bundle tasks, max ${Math.max(...tasks).toFixed(2)} ms`);
-  expect(tasks.length).toBeGreaterThan(0);
-  expect(Math.max(...tasks)).toBeLessThanOrEqual(LIMIT_MS);
+  report("vanilla", tasks);
 });
