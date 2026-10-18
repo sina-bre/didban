@@ -1,0 +1,17 @@
+{
+  "_comment": "Channel grouping (spec §4, ADR 0026). utm_medium (lowercased) wins over the referrer; then the referrer source type; then Referral for any other external referrer or UTM-tagged visit; else Direct.",
+  "mediums": {
+    "cpc": "paidSearch",
+    "ppc": "paidSearch",
+    "paidsearch": "paidSearch",
+    "organic": "organicSearch",
+    "social": "social",
+    "email": "email"
+  },
+  "sourceTypes": {
+    "search": "organicSearch",
+    "social": "social",
+    "email": "email",
+    "referral": "referral"
+  }
+}

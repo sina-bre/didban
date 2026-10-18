@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { EnrichBatch } from "./enrich/enrich-batch.js";
+import { GeoLookup } from "./enrich/geo-lookup.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { IngestRateLimiter } from "./ingest-rate-limiter.js";
 import { IngestionController } from "./ingestion.controller.js";
@@ -13,6 +15,8 @@ import { WriteKeyCache } from "./write-key-cache.js";
   controllers: [IngestionController],
   providers: [
     PrepareBatch,
+    EnrichBatch,
+    GeoLookup,
     WriteKeyResolver,
     IngestionFlusher,
     { provide: WriteKeyCache, useFactory: () => new WriteKeyCache() },

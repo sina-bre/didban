@@ -1,6 +1,7 @@
 export * from "./api-keys.js";
 export * from "./audit.js";
 export * from "./auth.js";
+export * from "./dimensions.js";
 export * from "./envelope.js";
 export * from "./environments.js";
 export * from "./error-codes.js";

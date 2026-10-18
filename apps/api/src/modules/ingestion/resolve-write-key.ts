@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { hashApiKeyToken } from "../api-keys/api-key-token.js";
 import { ingestError } from "./ingest-error.js";
+import { type SettingsRow, toIngestSettings } from "./ingest-settings.js";
 import { KeyUsage } from "./key-usage.js";
 import { type ResolvedKey, WriteKeyCache } from "./write-key-cache.js";
 
@@ -11,16 +12,26 @@ const TOKEN_PATTERN = /^(dpk|dsk)_[0-9a-f]{12}_[A-Za-z0-9_-]{43}$/;
 
 const invalid = () => ingestError("INVALID_WRITE_KEY", "Invalid write key");
 
+type KeyRow = Omit<ResolvedKey, "settings"> & SettingsRow;
+
 async function lookup(sql: Sql, secretHash: Buffer): Promise<ResolvedKey | null> {
-  const [row] = await sql<ResolvedKey[]>`
+  const [row] = await sql<KeyRow[]>`
     SELECT k.id AS key_id, p.organization_id, k.project_id, k.environment_id, k.kind,
-           k.revoked_at IS NOT NULL AS revoked, e.allowed_origins
+           k.revoked_at IS NOT NULL AS revoked, e.allowed_origins,
+           e.identity_mode, e.excluded_cidrs, e.track_localhost,
+           p.allow_identify, p.session_timeout_minutes, p.pii_guard, p.url_param_allowlist,
+           p.trailing_slash_policy, p.hash_routing, p.store_city, p.site_search_params,
+           ARRAY(SELECT r.pattern FROM route_templates r
+                 WHERE r.project_id = k.project_id ORDER BY r.position) AS route_patterns
     FROM api_keys k
     JOIN environments e ON e.id = k.environment_id
     JOIN projects p ON p.id = k.project_id
     JOIN organizations o ON o.id = p.organization_id
     WHERE k.secret_hash = ${secretHash} AND p.archived_at IS NULL AND o.suspended_at IS NULL`;
-  return row ?? null;
+  if (!row) return null;
+  const { keyId, organizationId, projectId, environmentId, kind, revoked, allowedOrigins } = row;
+  const base = { keyId, organizationId, projectId, environmentId, kind, revoked, allowedOrigins };
+  return { ...base, settings: toIngestSettings(row) };
 }
 
 @Injectable()
