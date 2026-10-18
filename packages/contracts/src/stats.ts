@@ -11,25 +11,30 @@ export type StatsCompare = (typeof STATS_COMPARE)[number];
 
 const instant = z.iso.datetime({ offset: false }).transform((value) => new Date(value));
 
-export const statsQuerySchema = z
-  .object({
-    from: instant,
-    to: instant,
-    interval: z.enum(STATS_INTERVALS).default("auto"),
-    compare: z.enum(STATS_COMPARE).default("none"),
-    filter: z
-      .union([z.string(), z.array(z.string())])
-      .optional()
-      .transform((value) => (value === undefined ? [] : [value].flat()))
-      .pipe(z.array(z.string()).max(MAX_FILTERS))
-      .transform((list, ctx) => {
-        const parsed = list.map(parseFilter);
-        if (parsed.some((f) => f === null)) ctx.addIssue({ code: "custom", message: "bad filter" });
-        return parsed.filter((f): f is StatsFilter => f !== null);
-      }),
-    environmentId: z.uuid().optional(),
-  })
-  .superRefine((q, ctx) => {
+/** The shared fields; endpoints extend this, then add the range check with `withRangeCheck`. */
+export const statsQueryBase = z.object({
+  from: instant,
+  to: instant,
+  interval: z.enum(STATS_INTERVALS).default("auto"),
+  compare: z.enum(STATS_COMPARE).default("none"),
+  filter: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((value) => (value === undefined ? [] : [value].flat()))
+    .pipe(z.array(z.string()).max(MAX_FILTERS))
+    .transform((list, ctx) => {
+      const parsed = list.map(parseFilter);
+      if (parsed.some((f) => f === null)) ctx.addIssue({ code: "custom", message: "bad filter" });
+      return parsed.filter((f): f is StatsFilter => f !== null);
+    }),
+  environmentId: z.uuid().optional(),
+});
+
+type RangeFields = { from: Date; to: Date };
+
+/** `from < to`, at most MAX_RANGE_DAYS. */
+export function withRangeCheck<T extends z.ZodType<RangeFields>>(schema: T) {
+  return schema.superRefine((q, ctx) => {
     // Zod 4 runs this even when a field failed: only compare two real dates.
     if (!(q.from instanceof Date) || !(q.to instanceof Date)) return;
     const span = q.to.getTime() - q.from.getTime();
@@ -43,6 +48,9 @@ export const statsQuerySchema = z
       });
     }
   });
+}
+
+export const statsQuerySchema = withRangeCheck(statsQueryBase);
 export type StatsQuery = z.output<typeof statsQuerySchema>;
 
 export type IdentityModeMeta = "cookieless" | "persistent" | "mixed";

@@ -66,6 +66,25 @@ Ranges are `[from, to)` in UTC, at most 366 days. With filters, events must matc
   buckets per request.
 - Events go to the bucket of their `occurred_at`, visits to the bucket of their `started_at`.
 
+## Breakdown reports
+
+Top-N lists (`limit` 1–100, default 10; `meta.truncated` = more rows exist), ordered by visitors,
+then events or visits, then value. All honour the range and filters.
+
+| Report | Grouped by | Rows |
+|---|---|---|
+| `pages` (`view=top`) | page views per hostname + route | visitors, page views |
+| `pages?view=entry` / `exit` | first / last page of visits that started in the range | visitors, visits, bounce rate, duration |
+| `pages?view=discovered` | `pages_seen` rows first seen in the range, newest first (filters do not apply) | first/last seen, last title |
+| `pages/detail?hostname=&route=` | one page | visitors, page views, visitors per scroll threshold, average engaged seconds (`null` = module sent nothing) |
+| `sources?by=` | first touch of the visit: `channel`, `referrer`, `utm_*` | visit rows |
+| `geo?by=` | browser events by `country`, `region`, `city` | visitors, page views, events |
+| `devices?by=` | browser events by `browser`, `os`, `device_type`, `screen`, `language` | same |
+| `events` | custom event names (browser and server events; visitors count browser only) | same |
+| `events/:name/properties[?key=]` | the event's property keys, or the values of one key | same |
+
+`value: null` means the dimension was not recorded (no referrer, no geo database, unknown device).
+
 ## Filters
 
 `filter=field:op:value` (repeatable, ≤ 10; ops `eq`, `neq`, `contains`, `in` with `|`-separated

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { statsQuerySchema } from "../src/stats.js";
+import {
+  devicesQuerySchema,
+  eventPropertiesQuerySchema,
+  geoQuerySchema,
+  pagesQuerySchema,
+  sourcesQuerySchema,
+} from "../src/stats-breakdowns.js";
 import { formatFilter, parseFilter } from "../src/stats-filters.js";
 
 const range = { from: "2026-10-01T00:00:00Z", to: "2026-10-08T00:00:00Z" };
@@ -54,5 +61,19 @@ describe("statsQuerySchema", () => {
       { ...range, interval: "minute" },
     ];
     for (const input of bad) expect(statsQuerySchema.safeParse(input).success).toBe(false);
+  });
+});
+
+describe("breakdown query schemas", () => {
+  it("default limit 10, max 100, enum dimensions, property key pattern", () => {
+    const pages = pagesQuerySchema.parse({ ...range });
+    expect([pages.limit, pages.view]).toEqual([10, "top"]);
+    expect(sourcesQuerySchema.parse({ ...range, limit: "100", by: "utm_campaign" }).limit).toBe(
+      100,
+    );
+    expect(sourcesQuerySchema.safeParse({ ...range, limit: "101" }).success).toBe(false);
+    expect(devicesQuerySchema.safeParse({ ...range, by: "password_hash" }).success).toBe(false);
+    expect(eventPropertiesQuerySchema.safeParse({ ...range, key: "a;b" }).success).toBe(false);
+    expect(geoQuerySchema.safeParse({ from: range.to, to: range.from }).success).toBe(false);
   });
 });
