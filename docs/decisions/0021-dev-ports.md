@@ -14,5 +14,7 @@ port; changing it would mean editing the server's own config for no gain). All b
 Production is unchanged: Caddy serves 443 and proxies to the API on 127.0.0.1.
 
 ## Consequences
-Existing `.env` files with `PORT=3000` keep working; set `PORT=5100` to match the docs.
+`PORT` in `.env` overrides the default. A `.env` written before this change may still say
+`PORT=3000`; the API then listens on 3000 instead of 5100, so change it to `PORT=5100` to match
+the docs and the dashboard's `/api` proxy.
 `strictPort` makes a port clash fail loudly instead of silently moving to another port.

@@ -58,7 +58,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - Valid batches get **503 until 3c** (200 = committed). `application/json` errors now say `INVALID_JSON`.
 - Checks: lint, typecheck, build ok; tests 25 + 134 passed; mutation (skip origin / rate check) fails 3 / 2 tests;
   dev DB migrated; live: ready 200, bad key 401, bad JSON 400, 200 KB 413, preflight 204 + CORS.
-- Owner: `.env` still has `PORT=5100` (ADR 0021 says 5100). No way to set quotas over HTTP yet (SQL only).
+- Owner: make sure `.env` has `PORT=5100` (ADR 0021; an older `.env` may still say 3000). No way to set quotas over HTTP yet (SQL only).
 - **Next:** 3b enrichment (trusted-proxy IP, UA parser, geo, bots, PII, URL, referrer/channel, route templates).
 
 ## 2026-10-17 — Stage 2 gate met
