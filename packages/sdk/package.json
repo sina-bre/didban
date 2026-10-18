@@ -26,7 +26,6 @@
       "types": "./dist/engaged-time.d.ts",
       "default": "./dist/engaged-time.js"
     },
-    "./didban.iife.js": "./dist/didban.iife.js",
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
