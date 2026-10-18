@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 4a (overview, time series, filters)
+
+- `GET /projects/:id/stats/overview|timeseries` (`project:view`): 6 KPIs (spec §4), compare `previous_period`
+  / `previous_year`, null-change rule; buckets via `date_trunc(unit, ts, tz)` + `generate_series(…, tz)` (DST,
+  half-hour zones); auto interval, ≤ 1000 buckets; read-only tx + 10 s timeout. ADR 0033, `docs/metrics.md`.
+- Filters: grammar + allowlist in contracts (`parseFilter`), bound values, `prop.<key>`, coded fields by name.
+- Boundary tests: Berlin fall-back (25 h day, repeated hour = 2 buckets), NY spring-forward, Tehran 20:30 UTC
+  days, midnight UTC rotation, `[from, to)`, totals ≠ bucket sums. Mutations (UTC buckets / no filters) fail 3 / 2.
+- Plans (`docs/database.md`, 191 k events): 40–236 ms, `count(DISTINCT)` spills to disk (work_mem 4 MB) → 4d.
+- Checks: lint, typecheck, build ok; tests 29 + 63 + 205 + 5; e2e 9; live: overview 200, bad filter 400.
+- **Next:** 4b pages (top/entry/exit/discovered/detail), sources, geo, devices, events, properties.
+
 ## 2026-10-18 — Stage 3f (load baseline) + **Stage 3 gate met**
 
 - `tools/load` (`pnpm load`, autocannon 8 + postgres.js, ADR 0031): SDK-shaped batches → built API on the
