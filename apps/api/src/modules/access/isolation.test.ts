@@ -39,6 +39,8 @@ beforeEach(async () => {
 });
 afterEach(() => t.close());
 
+const STATS_RANGE = "from=2026-10-01T00:00:00Z&to=2026-10-08T00:00:00Z";
+
 /** Every route that touches one of A's resources, as [method, url, body]. */
 function routesOfA(): [string, string, object][] {
   const { orgA, memberA, projectA } = tenants.ids;
@@ -63,6 +65,8 @@ function routesOfA(): [string, string, object][] {
     ["POST", `${project}/routes/preview`, { paths: ["/products/1"] }],
     ["PATCH", `${project}/routes/${routeA}`, { position: 1 }],
     ["DELETE", `${project}/routes/${routeA}`, {}],
+    ["GET", `${project}/stats/overview?${STATS_RANGE}`, {}],
+    ["GET", `${project}/stats/timeseries?${STATS_RANGE}`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
