@@ -90,7 +90,14 @@ export type PageDetailResponse = {
 };
 
 /** `GET …/stats/export.csv?report=…` plus that report's own parameters (catalog: ≤ 10 000 rows). */
-export const EXPORT_REPORTS = ["pages", "sources", "geo", "devices", "events", "properties"] as const;
+export const EXPORT_REPORTS = [
+  "pages",
+  "sources",
+  "geo",
+  "devices",
+  "events",
+  "properties",
+] as const;
 export const MAX_EXPORT_ROWS = 10_000;
 export const exportQuerySchema = z.object({
   report: z.enum(EXPORT_REPORTS),

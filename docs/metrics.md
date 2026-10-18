@@ -85,6 +85,26 @@ then events or visits, then value. All honour the range and filters.
 
 `value: null` means the dimension was not recorded (no referrer, no geo database, unknown device).
 
+## Realtime, Data Health, export
+
+- **Realtime** (`stats/realtime`, poll every 10 s): window = the last 30 minutes. Active visitors =
+  distinct browser visitors with an event in the last 5 minutes; active pages (top 10 routes, same 5
+  minutes); page views per minute (31 points: the window's minutes including the current one);
+  first-touch channels of visits started in the window; the last 20 events (type, name, path,
+  country — never a visitor ID). Never cached.
+- **Data Health** (`stats/data-health`): last event ever, events per UTC hour for 7 days, rejection
+  and drop codes and the most frequent rejected origins (7 days; counters reach the database once a
+  minute), the `pages_seen` count against its 10 000 cap (`overflowing` = new routes go to
+  `/__other__`), and the last 20 rejected batches **seen by this API process** (code, origin,
+  time; never the payload; empty on a management-only instance).
+- **CSV export** (`stats/export.csv?report=pages|sources|geo|devices|events|properties`, plus that
+  report's own parameters; `event=` for properties): up to 10 000 rows, UTF-8 with BOM, cells that
+  start with `= + - @` get a leading `'` so spreadsheets do not run them.
+- **Cache and limits**: per project at most 3 stats queries run at once; a request waits up to 2 s
+  for a slot, then gets `429` with `Retry-After: 1`. Identical requests within 15 s are answered
+  from a per-process cache (so with several API processes, each has its own); `meta.generatedAt`
+  shows when the answer was computed. Realtime and exports are never cached.
+
 ## Filters
 
 `filter=field:op:value` (repeatable, ≤ 10; ops `eq`, `neq`, `contains`, `in` with `|`-separated

@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 4c-1 (stats gate, realtime, data health, CSV export)
+
+- `StatsGate`: ≤ 3 stats queries per project, 2 s wait then 429 + Retry-After; 15 s per-process LRU (500) keyed by
+  project + route + parsed query (filters sorted), after the guard. Realtime/export never cached. ADR 0035.
+- `stats/realtime` (30 min, 5 min active, per-minute views, sources, last 20 events without IDs); `stats/data-health`
+  (last event, 168 UTC hours, rejection codes, origins, pages_seen cap, debugger); `stats/export.csv?report=`
+  (the report schema, ≤ 10 000 rows, BOM, CSV-injection guard, digits-only filename).
+- Debugger = `RecentRejections` in a global DiagnosticsModule (ingestion writes, analytics reads; per process).
+- Checks: lint, typecheck, build ok; tests 30 + 63 + 220 + 5; e2e 9; mutation (realtime cached) fails 1; live 200 ×3.
+- Git slip: 4c-1 was committed straight to `develop` (no feature branch); left as is (no history rewrite).
+- **Next:** 4c-2 goals (revenue per currency, browser-only conversion rate) and share links (hashed token, expiry).
+
 ## 2026-10-18 — Stage 4b (breakdown reports)
 
 - `…/stats/pages` (top by hostname+route, entry, exit, discovered), `pages/detail` (views, scroll-depth visitors per
