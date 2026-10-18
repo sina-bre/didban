@@ -33,10 +33,10 @@ const codeOf = async (res: Promise<{ json: () => { error: { code: string } } }>)
   (await res).json().error.code;
 
 describe("ingestion: body (spec §7 step 1)", () => {
-  it("runs a valid browser batch through every check (storage arrives in 3c: 503)", async () => {
+  it("runs a valid browser batch through every check and commits it", async () => {
     const res = await ingest(batchBody(target.browserKey));
-    expect(res.statusCode).toBe(503);
-    expect(res.json().error.code).toBe("SERVICE_UNAVAILABLE");
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toMatchObject({ accepted: 1, duplicates: 0, rejected: [] });
     expect(res.headers["access-control-allow-origin"]).toBe("*");
     expect(res.headers["x-request-id"]).toBeDefined();
   });
@@ -84,7 +84,7 @@ describe("ingestion: origin and CORS (spec §7 step 3, §6.1)", () => {
       origin: "",
       headers: { "x-write-key": target.serverKey },
     });
-    expect(server.json().error.code).toBe("SERVICE_UNAVAILABLE");
+    expect(server.statusCode).toBe(200);
   });
 
   it("answers preflights with a cacheable CORS response", async () => {
@@ -101,6 +101,6 @@ describe("ingestion: origin and CORS (spec §7 step 3, §6.1)", () => {
 
   it("never runs the dashboard CSRF rule on ingestion", async () => {
     const res = await ingest(batchBody(target.serverKey), { origin: "https://other.example" });
-    expect(res.json().error.code).toBe("SERVICE_UNAVAILABLE");
+    expect(res.statusCode).toBe(200);
   });
 });

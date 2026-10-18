@@ -12,6 +12,13 @@ export const CHANNELS = {
 } as const;
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];
 
+/** `events.type` (spec §9.2). */
+export const EVENT_TYPES = { page: 1, track: 2, identify: 3 } as const;
+
+/** `events.source`, from the write key kind, never from the body (spec §6.1). */
+export const EVENT_SOURCES = { browser: 1, server: 2 } as const;
+export type EventSource = (typeof EVENT_SOURCES)[keyof typeof EVENT_SOURCES];
+
 /** `device_type`; NULL when the user agent does not say. */
 export const DEVICE_TYPES = { desktop: 1, mobile: 2, tablet: 3, tv: 4 } as const;
 export type DeviceType = (typeof DEVICE_TYPES)[keyof typeof DEVICE_TYPES];

@@ -9,9 +9,9 @@ export const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 
 /** One org → project → environment (allowing SITE) with a browser and a server write key. */
-export async function seedIngestTarget(sql: Sql) {
-  const organizationId = await seedOrg(sql, "heliumpark");
-  const projectId = await seedProject(sql, organizationId, "heliumpark");
+export async function seedIngestTarget(sql: Sql, slug = "heliumpark") {
+  const organizationId = await seedOrg(sql, slug);
+  const projectId = await seedProject(sql, organizationId, slug);
   const [env] = await sql<{ id: string }[]>`
     INSERT INTO environments (project_id, name, allowed_origins)
     VALUES (${projectId}, 'production', ${[SITE]}) RETURNING id`;

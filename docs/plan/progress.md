@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3c (identity, visits, event writer)
+
+- `migrations/0011`: `daily_salts`, `events`, `visits`, `pages_seen` (spec §9). Ingest now answers
+  **200 after commit** (`{accepted, duplicates, rejected, requestId}`); lock/timeout/DB loss → 503.
+- Identity (cookieless daily salt / persistent `anonymousId` / server `anonymousId|userId`),
+  `allow_identify`, ≤ 5 visitors per browser batch. `modules/events` = `EventWriter`: advisory
+  locks, in-memory visit assignment, chunked `ON CONFLICT DO NOTHING`, visits/pages/usage from
+  inserted rows only, `pages_seen` cap → `/__other__`. ADR 0028, `docs/metrics.md` visitors/visits.
+- Checks: lint, typecheck, build ok; tests 25 + 193 passed; mutations (no lock / no dedupe) fail
+  tests; dev DB migrated; live on 5199: 200, retry → duplicates 2, server key rejects no-ID event.
+- Open: 50 property keys per (project, event name) limit (§6.2) not built. **Next:** 3d SDK core.
+
 ## 2026-10-18 — Stage 3b-2 (route-template API) → **Stage 3b done**
 
 - `migrations/0010`: `route_templates.id` (stable; positions shift). `/projects/:projectId/routes`
@@ -14,6 +26,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next (new session):** 3c identity, visit resolution, bulk writer, `pages_seen`, server-key events, dedupe/retry tests.
 
 ## 2026-10-18 — Stage 3b-1 (enrichment step)
+
 - `enrich/*`: bot (isbot + no UA), internal CIDRs (BlockList, trusted-proxy IP), UA (bowser beat
   my-ua-parser on maintenance; equal on 14 UAs), optional geo (`GEOIP_DB_PATH`, fail fast), URL, referrer →
   source (`data/sources.json`), channel (`data/channels.json`, `CHANNELS` in contracts), PII, revenue, routes.
@@ -25,6 +38,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
   isolation + route-coverage tests), `docs/metrics.md` channel table; then 3c.
 
 ## 2026-10-17 — Stage 3a (ingestion pipeline steps 1–5)
+
 - `POST /api/v1/ingest/batch` + `OPTIONS` (public; write key is the credential). Order: body limit → JSON →
   key (shape check, LRU 60 s / 10 s) → Origin (browser keys) → rate limit (key, IP) → quota → envelope → events.
 - `migrations/0008`: `organizations.daily_event_quota`, `project_usage_daily`, `ingestion_diagnostics`,
@@ -32,10 +46,11 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - Valid batches get **503 until 3c** (200 = committed). `application/json` errors now say `INVALID_JSON`.
 - Checks: lint, typecheck, build ok; tests 25 + 134 passed; mutation (skip origin / rate check) fails 3 / 2 tests;
   dev DB migrated; live: ready 200, bad key 401, bad JSON 400, 200 KB 413, preflight 204 + CORS.
-- Owner: `.env` still has `PORT=3000` (ADR 0021 says 5100). No way to set quotas over HTTP yet (SQL only).
+- Owner: `.env` still has `PORT=5100` (ADR 0021 says 5100). No way to set quotas over HTTP yet (SQL only).
 - **Next:** 3b enrichment (trusted-proxy IP, UA parser, geo, bots, PII, URL, referrer/channel, route templates).
 
 ## 2026-10-17 — Stage 2 gate met
+
 - Gate checks: lint, typecheck, build ok; tests 25 + 111 passed (two-org isolation 404s, route coverage,
   login/session/CSRF, forced password change).
 - Live walkthrough on the test DB (port 5199): owner → project → environment → key → user → viewer,
@@ -45,6 +60,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** Stage 3a ingestion (new session).
 
 ## 2026-10-17 — Stage 2d-3 (owner-created users, replaces invites)
+
 - Owner decision (spec addendum A9, ADR 0024): no invites/signup. Invites merge reverted; `0007` drops
   `invites`, adds `users.must_change_password`. TOTP moved to "optional, before first public release".
 - `POST /organizations/:id/users` (`org:users`; admins → members only), `POST /admin/organizations/:id/owners`,
@@ -55,6 +71,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
   then Stage 3a ingestion.
 
 ## 2026-10-17 — Stage 2d-2 (audit log) + dev ports
+
 - Ports (ADR 0021): API default 5100, dashboard 5173 (strictPort, `/api` proxy), PostgreSQL 5432.
 - `migrations/0005_audit_logs.sql`: append-only (app role lacks UPDATE/DELETE/TRUNCATE + trigger). ADR 0022.
 - `recordAudit(tx, …)` in the same transaction for auth, org, project, member, environment, key and CLI
@@ -65,6 +82,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - Owner: set `PORT=5100` in `.env` (I cannot read it). **Next:** 2d-3 invites (single-use, 72 h, hashed).
 
 ## 2026-10-17 — Stage 2d-1 (projects, environments, API keys)
+
 - `migrations/0004_*`: project settings columns, `environments`, `api_keys` (composite FK env→project,
   SHA-256 only, token shown once). Contracts: `projects.ts`, `environments.ts`, `api-keys.ts`. ADR 0020.
 - Routes: org projects list/create/archive, project get/patch, environments list/create/patch,
@@ -76,6 +94,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** 2d-2 audit log (also for 2d-1 actions), then invites, TOTP + recovery codes, reset links.
 
 ## 2026-10-17 — Stage 2c (AccessScope guard, permissions, routes)
+
 - `domain/permissions.ts` (pure `decide()` → allow/404/403), `modules/access/*`: scope loader (skips suspended
   orgs, archived projects), `@Requires(permission)`, `authorize()` called by the one global guard (fails closed). ADR 0019.
 - Routes: `GET /organizations`, `GET /projects`, `PATCH|DELETE /organizations/:id/members/:userId`,
@@ -88,6 +107,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** 2d projects (settings columns), environments, API keys, audit log, invites, TOTP, reset links.
 
 ## 2026-10-17 — Stage 2b (organizations, memberships, project members)
+
 - `migrations/0003_projects_and_members.sql`: `projects` (identity columns only; settings in 2d), `project_members`
   with composite FKs through `organization_id` + index (EXPLAIN in ADR 0018).
 - `src/domain/org-roles.ts` (pure rules); use cases: change role, remove member (last-owner rule, org row lock),
@@ -99,6 +119,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** 2c `AccessScope` guard (skip suspended orgs), permission decorator, routes for 2b use cases, route-coverage test, 404 hiding.
 
 ## 2026-10-17 — Stage 2a (auth core)
+
 - `migrations/0002_auth_sessions.sql`; `src/modules/auth/*` (login, logout, logout-all, me, change password),
   global `SessionGuard` + `@Public()`, CSRF `onRequest` hook, `ZodPipe`, `SESSION_COOKIE` env switch.
 - `@node-rs/argon2` 2.2.2 (m=19456,t=2,p=1; verify 33 ms), SecLists 10k list in `apps/api/data/`, in-memory
@@ -111,6 +132,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** 2b organizations, memberships, project members, platform-admin flag + CLI, last-owner rule.
 
 ## 2026-10-17 — Stage 1d done → **Stage 1 gate met**
+
 - Decision: no ORM. postgres.js 3.4.9 + forward-only SQL migrations (checksum + advisory lock), ADR 0016, addendum A8.
 - `pnpm db:setup` is now Node (`scripts/dev-db.mjs`; bash failed on Windows: pnpm picked WSL's bash).
   Owner ran it: roles analytics_migrator/analytics_app, DBs didban_dev/test/shadow, URLs in `.env`.
@@ -123,6 +145,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
   Needs: a common-password list for the password policy (spec §11) — download approval pending.
 
 ## 2026-10-17 — Stage 1c (API skeleton)
+
 - Renamed product to **didban** (`@didban/analytics`, `@didban/react`, private `@didban/contracts`, `@didban/api`).
 - `apps/api`: NestJS 12.1.3 (ESM-only) on Fastify 5.12.5, SWC 1.16 build, Zod env (fail fast, prod https rule,
   TRUST_PROXY hops/CIDRs, INSTANCE_ROLE), Pino redaction (no IP, no query strings), request id header,
@@ -134,6 +157,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - **Next:** 1d Prisma 7 + `scripts/dev-db.mjs` + first migration + DB in `/health/ready`.
 
 ## 2026-10-17 — Stage 1a + 1b
+
 - Spec `23-feature-catalog.md` added (owner asked for more features + boundaries; v1+ items are cheap, no new infra).
 - 1a: pnpm workspace, `.nvmrc` 24, TS 6.0.3 base config, Biome 2.5.15 (40-line functions, complexity 12),
   `check-file-size.mjs`, `check-logical-css.mjs`, Biome format hook for Claude edits, LICENSE (MIT), CONTRIBUTING,
@@ -145,6 +169,7 @@ Newest first. ≤ 10 lines per entry: what was done, checks run + result, what i
 - Product name: **didban**, npm scope `@didban` (owner, 2026-10-17).
 
 ## 2026-10-17 — Phase 0 (agent setup)
+
 - Git initialized (repo was empty except 7 design screenshots → moved to `design/reference/`).
 - Installed 15 project skills (`skills-lock.json`), wrote `.mcp.json` (context7, playwright, postgres read-only).
 - Spec split into `docs/spec/00–21` + `22-addendum.md`; phases, ADRs 0000–0014, design system written.

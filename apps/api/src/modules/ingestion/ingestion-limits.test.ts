@@ -44,13 +44,8 @@ describe("ingestion: rate limit and quota (spec §7 step 4)", () => {
         headers: { "content-type": "application/json", "x-write-key": target.serverKey },
       });
     const codes = [];
-    for (let i = 0; i < 4; i++) codes.push((await send()).json().error.code);
-    expect(codes).toEqual([
-      "SERVICE_UNAVAILABLE",
-      "SERVICE_UNAVAILABLE",
-      "SERVICE_UNAVAILABLE",
-      "RATE_LIMITED",
-    ]);
+    for (let i = 0; i < 4; i++) codes.push((await send()).json().error?.code ?? "OK");
+    expect(codes).toEqual(["OK", "OK", "OK", "RATE_LIMITED"]);
   });
 
   it("stops at the organization's daily quota", async () => {

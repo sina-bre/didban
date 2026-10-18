@@ -35,10 +35,11 @@ where counters live, and what a valid batch returns before the event writer exis
   and on shutdown, with bulk upserts. Two processes flushing together may overshoot the origin
   cap slightly.
 - **Until Stage 3c:** a batch that passes every check gets `503 SERVICE_UNAVAILABLE`. A `200`
-  means "committed to PostgreSQL" (§6.4), and nothing is stored yet.
+  means "committed to PostgreSQL" (§6.4), and nothing is stored yet. (Ended in 3c: ADR 0028.)
 
 ## Consequences
 - An ingest request costs one key lookup per minute per key and one quota read. No writes yet.
 - Limits and caches are per process; with more than one replica the effective limits multiply.
   The §20 trigger (more than one API replica) moves the limiter to Redis.
-- Visitor-count and property-key limits (§6.2) need identity and storage: they arrive in 3c.
+- Visitor-count and property-key limits (§6.2) need identity and storage: they arrive in 3c
+  (visitor count done in ADR 0028; property keys still open).

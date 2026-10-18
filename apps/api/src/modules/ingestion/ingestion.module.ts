@@ -1,6 +1,10 @@
 import { Module } from "@nestjs/common";
+import { EventsModule } from "../events/events.module.js";
+import { DailySalt } from "./daily-salt.js";
 import { EnrichBatch } from "./enrich/enrich-batch.js";
 import { GeoLookup } from "./enrich/geo-lookup.js";
+import { IdentifyBatch } from "./identify-batch.js";
+import { IngestBatch } from "./ingest-batch.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { IngestRateLimiter } from "./ingest-rate-limiter.js";
 import { IngestionController } from "./ingestion.controller.js";
@@ -12,10 +16,14 @@ import { WriteKeyCache } from "./write-key-cache.js";
 
 // The in-memory pieces take an optional clock, so they are built with factories (tests pass fakes).
 @Module({
+  imports: [EventsModule],
   controllers: [IngestionController],
   providers: [
+    IngestBatch,
     PrepareBatch,
     EnrichBatch,
+    IdentifyBatch,
+    DailySalt,
     GeoLookup,
     WriteKeyResolver,
     IngestionFlusher,
