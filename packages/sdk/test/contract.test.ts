@@ -10,6 +10,7 @@ import {
 import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import pkg from "../package.json" with { type: "json" };
 import * as limits from "../src/limits.js";
+import { MAX_PROPERTY_STRING_LENGTH } from "../src/modules/property.js";
 import { SDK_NAME, SDK_VERSION } from "../src/payload.js";
 import type { SdkEvent } from "../src/types.js";
 import { cleanup, idle, setup, stubFetch } from "./helpers.js";
@@ -47,6 +48,7 @@ describe("contract", () => {
     expect(limits.MAX_BEACON_BYTES).toBe(LIMITS.maxBeaconBytes);
     expect(limits.MAX_URL_LENGTH).toBe(LIMITS.maxUrlLength);
     expect(limits.MAX_TITLE_LENGTH).toBe(LIMITS.maxTitleLength);
+    expect(MAX_PROPERTY_STRING_LENGTH).toBe(LIMITS.maxPropertyStringLength);
     expect(limits.MAX_ID_LENGTH).toBe(LIMITS.maxIdLength);
     expect(limits.EVENT_NAME_PATTERN.source).toBe(EVENT_NAME_PATTERN.source);
     expect(limits.RETRYABLE_HTTP_STATUSES).toEqual([...RETRYABLE_HTTP_STATUSES]);
