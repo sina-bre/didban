@@ -7,6 +7,7 @@ const REDACT = [
   "req.headers.authorization",
   "req.headers.cookie",
   "req.headers['x-write-key']",
+  "req.headers['x-share-token']",
   "res.headers['set-cookie']",
   "*.password",
   "*.token",

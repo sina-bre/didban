@@ -15,6 +15,8 @@ const PUBLIC_ALLOWLIST = [
   "POST auth/login",
   "POST ingest/batch",
   "OPTIONS ingest/batch",
+  "GET share",
+  "GET share/stats/:report",
 ];
 
 type Route = { route: string; isPublic: boolean; permission: unknown };

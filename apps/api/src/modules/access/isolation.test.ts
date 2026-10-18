@@ -16,6 +16,7 @@ let keyA: string;
 let tokenA: string;
 let routeA: string;
 let goalA: string;
+let shareA: string;
 
 beforeEach(async () => {
   await resetDb();
@@ -49,6 +50,16 @@ beforeEach(async () => {
     },
   );
   goalA = goal.json().id;
+  const share = await call(
+    t,
+    "POST",
+    `/projects/${tenants.ids.projectA}/shares`,
+    tenants.cookies.ownerA,
+    {
+      label: "Board",
+    },
+  );
+  shareA = share.json().id;
 });
 afterEach(() => t.close());
 
@@ -82,6 +93,9 @@ function routesOfA(): [string, string, object][] {
     ["POST", `${project}/goals`, { kind: "event", name: "Stolen", eventName: "x" }],
     ["PATCH", `${project}/goals/${goalA}`, { name: "Stolen" }],
     ["DELETE", `${project}/goals/${goalA}`, {}],
+    ["GET", `${project}/shares`, {}],
+    ["POST", `${project}/shares`, { label: "Stolen" }],
+    ["DELETE", `${project}/shares/${shareA}`, {}],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
@@ -143,7 +157,8 @@ describe("tenant isolation (spec §11, §16)", () => {
              (SELECT count(revoked_at)::int FROM api_keys) AS revoked,
              (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived,
              (SELECT string_agg(pattern, ',') FROM route_templates) AS routes,
-             (SELECT string_agg(name, ',') FROM goals) AS goals`;
+             (SELECT string_agg(name, ',') FROM goals) AS goals,
+             (SELECT count(*)::int FROM share_links WHERE revoked_at IS NULL) AS shares`;
     const routes = "/products/:id";
     expect(state).toEqual({
       projects: 2,
@@ -152,6 +167,7 @@ describe("tenant isolation (spec §11, §16)", () => {
       archived: 0,
       routes,
       goals: "Signup",
+      shares: 1,
     });
   });
 
