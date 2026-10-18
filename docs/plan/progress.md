@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3b-2 (route-template API) → **Stage 3b done**
+
+- `migrations/0010`: `route_templates.id` (stable; positions shift). `/projects/:projectId/routes`
+  GET/POST, PATCH/DELETE `:routeId`, `POST …/preview` (1–20 paths, optional unsaved patterns), all
+  `project:manage`. Changes lock the project row and rewrite positions 1..n. Audit
+  `route_template.*` (field names only). ADR 0027 (EXPLAIN: 100k rows, list 0.41 ms).
+- `docs/metrics.md` created: channel table + rules order, route grouping. Isolation test split.
+- Checks: lint, typecheck, build ok; tests 25 + 169 passed; mutations (viewer allowed / no dup
+  check) fail 2 tests; dev DB migrated; live on 5199: ready 200, routes 401, foreign Origin 403.
+- **Next (new session):** 3c identity, visit resolution, bulk writer, `pages_seen`, server-key events, dedupe/retry tests.
+
 ## 2026-10-18 — Stage 3b-1 (enrichment step)
 - `enrich/*`: bot (isbot + no UA), internal CIDRs (BlockList, trusted-proxy IP), UA (bowser beat
   my-ua-parser on maintenance; equal on 14 UAs), optional geo (`GEOIP_DB_PATH`, fail fast), URL, referrer →
