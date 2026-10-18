@@ -4,6 +4,9 @@ import { newApiKeyToken } from "../modules/api-keys/api-key-token.js";
 import { seedOrg, seedProject } from "./seed-org.js";
 
 export const SITE = "https://heliumpark.example";
+/** A real desktop browser: requests without a user agent are filtered as bots (spec §7 step 6). */
+export const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 
 /** One org → project → environment (allowing SITE) with a browser and a server write key. */
 export async function seedIngestTarget(sql: Sql) {

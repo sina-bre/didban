@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3b-1 (enrichment step)
+- `enrich/*`: bot (isbot + no UA), internal CIDRs (BlockList, trusted-proxy IP), UA (bowser beat
+  my-ua-parser on maintenance; equal on 14 UAs), optional geo (`GEOIP_DB_PATH`, fail fast), URL, referrer →
+  source (`data/sources.json`), channel (`data/channels.json`, `CHANNELS` in contracts), PII, revenue, routes.
+- `migrations/0009`: `hash_routing`, `store_city`, `site_search_params`, `route_templates` (≤ 200). Settings
+  load with the write key (60 s cache). Drops counted in diagnostics. ADR 0026. Valid batches still 503.
+- Checks: lint, typecheck, build ok; tests 25 + 160 passed; mutation (no PII strip / no CIDR check) fails 4;
+  dev DB migrated (rerun up to date); live: ready 200, bad key 401; bad `GEOIP_DB_PATH` → exit 1.
+- **Next (new session):** 3b-2 route-template HTTP (`…/routes` CRUD + `POST …/routes/preview`, project admin,
+  isolation + route-coverage tests), `docs/metrics.md` channel table; then 3c.
+
 ## 2026-10-17 — Stage 3a (ingestion pipeline steps 1–5)
 - `POST /api/v1/ingest/batch` + `OPTIONS` (public; write key is the credential). Order: body limit → JSON →
   key (shape check, LRU 60 s / 10 s) → Origin (browser keys) → rate limit (key, IP) → quota → envelope → events.

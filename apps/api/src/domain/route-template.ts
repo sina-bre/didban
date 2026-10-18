@@ -4,7 +4,7 @@
 
 export type RouteTemplate = { pattern: string; segments: readonly string[]; rest: boolean };
 
-const LITERAL = /^[A-Za-z0-9._~!$&'()+,;=@%-]+$/;
+const LITERAL = /^[A-Za-z0-9._~%@#-]+$/; // `#` for hash-routed apps ("/#/settings")
 const PARAM = /^:[A-Za-z][A-Za-z0-9_]{0,31}$/;
 export const MAX_ROUTE_TEMPLATE_LENGTH = 200;
 

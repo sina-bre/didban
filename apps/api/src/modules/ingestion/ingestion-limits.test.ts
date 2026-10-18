@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetDb } from "../../test-support/reset-db.js";
-import { batchBody, SITE, seedIngestTarget } from "../../test-support/seed-ingest.js";
+import { BROWSER_UA, batchBody, SITE, seedIngestTarget } from "../../test-support/seed-ingest.js";
 import { startTestApp } from "../../test-support/test-app.js";
 import { IngestionFlusher } from "./ingestion-flusher.js";
 
@@ -20,7 +20,7 @@ function ingest(payload: unknown, origin = SITE) {
     method: "POST",
     url: "/api/v1/ingest/batch",
     payload: JSON.stringify(payload),
-    headers: { "content-type": "text/plain", origin },
+    headers: { "content-type": "text/plain", origin, "user-agent": BROWSER_UA },
   });
 }
 const flush = () => t.app.get(IngestionFlusher).flush();
