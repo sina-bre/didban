@@ -1,0 +1,13 @@
+{
+  "name": "@didban/load",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "load": "node --env-file-if-exists=../../.env src/run.mjs"
+  },
+  "devDependencies": {
+    "autocannon": "8.0.0",
+    "postgres": "3.4.9"
+  }
+}

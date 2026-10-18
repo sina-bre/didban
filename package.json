@@ -14,14 +14,18 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm -C e2e test:e2e",
+    "load": "pnpm -C tools/load load",
     "build": "pnpm -r --if-present build",
     "cli": "pnpm --silent -C apps/api cli",
+    "check:packages": "node scripts/check-packages.mjs",
     "db:setup": "node scripts/dev-db.mjs",
     "db:migrate": "pnpm -C apps/api migrate",
     "db:migrate:test": "pnpm -C apps/api migrate:test"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@biomejs/biome": "2.5.15",
+    "publint": "0.3.25",
     "typescript": "6.0.3"
   }
 }

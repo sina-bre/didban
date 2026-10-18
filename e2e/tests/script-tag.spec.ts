@@ -1,12 +1,16 @@
 import { expect, test } from "@playwright/test";
 import { clearRecords, events, eventually, LOOPBACK, pagePaths, records } from "./collector.js";
+import { storedEvents, storedPagePaths } from "./db.js";
+import { PROJECTS } from "./keys.js";
 
 const SITE = "http://localhost:5304";
-const KEY = "wk_e2e_script";
+const KEY = PROJECTS.script.key;
+const SLUG = PROJECTS.script.slug;
 
 test.beforeEach(clearRecords);
 
 test("loads under a strict CSP with SRI and exposes window.analytics", async ({ page }) => {
+  const since = new Date();
   const problems: string[] = [];
   page.on("console", (m) => m.type() === "error" && problems.push(m.text()));
   page.on("pageerror", (e) => problems.push(e.message));
@@ -23,7 +27,17 @@ test("loads under a strict CSP with SRI and exposes window.analytics", async ({ 
       expect(list.filter((e) => e.name === "pricing_viewed")).toHaveLength(1);
     },
   );
-  for (const r of await records(KEY)) expect(r.forwardedFor ?? "").toMatch(LOOPBACK);
+  for (const r of await records(KEY)) {
+    expect(r.forwardedFor ?? "").toMatch(LOOPBACK);
+    expect(r.status).toBe(200);
+  }
+  await eventually(
+    () => storedEvents(SLUG, since),
+    (stored) => {
+      expect(storedPagePaths(stored)).toEqual(["/"]);
+      expect(stored.filter((e) => e.name === "pricing_viewed")).toHaveLength(1);
+    },
+  );
   expect(problems).toEqual([]);
 });
 
