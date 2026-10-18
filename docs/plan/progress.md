@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 4d (10 M events, plans) → **Stage 4 gate met (2 slow cases documented)**
+
+- `tools/load` `seed:large` (pure SQL, uuidv7, resumable; 10 081 634 events / 2.35 M visits / 90 d) and `explain`
+  (built use cases, statements captured via postgres.js `debug`, EXPLAIN ANALYZE BUFFERS). Raw plans committed.
+- Fix (ADR 0037): `SET LOCAL parallel_*_cost = 0` in stats tx + distinct visitors as group-then-count. 90 d:
+  overview 7.6 → 3.8 s, devices timeout → 5.9 s, timeseries timeout → 9.0 s, goals 12.5 → 9.3 s.
+- Still > 10 s at 90 d on this box (documented with plans in `docs/database.md`, gate allows): top pages
+  (7.5 M page×visitor groups, ~16 s, CPU-bound) and property keys (cold heap fetches). 30 d: all < 3.5 s.
+- Gate: boundary tests (DST, midnight UTC, range edges) green since 4a; plans recorded. Checks: lint, typecheck,
+  build ok; tests 30 + 63 + 228 + 5; e2e 9; mutation (server IDs counted as visitors) fails 3.
+- Lessons: `pnpm test` truncates the test DB (lost one 10 M seed); postgres.js recycles connections after 30–60 min.
+- **Next:** Stage 5a dashboard (Vite + Tailwind 4 + tokens, fonts, i18n en/fa, direction, shells).
+
 ## 2026-10-18 — Stage 4c-2 (goals, share links) → Stage 4c done
 
 - `migrations/0012`: `goals` (event | page pattern, ≤ 50) and `share_links` (SHA-256 token, expiry, revoke, ≤ 20
