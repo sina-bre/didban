@@ -2,6 +2,7 @@ import { type DynamicModule, Module } from "@nestjs/common";
 import { ConfigModule } from "./config/config.module.js";
 import type { Env } from "./config/env.js";
 import { DbModule } from "./db/db.module.js";
+import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { ApiKeysModule } from "./modules/api-keys/api-keys.module.js";
 import { AuditModule } from "./modules/audit/audit.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
@@ -32,6 +33,7 @@ export class AppModule {
             ApiKeysModule,
             AuditModule,
             UsersModule,
+            AnalyticsModule,
           ];
     const ingestion = env.INSTANCE_ROLE === "management" ? [] : [IngestionModule];
     return {
