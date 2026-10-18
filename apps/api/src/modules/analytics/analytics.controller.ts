@@ -12,12 +12,16 @@ import { ZodPipe } from "../../http/zod-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
 import { getOverview } from "./overview.js";
+import { queryKey, StatsGate } from "./stats-gate.js";
 import { getTimeseries } from "./timeseries.js";
 
 // Spec §10 `/projects/:projectId/stats/*`: any role that can see the project (`project:view`).
 @Controller("projects/:projectId/stats")
 export class AnalyticsController {
-  constructor(@Inject(SQL) private readonly sql: Sql) {}
+  constructor(
+    @Inject(SQL) private readonly sql: Sql,
+    private readonly gate: StatsGate,
+  ) {}
 
   @Requires("project:view")
   @Get("overview")
@@ -26,7 +30,8 @@ export class AnalyticsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(statsQuerySchema)) query: StatsQuery,
   ): Promise<OverviewResponse> {
-    return getOverview(this.sql, scope, { projectId, query });
+    const work = () => getOverview(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("overview", query), work);
   }
 
   @Requires("project:view")
@@ -36,6 +41,7 @@ export class AnalyticsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(statsQuerySchema)) query: StatsQuery,
   ): Promise<TimeseriesResponse> {
-    return getTimeseries(this.sql, scope, { projectId, query });
+    const work = () => getTimeseries(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("timeseries", query), work);
   }
 }

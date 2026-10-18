@@ -6,6 +6,7 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { ApiKeysModule } from "./modules/api-keys/api-keys.module.js";
 import { AuditModule } from "./modules/audit/audit.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
+import { DiagnosticsModule } from "./modules/diagnostics/diagnostics.module.js";
 import { EnvironmentsModule } from "./modules/environments/environments.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IngestionModule } from "./modules/ingestion/ingestion.module.js";
@@ -42,6 +43,7 @@ export class AppModule {
         ConfigModule.register(env),
         DbModule.register(env),
         HealthModule,
+        DiagnosticsModule,
         ...ingestion,
         ...management,
       ],

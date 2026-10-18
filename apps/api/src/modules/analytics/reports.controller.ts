@@ -9,13 +9,17 @@ import { Requires } from "../access/requires.decorator.js";
 import { getEventProperties, getEvents } from "./events-report.js";
 import { getDevices, getGeo } from "./geo-devices.js";
 import { getSources } from "./sources.js";
+import { queryKey, StatsGate } from "./stats-gate.js";
 
 type Rows<Row> = Promise<c.BreakdownResponse<Row>>;
 
 // Spec §10 breakdowns besides pages. Read access (`project:view`) for every role on the project.
 @Controller("projects/:projectId/stats")
 export class ReportsController {
-  constructor(@Inject(SQL) private readonly sql: Sql) {}
+  constructor(
+    @Inject(SQL) private readonly sql: Sql,
+    private readonly gate: StatsGate,
+  ) {}
 
   @Requires("project:view")
   @Get("sources")
@@ -24,7 +28,8 @@ export class ReportsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(c.sourcesQuerySchema)) query: c.SourcesQuery,
   ): Rows<c.VisitRow> {
-    return getSources(this.sql, scope, { projectId, query });
+    const work = () => getSources(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("sources", query), work);
   }
 
   @Requires("project:view")
@@ -34,7 +39,8 @@ export class ReportsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(c.geoQuerySchema)) query: c.GeoQuery,
   ): Rows<c.EventRow> {
-    return getGeo(this.sql, scope, { projectId, query });
+    const work = () => getGeo(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("geo", query), work);
   }
 
   @Requires("project:view")
@@ -44,7 +50,8 @@ export class ReportsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(c.devicesQuerySchema)) query: c.DevicesQuery,
   ): Rows<c.EventRow> {
-    return getDevices(this.sql, scope, { projectId, query });
+    const work = () => getDevices(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("devices", query), work);
   }
 
   @Requires("project:view")
@@ -54,7 +61,8 @@ export class ReportsController {
     @Param("projectId", UuidPipe) projectId: string,
     @Query(new ZodPipe(c.eventsQuerySchema)) query: c.EventsQuery,
   ): Rows<c.EventRow> {
-    return getEvents(this.sql, scope, { projectId, query });
+    const work = () => getEvents(this.sql, scope, { projectId, query });
+    return this.gate.run(projectId, queryKey("events", query), work);
   }
 
   @Requires("project:view")
@@ -65,6 +73,7 @@ export class ReportsController {
     @Param("name") name: string,
     @Query(new ZodPipe(c.eventPropertiesQuerySchema)) query: c.EventPropertiesQuery,
   ): Rows<c.EventRow> {
-    return getEventProperties(this.sql, scope, { projectId, query, name });
+    const work = () => getEventProperties(this.sql, scope, { projectId, query, name });
+    return this.gate.run(projectId, queryKey(`events/${name}/properties`, query), work);
   }
 }

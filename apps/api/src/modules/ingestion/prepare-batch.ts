@@ -4,6 +4,7 @@ import { ENV } from "../../config/config.module.js";
 import type { Env } from "../../config/env.js";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
+import { RecentRejections } from "../diagnostics/recent-rejections.js";
 import { isOverQuota } from "./check-quota.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { ingestError } from "./ingest-error.js";
@@ -29,6 +30,7 @@ export class PrepareBatch {
     private readonly keys: WriteKeyResolver,
     private readonly limiter: IngestRateLimiter,
     private readonly diagnostics: IngestDiagnostics,
+    private readonly recent: RecentRejections,
   ) {}
 
   async execute(request: IngestRequest): Promise<PreparedBatch> {
@@ -41,7 +43,10 @@ export class PrepareBatch {
       for (const rejection of batch.rejected) this.diagnostics.record(key, rejection.code);
       return { ...batch, key };
     } catch (error) {
-      if (error instanceof AppError) this.diagnostics.record(key, error.code);
+      if (error instanceof AppError) {
+        this.diagnostics.record(key, error.code);
+        this.recent.add(key.environmentId, error.code, request.origin);
+      }
       throw error;
     }
   }

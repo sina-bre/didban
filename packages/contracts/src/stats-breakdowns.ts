@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PROPERTY_KEY_PATTERN } from "./limits.js";
+import { EVENT_NAME_PATTERN, PROPERTY_KEY_PATTERN } from "./limits.js";
 import { type StatsMeta, statsQueryBase, withRangeCheck } from "./stats.js";
 
 // Spec §10 breakdown endpoints. Aggregates are not paginated: `limit` (default 10, max 100) rows,
@@ -88,3 +88,13 @@ export type PageDetailResponse = {
   /** Average engaged seconds per page view that reported it. */
   engagedSeconds: number | null;
 };
+
+/** `GET …/stats/export.csv?report=…` plus that report's own parameters (catalog: ≤ 10 000 rows). */
+export const EXPORT_REPORTS = ["pages", "sources", "geo", "devices", "events", "properties"] as const;
+export const MAX_EXPORT_ROWS = 10_000;
+export const exportQuerySchema = z.object({
+  report: z.enum(EXPORT_REPORTS),
+  /** The event whose properties are exported (`report=properties`). */
+  event: z.string().regex(EVENT_NAME_PATTERN).optional(),
+});
+export type ExportReport = (typeof EXPORT_REPORTS)[number];
