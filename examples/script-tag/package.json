@@ -1,0 +1,11 @@
+{
+  "name": "@didban/example-script-tag",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs"
+  },
+  "dependencies": {
+    "@didban/analytics": "workspace:*"
+  }
+}

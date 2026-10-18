@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "jsx": "react-jsx",
+    "paths": { "@didban/analytics": ["../sdk/src/index.ts"] },
     "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"]

@@ -1,0 +1,24 @@
+{
+  "name": "@didban/example-nextjs-app-router",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 5303",
+    "build": "next build",
+    "typecheck": "next typegen && tsc --noEmit",
+    "start": "next start --port 5303"
+  },
+  "dependencies": {
+    "@didban/analytics": "workspace:*",
+    "@didban/react": "workspace:*",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}
