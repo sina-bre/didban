@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 4b (breakdown reports)
+
+- `…/stats/pages` (top by hostname+route, entry, exit, discovered), `pages/detail` (views, scroll-depth visitors per
+  threshold, avg engaged seconds; `null` = module off), `sources?by=` (first touch on visits), `geo?by=`,
+  `devices?by=`, `events`, `events/:name/properties[?key=]`. Limit 1–100, `meta.truncated`. ADR 0034.
+- Shared `scope-sql.ts` (range + envs + filters) for totals and breakdowns; columns only from per-endpoint maps;
+  coded columns returned by name. Contracts: `withRangeCheck` (Zod 4 cannot extend refined objects).
+- Checks: lint, typecheck, build ok; tests 30 + 63 + 211 + 5; e2e 9; mutation (visit breakdown ignores filters)
+  fails 1; isolation covers the 9 stats routes; live: 5 reports 200 on real e2e browser data.
+- Note: fixture SQL literals without `Z` are read in the DB session zone (Tehran here) — always write `…Z`.
+- **Next:** 4c goals + revenue, realtime, data health, CSV export, share links, semaphore + 15 s cache.
+
 ## 2026-10-18 — Stage 4a (overview, time series, filters)
 
 - `GET /projects/:id/stats/overview|timeseries` (`project:view`): 6 KPIs (spec §4), compare `previous_period`
