@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-18 — Stage 3e (SDK modules, script tag, React adapter, examples)
+
+- SDK: 4 module entries via `autoCapture` factories (0.24–0.52 kB gz), `notFound()`, IIFE
+  `didban.iife.js` (data attributes, strict CSP, SRI; 5.96/6.5 kB). Core 4.97/5 kB (~30 B left). ADR 0030.
+- `@didban/react` 0.1.0 (240 B gz, `"use client"` checked on build, peer of core). Examples:
+  `vanilla-vite`, `nextjs-app-router`, `script-tag`; `e2e/` Playwright (system Chrome) + `pnpm test:e2e`.
+- Finding: Next.js rewrites do **not** add `X-Forwarded-For` → docs require a front proxy; test pins it.
+- Checks: lint, typecheck, build ok; tests 25 + 63 + 193 + 5 passed; e2e 8 passed (one view per Link /
+  router.push in StrictMode dev, client IP, CSP+SRI, perf: longest SDK task 2.4–4.4 ms ≤ 5 ms — thin margin).
+  publint "All good" ×2, attw no problems (esm-only), `npm pack --dry-run` ok, tarballs installed + smoke-run.
+- Docs: `docs/sdk.md` (modules, script tag, Caddy/Nginx proxy), `docs/integration.md` (server event fetch).
+- **Next:** 3f load-test baseline (`tools/load`), then the Stage 3 gate.
+
 ## 2026-10-18 — Stage 3d (SDK core)
 
 - `packages/sdk` (`@didban/analytics` 0.1.0, zero deps): queue, batching, fetch transport (keepalive,
