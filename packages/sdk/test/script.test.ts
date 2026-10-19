@@ -34,6 +34,14 @@ describe("script-tag build", () => {
     ).toEqual(["page", "page_not_found"]);
   });
 
+  it("defines window.analytics at once and creates the instance in a later task", async () => {
+    const { events } = stubFetch();
+    await load({ endpoint: "/a/e", writeKey: "wk_script_2" });
+    expect(typeof window.analytics?.track).toBe("function");
+    await idle(10_000);
+    expect(events().map((e) => e.type)).toEqual(["page"]);
+  });
+
   it("stays a no-op without a write key and never throws", async () => {
     const { sent } = stubFetch();
     await load({ endpoint: "/a/e" });

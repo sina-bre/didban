@@ -9,12 +9,26 @@ import type { Analytics, AnalyticsOptions, SpaMode } from "./types.js";
 // Script-tag build (spec §8.5): `<script defer src=".../didban.js" data-endpoint="/a/e"
 // data-write-key="wk_…">`. All settings come from data attributes, so a strict CSP without
 // 'unsafe-inline' works. Exposes `window.analytics` (the core instance plus `notFound()`).
+// Script evaluation only reads the attributes: the instance is created in its own task, or by the
+// first call, so no single task gets long (addendum A2).
 
 declare global {
   interface Window {
     analytics?: Analytics & { notFound(path?: string): void };
   }
 }
+
+const METHODS = [
+  "page",
+  "track",
+  "identify",
+  "reset",
+  "setConsent",
+  "optOut",
+  "optIn",
+  "flush",
+  "shutdown",
+] as const;
 
 const MODULES = {
   "outbound-links": outboundLinks,
@@ -48,6 +62,15 @@ function readOptions(data: DOMStringMap): AnalyticsOptions {
 
 const script = document.currentScript as HTMLScriptElement | null;
 if (script && !window.analytics) {
-  const analytics = createAnalytics(readOptions(script.dataset));
-  window.analytics = { ...analytics, notFound: (path) => notFound(analytics, path) };
+  const options = readOptions(script.dataset);
+  let instance: Analytics | undefined;
+  const get = () => (instance ??= createAnalytics(options));
+  const forward = (name: (typeof METHODS)[number]) => [
+    name,
+    (...args: unknown[]) => (get()[name] as (...a: unknown[]) => unknown)(...args),
+  ];
+  window.analytics = Object.assign(Object.fromEntries(METHODS.map(forward)) as Analytics, {
+    notFound: (path?: string) => notFound(get(), path),
+  });
+  setTimeout(get, 0);
 }
