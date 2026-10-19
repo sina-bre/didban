@@ -59,5 +59,11 @@ export default defineConfig({
       port: 5304,
       env: { COLLECTOR_URL, DIDBAN_WRITE_KEY: PROJECTS.script.key },
     },
+    // The dashboard's production build (`pnpm build`), its `/api` proxied to the API under test.
+    {
+      command: "pnpm -C ../apps/dashboard preview",
+      url: "http://127.0.0.1:5173/",
+      env: { API_URL },
+    },
   ],
 });

@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "./shared/ui/tokens.css";
+
+@layer base {
+  html {
+    @apply bg-canvas font-sans text-body text-ink antialiased;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  /* Design system §4: 2 px focus ring with 2 px offset, never removed. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Fixed bottom bars clear the home indicator (addendum A6). */
+@utility pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
