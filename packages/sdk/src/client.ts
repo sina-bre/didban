@@ -26,6 +26,7 @@ function announce(pages: ReturnType<Module>[], event: SdkEvent): SdkEvent {
  * listeners and the first page view run on idle (addendum A2), or earlier on an explicit flush().
  * `shutdown()` before that start drops queued events: nothing was sent and no listener exists.
  * While `startTracking` runs, the state is still "idle", so the first page view is queued.
+ * Its later steps (page views, first send) are idle tasks too: flush, hide and shutdown settle them.
  */
 export function createClient(config: Config, onShutdown: () => void): Analytics {
   const report = createReport(config);
@@ -62,10 +63,12 @@ export function createClient(config: Config, onShutdown: () => void): Analytics 
       optIn: () => privacy.optIn(),
       flush() {
         start();
+        scope.settle();
         return pipeline.flush();
       },
       shutdown() {
-        if (state === "running") pipeline.beacon();
+        if (state === "running") scope.settle();
+        pipeline.beacon(); // sends nothing when the pipeline never started
         state = "off";
         pipeline.stop();
         scope.dispose();

@@ -2,6 +2,17 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-19 — SDK perf fix (script-tag ≤ 5 ms flake)
+
+- Cause (Chrome trace): idle start did checks + modules + first storage read (~1–2 ms cold) + page
+  view + send in one task (≤ 4.6 ms); script eval also built the instance. ADR 0039.
+- Fix: idle start → checks/listeners, then storage, page views, first send as separate idle callbacks;
+  `scope.settle()` for flush/hide/shutdown. Script tag: `window.analytics` forwarders, instance in own task.
+- Core 4991/5000 B gz (dropped `uuidv7` Math.random fallback). 5 ms limit unchanged.
+- Checks: lint, typecheck, build + size-limit ok; tests 30 + 17 + 68 + 228 + 5 (4 new idle-step tests,
+  each fails on its mutation); `pnpm test:e2e` 5 consecutive runs 13/13, script-tag medians 1.9–2.5 ms.
+- **Next:** Stage 5b (unchanged).
+
 ## 2026-10-19 — Stage 5a (dashboard foundation)
 
 - `apps/dashboard`: Vite 8.3, React 19.3, React Router 8.4 (data mode), Tailwind 4.3 + tokens (moved from

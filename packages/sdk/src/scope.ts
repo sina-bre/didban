@@ -9,12 +9,25 @@ export interface Scope {
   sleep(ms: number): Promise<boolean>;
   /** Runs `fn` when the browser is idle (`requestIdleCallback`, `setTimeout` fallback). */
   idle(fn: () => void): void;
+  /** Runs the pending idle callbacks now, in order (each runs once). */
+  settle(): void;
   add(cleanup: () => void): void;
   dispose(): void;
 }
 
+/** `requestIdleCallback` (`setTimeout` fallback); returns the cancel function. */
+function requestIdle(fire: () => void): () => void {
+  if (typeof requestIdleCallback !== "function") {
+    const id = setTimeout(fire, 1);
+    return () => clearTimeout(id);
+  }
+  const id = requestIdleCallback(fire, { timeout: 2000 });
+  return () => cancelIdleCallback(id);
+}
+
 export function createScope(): Scope {
   const cleanups = new Set<() => void>();
+  const idles = new Set<() => void>();
   let disposed = false;
   /** One-shot callback: `start` schedules `fire` and returns its cancel function. */
   const arm = (start: (fire: () => void) => () => void, fn: () => void) => {
@@ -50,11 +63,12 @@ export function createScope(): Scope {
         }, ms);
       }),
     idle(fn) {
-      if (typeof requestIdleCallback !== "function") return timeout(fn, 1);
-      arm((fire) => {
-        const id = requestIdleCallback(fire, { timeout: 2000 });
-        return () => cancelIdleCallback(id);
-      }, fn);
+      const run = () => !disposed && idles.delete(run) && fn();
+      idles.add(run);
+      arm(requestIdle, run);
+    },
+    settle() {
+      for (const run of idles) run();
     },
     add: (cleanup) => void add(cleanup),
     dispose() {
