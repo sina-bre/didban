@@ -1,6 +1,6 @@
 # Design system
 
-Extracted from `design/reference/01–07.webp` (ADR 0003). Tokens: [`tokens.css`](tokens.css).
+Extracted from `design/reference/01–07.webp` (ADR 0003). Tokens: [`tokens.css`](../../apps/dashboard/src/shared/ui/tokens.css).
 Fonts: ADR 0006. i18n/RTL: ADR 0005. Primitives policy: ADR 0004.
 
 ## 1. Visual language (what makes it look like the reference)

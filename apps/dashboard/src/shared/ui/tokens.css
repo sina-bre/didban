@@ -1,6 +1,6 @@
 /*
  * Design tokens extracted from design/reference/*.webp (ADR 0003).
- * Source of truth. Stage 5a moves this file to apps/dashboard/src/shared/ui/tokens.css (git mv, one copy only).
+ * Source of truth (moved here from docs/design-system in Stage 5a; one copy only).
  * Tailwind 4: @theme turns these into utilities (bg-canvas, text-ink, rounded-card, ...).
  * Rule: components use semantic tokens only. Never raw hex in components.
  */
@@ -68,6 +68,9 @@
   --radius-panel: 1rem; /* 16 inner panels (chart frame, mini stat) */
   --radius-control: 0.75rem; /* 12 inputs, small buttons */
   --radius-pill: 9999px; /* segmented, chips, delta badges */
+
+  /* ---- layout ---- */
+  --container-content: 90rem; /* 1440 content max width (max-w-content) */
 
   /* ---- elevation (the reference is almost flat) ---- */
   --shadow-card: 0 1px 2px rgb(20 33 61 / 0.04);
