@@ -1,9 +1,7 @@
 import type { Config } from "./config.js";
-import { currentUrl } from "./events.js";
+import { currentUrl, type EventInput } from "./events.js";
 import { patchHistory } from "./history.js";
 import type { Scope } from "./scope.js";
-
-export type EmitPage = (url: string, referrer: string | undefined) => void;
 
 /** `auto` counts the fragment only when it looks like a route (`#/…` or `#!/…`). */
 const isHashRoute = (hash: string) => /^#!?\//.test(hash);
@@ -13,7 +11,11 @@ const isHashRoute = (hash: string) => /^#!?\//.test(hash);
  * bfcache restores. A view is emitted only when the tracked URL (path + search, plus the hash when
  * hash routing applies) changes; navigations in one task are coalesced into one check.
  */
-export function startPageviews(config: Config, scope: Scope, emit: EmitPage): void {
+export function startPageviews(
+  config: Config,
+  scope: Scope,
+  emit: (input: EventInput) => void,
+): void {
   const { spa } = config;
   let lastKey: string | null = null;
   let previousUrl: string | undefined = document.referrer || undefined;
@@ -28,7 +30,7 @@ export function startPageviews(config: Config, scope: Scope, emit: EmitPage): vo
     lastKey = key;
     if (config.excludePaths.some((pattern) => pattern.test(pathname))) return;
     const url = currentUrl() + (withHash ? hash : "");
-    emit(url, previousUrl);
+    emit({ type: "page", url, referrer: previousUrl });
     previousUrl = url;
   }
 
