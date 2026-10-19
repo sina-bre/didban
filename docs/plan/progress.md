@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-19 — Stage 5a (dashboard foundation)
+
+- `apps/dashboard`: Vite 8.3, React 19.3, React Router 8.4 (data mode), Tailwind 4.3 + tokens (moved from
+  docs), Inter + Vazirmatn (fontsource, split by script, active one preloaded), Lucide icons. ADR 0038.
+- i18n: typed `en`/`fa` catalogs (lazy chunks), `t()` with `Intl.PluralRules`; locale boot before render
+  (saved → browser → en), `<html lang dir>`; Persian calendar + digits via `Intl` in `format.ts`.
+- Shell: top bar, pill nav ≥ 1024, tab bar + `<dialog>` "More" sheet below; `?range=` default 30d. Build gate
+  `check-dist.mjs`: no external URLs, initial JS 101 KB gz (≤ 180).
+- Checks: lint, typecheck, build ok; tests 30 + 17 + 63 + 228 + 5; e2e 13 (4 new: desktop, fa/RTL + fonts,
+  360 px tab bar/sheet, fa browser). Mutation: label in Inter stack → en page loads Vazirmatn → e2e fails.
+  SDK perf e2e flaked once (script-tag 5.098 ms > 5 ms; SDK untouched, known thin margin), green on rerun.
+- **Next:** 5b `shared/ui` primitives + gap-list widgets (ADR 0004), `shared/components` wrappers.
+
 ## 2026-10-18 — Stage 4d (10 M events, plans) → **Stage 4 gate met (2 slow cases documented)**
 
 - `tools/load` `seed:large` (pure SQL, uuidv7, resumable; 10 081 634 events / 2.35 M visits / 90 d) and `explain`
