@@ -48,6 +48,8 @@
 
   /* ---- type ---- */
   --font-sans: "Inter Variable", "Vazirmatn Variable", system-ui, sans-serif;
+  --font-system:
+    system-ui, sans-serif; /* the other language's name in the switch: no web font download */
   --text-caption: 0.75rem; /* 12 */
   --text-caption--line-height: 1rem;
   --text-body: 0.875rem; /* 14 */

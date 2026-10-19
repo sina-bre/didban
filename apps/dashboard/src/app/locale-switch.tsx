@@ -7,9 +7,14 @@ export function LocaleSwitch() {
   const { locale, t, setLocale } = useLocale();
   const other = locale === "fa" ? "en" : "fa";
   return (
-    <Button aria-label={t("locale.switch")} onClick={() => void setLocale(other)}>
+    <Button
+      aria-label={`${t("locale.switch")}: ${t("locale.other")}`}
+      onClick={() => void setLocale(other)}
+    >
       <Languages aria-hidden="true" className="size-4" />
-      <span lang={other}>{t("locale.other")}</span>
+      <span lang={other} className="font-system">
+        {t("locale.other")}
+      </span>
     </Button>
   );
 }

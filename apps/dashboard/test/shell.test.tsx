@@ -48,7 +48,7 @@ describe("app shell", () => {
 
   it("switches to Persian: rtl document, translated navigation", async () => {
     renderAt("/projects/p1/overview");
-    fireEvent.click(screen.getByRole("button", { name: "Switch language" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Switch language: فارسی$/ }));
     await screen.findByRole("heading", { level: 1, name: "نمای کلی" });
     expect(document.documentElement.dir).toBe("rtl");
     expect(document.documentElement.lang).toBe("fa");
