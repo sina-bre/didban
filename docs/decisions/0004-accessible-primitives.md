@@ -1,6 +1,6 @@
 # 0004 — Accessible primitives: native HTML first, React Aria Components for the hard widgets
 
-- Status: Accepted (owner approved "most optimized way", 2026-10-17; overrides spec §13.2.2 for these widgets only)
+- Status: Accepted (owner approved "most optimized way", 2026-10-17; overrides spec §13.2.2 for these widgets only). Size trigger amended by 0040
 - Date: 2026-10-17
 
 ## Context

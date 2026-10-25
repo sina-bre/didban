@@ -17,6 +17,8 @@ src/
 - Feature code imports UI only from `shared/ui` and `shared/components`.
 - Components ≤ 100 lines, one per file. Data fetching only in `use-*.ts` hooks (TanStack Query).
 - No global store. URL search params hold filters/date range.
+- Tests: `test/*.test.ts(x)` run in jsdom; `test/*.browser.tsx` run in real Chrome with our CSS
+  (keyboard, popovers, RTL, 360 px). Render widgets with `test/render.tsx` (locale + router).
 
 ## Styling
 - Tailwind 4 with tokens from `shared/ui/tokens.css`. No raw hex, no arbitrary values outside tokens.
