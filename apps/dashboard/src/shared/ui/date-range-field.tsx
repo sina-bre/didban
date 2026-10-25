@@ -1,21 +1,18 @@
 import { GregorianCalendar, parseDate, toCalendar } from "@internationalized/date";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays } from "lucide-react";
+import { useRef, useState } from "react";
 import {
   Button,
-  CalendarCell,
-  CalendarGrid,
   DateInput,
   DateRangePicker,
   DateSegment,
   type DateValue,
   Group,
   Label,
-  Popover,
-  RangeCalendar,
+  type RangeValue,
 } from "react-aria-components/DateRangePicker";
-import { Dialog } from "react-aria-components/Dialog";
-import { Heading } from "react-aria-components/Heading";
 import { I18nProvider } from "react-aria-components/I18nProvider";
+import { DateRangeCalendar, NAV } from "./date-range-calendar";
 
 /** ISO `YYYY-MM-DD` days (Gregorian), whatever calendar the user picked in. */
 export interface IsoRange {
@@ -30,31 +27,58 @@ interface Props {
   value: IsoRange | null;
   /** Latest selectable day (today). */
   max: string;
+  /** Called once per finished edit: on blur, on Enter, or when the calendar closes. */
   onChange: (range: IsoRange) => void;
 }
 
+type Draft = RangeValue<DateValue> | null;
 const gregorian = new GregorianCalendar();
+const toDraft = (v: IsoRange | null): Draft =>
+  v && { start: parseDate(v.start), end: parseDate(v.end) };
 const iso = (date: DateValue) => toCalendar(date, gregorian).toString().slice(0, 10);
 const SEGMENT =
   "rounded-sm px-0.5 tabular-nums outline-none data-focused:bg-inverse data-focused:text-on-inverse data-placeholder:text-muted";
-const NAV = "flex size-11 items-center justify-center rounded-pill hover:bg-subtle";
 
 /**
  * Typed + calendar date range on React Aria Components (ADR 0004: one of the two RAC widgets):
- * keyboard grid, RTL and non-Gregorian calendars included. Lazy-load it with the filter bar.
+ * keyboard grid, RTL and non-Gregorian calendars included. RAC reports every keystroke that forms
+ * a valid date (year "2" on the way to "2026"), so edits stay a draft until they are finished.
  */
 export default function DateRangeField({ label, locale, value, max, onChange }: Props) {
-  const range = value && { start: parseDate(value.start), end: parseDate(value.end) };
+  const [draft, setDraft] = useState<Draft>(() => toDraft(value));
+  const latest = useRef<Draft>(draft);
+  const [shown, setShown] = useState(value);
+  if (shown?.start !== value?.start || shown?.end !== value?.end) {
+    // The URL changed (back/forward, a preset): drop the draft for the new value.
+    setShown(value);
+    setDraft(toDraft(value));
+    latest.current = toDraft(value);
+  }
+  const commit = () => {
+    const next = latest.current;
+    if (!next) return;
+    const range = { start: iso(next.start), end: iso(next.end) };
+    if (range.start !== value?.start || range.end !== value?.end) onChange(range);
+  };
   return (
     <I18nProvider locale={locale}>
       <DateRangePicker
-        value={range}
+        value={draft}
         maxValue={parseDate(max)}
-        onChange={(next) => next && onChange({ start: iso(next.start), end: iso(next.end) })}
+        onChange={(next) => {
+          latest.current = next;
+          setDraft(next);
+        }}
+        onFocusChange={(focused) => !focused && commit()}
+        onOpenChange={(open) => !open && commit()}
         className="flex min-w-0 flex-col gap-1"
       >
         <Label className="text-body font-medium">{label}</Label>
-        <Group className="flex min-h-11 items-center gap-1 rounded-control border border-line bg-surface ps-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus">
+        <Group
+          // Capture: the date segments stop Enter from bubbling.
+          onKeyDownCapture={(event) => event.key === "Enter" && commit()}
+          className="flex min-h-11 items-center gap-1 rounded-control border border-line bg-surface ps-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus"
+        >
           <DateInput slot="start" className="flex">
             {(segment) => <DateSegment segment={segment} className={SEGMENT} />}
           </DateInput>
@@ -66,29 +90,7 @@ export default function DateRangeField({ label, locale, value, max, onChange }: 
             <CalendarDays aria-hidden="true" className="size-4" />
           </Button>
         </Group>
-        <Popover className="rounded-panel bg-surface p-3 text-ink shadow-pop">
-          <Dialog className="outline-none">
-            <RangeCalendar>
-              <header className="flex items-center justify-between">
-                <Button slot="previous" className={NAV}>
-                  <ChevronLeft aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-                </Button>
-                <Heading className="text-title font-medium" />
-                <Button slot="next" className={NAV}>
-                  <ChevronRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-                </Button>
-              </header>
-              <CalendarGrid className="border-separate border-spacing-0.5">
-                {(date) => (
-                  <CalendarCell
-                    date={date}
-                    className="flex size-10 items-center justify-center rounded-pill text-body tabular-nums outline-none data-disabled:text-muted/50 data-focus-visible:outline-2 data-focus-visible:outline-focus data-outside-month:invisible data-selected:bg-accent-soft data-selection-end:bg-inverse data-selection-end:text-on-inverse data-selection-start:bg-inverse data-selection-start:text-on-inverse"
-                  />
-                )}
-              </CalendarGrid>
-            </RangeCalendar>
-          </Dialog>
-        </Popover>
+        <DateRangeCalendar />
       </DateRangePicker>
     </I18nProvider>
   );

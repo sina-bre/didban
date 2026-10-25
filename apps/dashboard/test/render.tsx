@@ -6,8 +6,9 @@ import fa from "../src/messages/fa";
 import { dirOf, type Locale } from "../src/shared/lib/i18n";
 import { LocaleProvider } from "../src/shared/lib/locale-context";
 
-/** Renders a widget inside the locale and a memory router, with `<html lang dir>` set. */
 type Rendered = RenderResult & { router: ReturnType<typeof createMemoryRouter> };
+
+/** Renders a widget inside the locale and a memory router, with `<html lang dir>` set. */
 
 export function renderUi(ui: ReactNode, { locale = "en" as Locale, path = "/" } = {}): Rendered {
   document.documentElement.lang = locale;
