@@ -112,6 +112,9 @@ importers:
         specifier: 3.10.1
         version: 3.10.1(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react-is@17.0.2)(react@19.3.1)(redux@5.0.1)
     devDependencies:
+      '@react-aria/optimize-locales-plugin':
+        specifier: 2.1.0
+        version: 2.1.0
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0))
@@ -1022,6 +1025,9 @@ packages:
   '@quansync/fs@1.1.0':
     resolution: {integrity: sha512-qAPG/t3HqML1TlN7sY/pTbEjzFVAKsMjNNMGheyDosro+kT4iw2KCUoHcVdmliwWjorm4elZbgNQyU2eD97eDg==}
 
+  '@react-aria/optimize-locales-plugin@2.1.0':
+    resolution: {integrity: sha512-JN8dyMW/9qNbJt08xPDYin4MDe2IntrnCrnAgbmWfi9ob0uQaNv/m1k030kwlep3ip3Xf9DcPSgartxe26nZ/g==}
+
   '@react-types/shared@3.37.0':
     resolution: {integrity: sha512-VNlZuifu4tHdxWPfHvoMfKsHA9kVTCGkduv5vKVTdinm8wHFJNhyVB5RzIMiRFj0q3RKoCbP68u2zaoBSiFueg==}
     peerDependencies:
@@ -1629,6 +1635,11 @@ packages:
 
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
+
+  acorn@8.19.0:
+    resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
 
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
@@ -3233,6 +3244,10 @@ packages:
     peerDependencies:
       '@swc/core': ^1.2.108
 
+  unplugin@2.3.11:
+    resolution: {integrity: sha512-5uKD0nqiYVzlmCRs01Fhs2BdkEgBS3SAVP6ndrBsuK42iC2+JHyxM05Rm9G8+5mkmRtzMZGY8Ct5+mliZxU/Ww==}
+    engines: {node: '>=18.12.0'}
+
   unplugin@3.4.0:
     resolution: {integrity: sha512-9skdIFlCsPdFV7wUfZxNsFInlW+7nJmGu2gkTu0OUhF56aXGsHab9x52/QhdJ4lC7ZDPWTxbiC4ANqVlsuaW3w==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -4002,6 +4017,10 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
+  '@react-aria/optimize-locales-plugin@2.1.0':
+    dependencies:
+      unplugin: 2.3.11
+
   '@react-types/shared@3.37.0(react@19.3.1)':
     dependencies:
       react: 19.3.1
@@ -4528,6 +4547,8 @@ snapshots:
   '@yuku-toolchain/types@0.19.0': {}
 
   abstract-logging@2.0.1: {}
+
+  acorn@8.19.0: {}
 
   ajv-formats@3.0.1(ajv@8.20.0):
     optionalDependencies:
@@ -6017,6 +6038,13 @@ snapshots:
       - unloader
       - vite
       - webpack
+
+  unplugin@2.3.11:
+    dependencies:
+      '@jridgewell/remapping': 2.3.5
+      acorn: 8.19.0
+      picomatch: 4.0.7
+      webpack-virtual-modules: 0.6.2
 
   unplugin@3.4.0(rolldown@1.2.14)(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0)):
     dependencies:

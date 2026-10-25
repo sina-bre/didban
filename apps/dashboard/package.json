@@ -22,6 +22,7 @@
     "recharts": "3.10.1"
   },
   "devDependencies": {
+    "@react-aria/optimize-locales-plugin": "2.1.0",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
