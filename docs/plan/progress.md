@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-25 — Stage 5b (shared/ui + shared/components)
+
+- `shared/ui`: Card, Segmented (native radios), DeltaBadge, Tooltip + Menu (Popover API, CSS anchor
+  positioning), Dialog (replaces Sheet), Toast, Tabs, fields, Switch, Chip, CodeBlock, Stepper, DataTable,
+  Pagination, Skeleton, StatePanel; React Aria ComboBox + DateRangeField, lazy. ADR 0040 (amends 0004 size trigger).
+- `shared/components`: StatCard, ShareBars, SeriesSummary, TimeSeriesChart (lazy Recharts + table), BreakdownTable,
+  DateRangePicker (in the report header, `?from=&to=`), FilterBar, OrgProjectSwitcher, ChannelBadge, states.
+- New Vitest `browser` project (real Chrome). It found: rem was 14 px (`text-body` on `<html>`), hidden radios
+  widened 360 px pages, combobox list closed on ArrowDown, custom range wrote per keystroke. All fixed + tested.
+- Checks: lint, typecheck, build ok (initial JS 103.6 KB gz; RAC loads only on Custom/Add filter); tests 30 + 50
+  (unit 41 + browser 9) + 68 + 228 + 5; e2e 15/15 (2 new). Mutations: no `relative`, no `containerPadding` fail.
+- **Next:** 5c auth pages, org/project switcher wiring, overview, realtime (TanStack Query + api-client).
+
 ## 2026-10-19 — SDK perf fix (script-tag ≤ 5 ms flake)
 
 - Cause (Chrome trace): idle start did checks + modules + first storage read (~1–2 ms cold) + page

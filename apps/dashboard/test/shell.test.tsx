@@ -54,4 +54,11 @@ describe("app shell", () => {
     expect(document.documentElement.lang).toBe("fa");
     expect(localStorage.getItem("didban.locale")).toBe("fa");
   });
+  it("range pills write ?range= and drop a custom range", () => {
+    const router = renderAt("/projects/p1/overview?from=2026-01-01&to=2026-01-05");
+    expect(screen.getByTestId("range").textContent).toContain("Custom");
+    fireEvent.click(screen.getByRole("radio", { name: /^7 days$/ }));
+    expect(router.state.location.search).toBe("?range=7d");
+    expect(screen.getByTestId("range").textContent).toContain("Last 7 days");
+  });
 });

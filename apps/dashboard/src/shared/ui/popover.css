@@ -1,0 +1,18 @@
+/*
+ * Popovers live in the top layer and are placed with CSS anchor positioning (ADR 0040): the
+ * trigger sets `anchor-name`, the popover `position-anchor`. Logical areas, so RTL flips for free;
+ * the try-fallbacks keep it on screen at 360 px.
+ */
+@utility pop-below {
+  inset: auto;
+  margin: 0.25rem 0;
+  position-area: block-end span-inline-end;
+  position-try-fallbacks: flip-inline, flip-block;
+}
+
+@utility pop-above {
+  inset: auto;
+  margin: 0.25rem 0;
+  position-area: block-start;
+  position-try-fallbacks: flip-block;
+}

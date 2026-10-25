@@ -1,3 +1,4 @@
+import optimizeLocales from "@react-aria/optimize-locales-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -8,7 +9,9 @@ const proxy = { "/api": { target: process.env.API_URL ?? "http://127.0.0.1:5100"
 const server = { host: "127.0.0.1", port: 5173, strictPort: true, proxy };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  // React Aria ships strings for ~34 locales; it has none for `fa`, so only en-US is kept
+  // (fa falls back to it). ADR 0040.
+  plugins: [react(), tailwindcss(), optimizeLocales.vite({ locales: ["en-US"] })],
   server,
   preview: server,
   build: { target: "es2023", assetsInlineLimit: 0 },

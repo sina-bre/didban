@@ -1,12 +1,15 @@
 @import "tailwindcss";
 @import "./shared/ui/tokens.css";
+@import "./shared/ui/popover.css";
 
 @layer base {
   html {
-    @apply bg-canvas font-sans text-body text-ink antialiased;
+    @apply bg-canvas font-sans text-ink antialiased;
   }
 
+  /* Body size on <body>, not <html>: on the root it would make 1rem = 14 px and shrink every token. */
   body {
+    @apply text-body;
     min-height: 100dvh;
   }
 
