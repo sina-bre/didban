@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { type RenderResult, render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import en from "../src/messages/en";
@@ -7,7 +7,9 @@ import { dirOf, type Locale } from "../src/shared/lib/i18n";
 import { LocaleProvider } from "../src/shared/lib/locale-context";
 
 /** Renders a widget inside the locale and a memory router, with `<html lang dir>` set. */
-export function renderUi(ui: ReactNode, { locale = "en" as Locale, path = "/" } = {}) {
+type Rendered = RenderResult & { router: ReturnType<typeof createMemoryRouter> };
+
+export function renderUi(ui: ReactNode, { locale = "en" as Locale, path = "/" } = {}): Rendered {
   document.documentElement.lang = locale;
   document.documentElement.dir = dirOf(locale);
   const router = createMemoryRouter([{ path: "*", element: ui }], { initialEntries: [path] });

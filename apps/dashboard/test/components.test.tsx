@@ -13,11 +13,10 @@ afterEach(cleanup);
 
 describe("StatCard", () => {
   it("shows a signed delta with an arrow, and no badge when comparison is off", () => {
-    const { rerender } = renderUi(<StatCard label="Visitors" value={12_400} delta={0.011} />);
+    renderUi(<StatCard label="Visitors" value={12_400} delta={0.011} />);
     expect(screen.getByText("+1.1%")).toBeTruthy();
     expect(screen.getByText("12.4K")).toBeTruthy(); // compact below md
     expect(screen.getByText("12,400")).toBeTruthy(); // full from md
-    rerender(<></>);
     cleanup();
     renderUi(<StatCard label="Visitors" value={5} />);
     expect(screen.queryByText(/%/)).toBeNull();

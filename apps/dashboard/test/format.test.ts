@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sortRows } from "../src/shared/components/breakdown-table";
+import { type BreakdownRow, sortRows } from "../src/shared/components/breakdown-table";
 import { formatNumber, formatPercent } from "../src/shared/lib/format";
 import { tabIndexFor } from "../src/shared/ui/tabs";
 
@@ -38,7 +38,7 @@ describe("sortRows", () => {
     { key: "b", label: "b", sortText: "/a", values: { visitors: 9 } },
     { key: "c", label: "c", sortText: "/c", values: { visitors: 5 } },
   ];
-  const keys = (sorted: typeof rows) => sorted.map((r) => r.key);
+  const keys = (sorted: readonly BreakdownRow[]) => sorted.map((r) => r.key);
 
   it("sorts metrics by value and keeps the API order on ties", () => {
     expect(keys(sortRows(rows, { key: "visitors", dir: "desc" }, "en"))).toEqual(["b", "a", "c"]);
