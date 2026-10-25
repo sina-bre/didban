@@ -1,7 +1,7 @@
 import type { Ref } from "react";
 import { NavLink } from "react-router";
 import { useLocale } from "../shared/lib/locale-context";
-import { Sheet } from "../shared/ui/sheet";
+import { Dialog } from "../shared/ui/dialog";
 import type { Section } from "./sections";
 import type { ProjectNav } from "./use-project-nav";
 
@@ -16,7 +16,7 @@ interface Props {
 export function MoreSheet({ ref, sections, nav, onNavigate }: Props) {
   const { t } = useLocale();
   return (
-    <Sheet ref={ref} title={t("more.title")} closeLabel={t("more.close")}>
+    <Dialog ref={ref} title={t("more.title")} closeLabel={t("more.close")} placement="sheet">
       <ul className="grid gap-1">
         {sections.map((section) => (
           <li key={section.id}>
@@ -35,6 +35,6 @@ export function MoreSheet({ ref, sections, nav, onNavigate }: Props) {
           </li>
         ))}
       </ul>
-    </Sheet>
+    </Dialog>
   );
 }

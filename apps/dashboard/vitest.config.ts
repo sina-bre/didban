@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
-import { playwright } from "@vitest/browser-playwright";
 import react from "@vitejs/plugin-react";
+import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 // Two projects: `unit` (jsdom, logic and markup) and `browser` (real Chrome with our CSS, for

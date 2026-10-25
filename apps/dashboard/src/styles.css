@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./shared/ui/tokens.css";
+@import "./shared/ui/popover.css";
 
 @layer base {
   html {
