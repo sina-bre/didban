@@ -8,6 +8,18 @@ import { defineConfig } from "vitest/config";
 // the same one the E2E suite uses, so no browser download is needed.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Pre-bundled up front: discovering them mid-run makes Vite reload the browser test page.
+  optimizeDeps: {
+    include: [
+      "@internationalized/date",
+      "react-aria-components/ComboBox",
+      "react-aria-components/DateRangePicker",
+      "react-aria-components/Dialog",
+      "react-aria-components/Heading",
+      "react-aria-components/I18nProvider",
+      "recharts",
+    ],
+  },
   test: {
     restoreMocks: true,
     projects: [

@@ -7,7 +7,7 @@ interface Props {
 /** On/off toggle on a native checkbox with `role="switch"` (ADR 0004), e.g. "Compare". */
 export function Switch({ label, checked, onChange }: Props) {
   return (
-    <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-body">
+    <label className="relative inline-flex min-h-11 cursor-pointer items-center gap-2 text-body">
       <input
         type="checkbox"
         role="switch"

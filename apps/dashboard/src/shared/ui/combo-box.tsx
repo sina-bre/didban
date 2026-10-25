@@ -33,7 +33,6 @@ export default function ComboBox({ label, options, onSelect, emptyLabel }: Props
     <AriaComboBox
       defaultFilter={contains}
       defaultItems={options}
-      menuTrigger="focus"
       onSelectionChange={(key) => key !== null && onSelect(String(key))}
       className="flex min-w-0 flex-col gap-1"
     >
@@ -44,7 +43,12 @@ export default function ComboBox({ label, options, onSelect, emptyLabel }: Props
           <ChevronDown aria-hidden="true" className="size-4" />
         </Button>
       </div>
-      <Popover className="w-(--trigger-width) overflow-auto rounded-panel bg-surface p-1 text-ink shadow-pop">
+      {/* Same width and edge as the field: RAC's default 12 px edge padding would push a full-width
+          list past the screen edge, the page would scroll, and RAC closes popovers on scroll. */}
+      <Popover
+        containerPadding={0}
+        className="w-(--trigger-width) overflow-auto rounded-panel bg-surface p-1 text-ink shadow-pop"
+      >
         <ListBox<ComboOption>
           renderEmptyState={() => <p className="px-3 py-2 text-body text-muted">{emptyLabel}</p>}
           className="outline-none"
