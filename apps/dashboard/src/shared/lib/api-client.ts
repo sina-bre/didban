@@ -70,7 +70,9 @@ async function errorOf(response: Response): Promise<ApiError> {
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, signal } = options;
+  const { method = "GET", query, signal } = options;
+  // Every state change is JSON, even a body-less DELETE: the API's CSRF rule checks the type.
+  const body = options.body ?? (method === "GET" ? undefined : {});
   const headers: Record<string, string> = { accept: "application/json" };
   if (body !== undefined) headers["content-type"] = "application/json";
   let response: Response;

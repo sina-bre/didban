@@ -67,6 +67,26 @@ describe("api", () => {
   });
 });
 
+describe("api mutations", () => {
+  it("a body-less DELETE still goes as JSON (the API's CSRF rule), a GET has no body", async () => {
+    const fetch = vi.fn(async () => json(200, {}));
+    vi.stubGlobal("fetch", fetch);
+    await api("/projects/p/goals/g", { method: "DELETE" });
+    expect(fetch).toHaveBeenLastCalledWith(
+      "/api/v1/projects/p/goals/g",
+      expect.objectContaining({
+        body: "{}",
+        headers: { accept: "application/json", "content-type": "application/json" },
+      }),
+    );
+    await api("/projects");
+    expect(fetch).toHaveBeenLastCalledWith(
+      "/api/v1/projects",
+      expect.objectContaining({ body: undefined, headers: { accept: "application/json" } }),
+    );
+  });
+});
+
 describe("api 401", () => {
   it("a wrong password (401 INVALID_CREDENTIALS) is an answer: no redirect", async () => {
     const expired = vi.spyOn(session, "expired").mockImplementation(() => {});
