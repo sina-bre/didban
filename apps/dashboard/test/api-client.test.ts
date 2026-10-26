@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { retryable } from "../src/app/query-client";
-import { ApiError, api } from "../src/shared/lib/api-client";
+import { ApiError, api, session } from "../src/shared/lib/api-client";
 import { HOME, loginHref, safeNext } from "../src/shared/lib/return-path";
 
 const json = (status: number, body: unknown, headers: Record<string, string> = {}) =>
@@ -65,13 +65,23 @@ describe("api", () => {
       name: "AbortError",
     });
   });
+});
 
-  it("a 401 answer without the redirect (the login form) is just an error", async () => {
+describe("api 401", () => {
+  it("a wrong password (401 INVALID_CREDENTIALS) is an answer: no redirect", async () => {
+    const expired = vi.spyOn(session, "expired").mockImplementation(() => {});
     const error = { code: "INVALID_CREDENTIALS", message: "no", requestId: "r" };
     stubFetch(json(401, { error }));
-    await expect(api("/auth/login", { authRedirect: false })).rejects.toMatchObject({
-      status: 401,
-    });
+    await expect(api("/auth/login")).rejects.toMatchObject({ status: 401 });
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("any other 401 is a lost session: redirect to login", async () => {
+    const expired = vi.spyOn(session, "expired").mockImplementation(() => {});
+    const error = { code: "UNAUTHENTICATED", message: "no", requestId: "r" };
+    stubFetch(json(401, { error }));
+    await expect(api("/projects")).rejects.toMatchObject({ status: 401 });
+    expect(expired).toHaveBeenCalledOnce();
   });
 });
 

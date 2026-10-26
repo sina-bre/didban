@@ -30,9 +30,15 @@ export interface RequestOptions {
   body?: unknown;
   query?: Query;
   signal?: AbortSignal;
-  /** `false` where a 401 is an answer, not an expired session (the login form). */
-  authRedirect?: boolean;
 }
+
+/** The one 401 that is an answer (wrong password at login or password change), not a lost session. */
+const ANSWER_401 = "INVALID_CREDENTIALS";
+
+/** What a lost session does: a full load of /login, so no cached data survives it. */
+export const session = {
+  expired: () => window.location.assign(loginHref(window.location)),
+};
 
 function urlOf(path: string, query: Query = {}): string {
   const params = new URLSearchParams();
@@ -43,7 +49,7 @@ function urlOf(path: string, query: Query = {}): string {
   return `${BASE}${path}${search ? `?${search}` : ""}`;
 }
 
-function isErrorFields(value: unknown): value is ErrorFields {
+function isErrorBody(value: unknown): value is ErrorBody {
   const fields = (value as { error?: Partial<ErrorFields> } | null)?.error;
   return typeof fields?.code === "string" && typeof fields.message === "string";
 }
@@ -52,13 +58,18 @@ function isErrorFields(value: unknown): value is ErrorFields {
 async function errorOf(response: Response): Promise<ApiError> {
   const requestId = response.headers.get("x-request-id") ?? undefined;
   const body: unknown = await response.json().catch(() => null);
-  if (isErrorFields(body)) return new ApiError(response.status, { requestId, ...body.error });
+  if (isErrorBody(body)) {
+    return new ApiError(response.status, {
+      ...body.error,
+      requestId: body.error.requestId ?? requestId,
+    });
+  }
   const code = `HTTP_${response.status}`;
   return new ApiError(response.status, { code, message: response.statusText || code, requestId });
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, signal, authRedirect = true } = options;
+  const { method = "GET", body, query, signal } = options;
   const headers: Record<string, string> = { accept: "application/json" };
   if (body !== undefined) headers["content-type"] = "application/json";
   let response: Response;
@@ -76,6 +87,6 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   }
   if (response.ok) return (response.status === 204 ? undefined : await response.json()) as T;
   const error = await errorOf(response);
-  if (response.status === 401 && authRedirect) window.location.assign(loginHref(window.location));
+  if (response.status === 401 && error.code !== ANSWER_401) session.expired();
   throw error;
 }

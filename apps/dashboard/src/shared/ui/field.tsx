@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, useId } from "react";
+import { type ComponentProps, type ReactNode, type SelectHTMLAttributes, useId } from "react";
 
 interface Shared {
   label: string;
@@ -38,7 +38,8 @@ function describedBy(id: string, { hint, error }: Shared): string | undefined {
   return ids.length ? ids.join(" ") : undefined;
 }
 
-type TextProps = Shared & InputHTMLAttributes<HTMLInputElement>;
+/** `ComponentProps` includes `ref` (React 19), so form libraries can register the input. */
+type TextProps = Shared & ComponentProps<"input">;
 
 /** Labelled text input with hint and error wired to `aria-describedby` / `aria-invalid`. */
 export function TextField({ label, hint, error, className = "", ...rest }: TextProps) {

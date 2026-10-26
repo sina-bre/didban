@@ -17,16 +17,18 @@ interface Props {
   title: string;
   valueLabel: string;
   points: readonly SeriesPoint[];
+  /** Bucket label; defaults to the day ("Oct 3"). Reports pass hours and the project's zone. */
+  formatDate?: (date: Date) => string;
 }
 
 /**
  * Time series with a visible "View as table" toggle (design system §4): the chart is lazy
  * Recharts; the table is the same data in a DataTable, also the fallback while it loads.
  */
-export function TimeSeriesChart({ title, valueLabel, points }: Props) {
+export function TimeSeriesChart({ title, valueLabel, points, formatDate }: Props) {
   const { t, locale } = useLocale();
   const [asTable, setAsTable] = useState(false);
-  const day = (date: Date) => formatDay(locale, date);
+  const day = formatDate ?? ((date: Date) => formatDay(locale, date));
   const value = (n: number) => formatNumber(locale, n);
   const columns: Column<SeriesPoint>[] = [
     { key: "date", header: t("chart.date"), cell: (p) => day(p.date) },
