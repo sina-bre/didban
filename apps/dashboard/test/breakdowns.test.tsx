@@ -81,6 +81,9 @@ describe("Geo and Devices", () => {
     fakeApi({ ...signedIn(), ...reports() });
     const { router } = renderApp(`${base}/geo`);
     expect(within(await table("Country")).getByText("Germany")).toBeTruthy();
+    // Some rows without a location are rows, not "geo off".
+    await router.navigate(`${base}/geo?by=region`);
+    expect(within(await table("Region")).getByText("(not set)")).toBeTruthy();
     await router.navigate(`${base}/geo?by=city`);
     expect(await screen.findByText("Cities are not stored")).toBeTruthy();
     cleanup();

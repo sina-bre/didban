@@ -56,7 +56,7 @@ export const pageDetail: PageDetailResponse = {
 
 const geoRows: Record<string, BreakdownResponse<EventRow>> = {
   country: rows([event("DE", 12), event("IR", 8)]),
-  region: rows([event("DE-BY", 12)]),
+  region: rows([event("DE-BY", 12), event(null, 3)]),
   city: rows([event(null, 20)]),
 };
 const deviceRows: Record<string, BreakdownResponse<EventRow>> = {
