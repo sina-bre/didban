@@ -50,3 +50,30 @@ export function formatPercent(locale: Locale, ratio: number, signed = false): st
       }),
   ).format(ratio);
 }
+
+/** A time-series bucket in the project's zone: "14:00" for hours, "Oct 3" otherwise. */
+export function formatBucket(
+  locale: Locale,
+  date: Date,
+  hourly: boolean,
+  timeZone: string,
+): string {
+  const options = hourly
+    ? ({ hour: "numeric", minute: "2-digit", timeZone } as const)
+    : ({ day: "numeric", month: "short", timeZone } as const);
+  const key = `${locale}:${hourly ? "hour" : "day"}:${timeZone}`;
+  return cached(key, () => new Intl.DateTimeFormat(locale, options)).format(date);
+}
+
+/** Seconds as "1 min, 23 sec" (narrow units in the locale's words and digits). */
+export function formatDuration(locale: Locale, seconds: number): string {
+  const unit = (name: "minute" | "second") =>
+    cached(
+      `${locale}:${name}`,
+      () => new Intl.NumberFormat(locale, { style: "unit", unit: name, unitDisplay: "short" }),
+    );
+  const whole = Math.round(seconds);
+  const minutes = Math.floor(whole / 60);
+  const rest = unit("second").format(whole % 60);
+  return minutes > 0 ? `${unit("minute").format(minutes)} ${rest}` : rest;
+}

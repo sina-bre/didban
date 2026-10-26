@@ -11,13 +11,17 @@ export default defineConfig({
   // Pre-bundled up front: discovering them mid-run makes Vite reload the browser test page.
   optimizeDeps: {
     include: [
+      "@hookform/resolvers/zod",
       "@internationalized/date",
+      "@tanstack/react-query",
       "react-aria-components/ComboBox",
       "react-aria-components/DateRangePicker",
       "react-aria-components/Dialog",
       "react-aria-components/Heading",
       "react-aria-components/I18nProvider",
+      "react-hook-form",
       "recharts",
+      "zod",
     ],
   },
   test: {
@@ -25,7 +29,12 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["test/**/*.test.{ts,tsx}"], environment: "jsdom" },
+        test: {
+          name: "unit",
+          include: ["test/**/*.test.{ts,tsx}"],
+          environment: "jsdom",
+          testTimeout: 15_000, // app tests import lazy route chunks (cold in jsdom)
+        },
       },
       {
         extends: true,

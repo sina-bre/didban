@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-26 — Stage 5c (auth pages, switcher, overview, realtime)
+
+- `/login` + `/set-password` (first-login change) instead of `/accept-invite`: A9/ADR 0024 removed invites, no
+  such API. `RequireAuth` (me), `ProjectLayout` (404 → not found), switcher on real orgs/projects. ADR 0041.
+- `api-client.ts`: AbortSignal, contract errors (`x-request-id` fallback), 401 ≠ `INVALID_CREDENTIALS` → full
+  load of `/login?next=` (same-origin only). TanStack Query; RHF + contract Zod on the lazy auth chunk.
+- Overview (6 KPIs, compare `?compare=previous_period`, visitors chart, channels), Realtime (10 s poll, stops
+  while hidden). Ranges = whole days in the project zone. Primitives: Button `primary`, StatCard `kind`/null.
+- Checks: lint, typecheck, build ok (initial JS 122.0 KB gz); tests 30 + 68 + 89 (unit 76 + browser 13) + 228
+  + 5; e2e 22/22 (7 new, users seeded, API `PUBLIC_ORIGIN` = dashboard). Mutations: background polling, open
+  redirect fail their tests. **Next:** 5d remaining reports, FilterBar URL binding, interval selector.
+
 ## 2026-10-25 — Stage 5b (shared/ui + shared/components)
 
 - `shared/ui`: Card, Segmented (native radios), DeltaBadge, Tooltip + Menu (Popover API, CSS anchor

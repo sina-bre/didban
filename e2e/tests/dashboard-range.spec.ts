@@ -1,8 +1,15 @@
 import { expect, test } from "@playwright/test";
+import { projectBase, signIn } from "./dashboard.js";
 
 // Stage 5b: the report range picker on the production build (URL state, lazy React Aria field).
-const BASE = "http://127.0.0.1:5173";
-const OVERVIEW = `${BASE}/projects/p1/overview`;
+let BASE = ""; // `/projects/<id>` of the seeded project
+let OVERVIEW = "";
+
+test.beforeEach(async ({ page }) => {
+  await signIn(page);
+  BASE = await projectBase();
+  OVERVIEW = `${BASE}/overview`;
+});
 
 test.use({ locale: "en-US" });
 

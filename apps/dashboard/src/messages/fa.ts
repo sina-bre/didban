@@ -1,6 +1,10 @@
 import type { Messages } from "../shared/lib/i18n";
+import faAuth from "./fa-auth";
+import faReports from "./fa-reports";
 
 const fa: Messages = {
+  ...faAuth,
+  ...faReports,
   "app.name": "didban",
   "app.skip": "رفتن به محتوا",
   "nav.label": "گزارش‌ها",

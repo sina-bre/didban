@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { parseEnv } from "node:util";
 import { defineConfig } from "@playwright/test";
-import { API_URL, PROJECTS, SERVER_KEY } from "./tests/keys.js";
+import { API_URL, DASHBOARD_URL, PROJECTS, SERVER_KEY, USERS } from "./tests/keys.js";
 
 // Stage 3 host-site checks, end to end. Every example proxies /a/e to the recording hop
 // (collector.mjs, 5301), which forwards to the real API (5306) on the local test DB, seeded by
@@ -18,13 +18,13 @@ const DESKTOP_CHROME =
 const api = {
   NODE_ENV: "development",
   PORT: "5306",
-  PUBLIC_ORIGIN: API_URL,
+  PUBLIC_ORIGIN: DASHBOARD_URL, // the CSRF origin: the dashboard proxies /api to this API
   SESSION_COOKIE: "insecure-dev",
   DATABASE_URL: fromEnv("TEST_DATABASE_URL"),
   TEST_MIGRATION_DATABASE_URL: fromEnv("TEST_MIGRATION_DATABASE_URL"), // seed-e2e.mjs
   TRUST_PROXY: "1", // the example's proxy sets X-Forwarded-For; the recorder passes it on
   LOG_LEVEL: "warn",
-  E2E_SEED: JSON.stringify({ projects: PROJECTS, serverKey: SERVER_KEY }),
+  E2E_SEED: JSON.stringify({ projects: PROJECTS, serverKey: SERVER_KEY, users: USERS }),
 };
 
 export default defineConfig({
@@ -62,7 +62,7 @@ export default defineConfig({
     // The dashboard's production build (`pnpm build`), its `/api` proxied to the API under test.
     {
       command: "pnpm -C ../apps/dashboard preview",
-      url: "http://127.0.0.1:5173/",
+      url: `${DASHBOARD_URL}/`,
       env: { API_URL },
     },
   ],
