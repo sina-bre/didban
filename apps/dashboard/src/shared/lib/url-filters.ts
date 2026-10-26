@@ -40,6 +40,7 @@ export function withFilters(params: URLSearchParams, filters: readonly FilterLik
 export function withEquals(params: URLSearchParams, field: string, value: string) {
   const filter = parseFilter(`${field}:eq:${value}`);
   const current = readFilters(params);
-  if (!filter || current.length >= MAX_FILTERS) return new URLSearchParams(params);
+  const known = filter && current.some((f) => keyOf(f) === keyOf(filter));
+  if (!filter || known || current.length >= MAX_FILTERS) return new URLSearchParams(params);
   return withFilters(params, [...current, filter]);
 }
