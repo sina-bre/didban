@@ -1,7 +1,7 @@
 // The one entry point for UI primitives (spec §13.2.4). Feature code imports from here or from
 // shared/components. `combo-box` and `date-range-field` are default exports on purpose: load them
 // with `lazy()` so React Aria stays out of the initial bundle (ADR 0004).
-export { Button } from "./button";
+export { Button, LinkButton } from "./button";
 export { Card, CardHeader } from "./card";
 export { Chip } from "./chip";
 export { CodeBlock } from "./code-block";

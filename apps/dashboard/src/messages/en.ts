@@ -1,10 +1,14 @@
 import enAuth from "./en-auth";
+import enFilters from "./en-filters";
+import enInsights from "./en-insights";
 import enReports from "./en-reports";
 
 // Source of truth for message keys (ADR 0005). Other locales must provide every key.
 const en = {
   ...enAuth,
   ...enReports,
+  ...enFilters,
+  ...enInsights,
   "app.name": "didban",
   "app.skip": "Skip to content",
   "nav.label": "Reports",

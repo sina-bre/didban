@@ -75,9 +75,17 @@ describe("FilterBar", () => {
     const filters = [{ field: "country", op: "eq" as const, values: ["IR"] }];
     const fields = [{ id: "country", label: "Country" }];
     renderUi(
-      <FilterBar filters={filters} fields={fields} valuesFor={() => []} onChange={onChange} />,
+      <FilterBar
+        filters={filters}
+        fields={fields}
+        field=""
+        onFieldChange={() => {}}
+        values={[]}
+        valueLabel={(_, value) => (value === "IR" ? "Iran" : value)}
+        onChange={onChange}
+      />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /^Remove filter: Country is IR$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Remove filter: Country is Iran$/ }));
     expect(onChange).toHaveBeenCalledWith([]);
   });
 });

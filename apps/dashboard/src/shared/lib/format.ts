@@ -65,6 +65,21 @@ export function formatBucket(
   return cached(key, () => new Intl.DateTimeFormat(locale, options)).format(date);
 }
 
+/** Day and hour in the project's zone ("Oct 3, 14:00"): hourly series that span several days. */
+export function formatDayHour(locale: Locale, date: Date, timeZone: string): string {
+  const options = {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+  } as const;
+  return cached(
+    `${locale}:dayhour:${timeZone}`,
+    () => new Intl.DateTimeFormat(locale, options),
+  ).format(date);
+}
+
 /** Seconds as "1 min, 23 sec" (narrow units in the locale's words and digits). */
 export function formatDuration(locale: Locale, seconds: number): string {
   const unit = (name: "minute" | "second") =>

@@ -18,5 +18,7 @@ import { StatsGate } from "./stats-gate.js";
     ShareViewController,
   ],
   providers: [{ provide: StatsGate, useFactory: () => new StatsGate() }],
+  // Goals clear a project's cached reports when a goal changes.
+  exports: [StatsGate],
 })
 export class AnalyticsModule {}

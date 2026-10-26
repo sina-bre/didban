@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 
 type Variant = "primary" | "outline" | "ghost";
 
@@ -12,10 +12,20 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
 }
 
+const BASE =
+  "inline-flex min-h-11 items-center gap-2 rounded-pill text-body font-medium " +
+  "transition-colors duration-(--duration-fast) ease-(--ease-out)";
+
 /** Pill button. ≥ 44 px tall (addendum A6). */
 export function Button({ variant = "outline", className = "", type = "button", ...rest }: Props) {
-  const base =
-    "inline-flex min-h-11 items-center gap-2 rounded-pill text-body font-medium " +
-    "transition-colors duration-(--duration-fast) ease-(--ease-out)";
-  return <button type={type} className={`${base} ${VARIANTS[variant]} ${className}`} {...rest} />;
+  return <button type={type} className={`${BASE} ${VARIANTS[variant]} ${className}`} {...rest} />;
+}
+
+interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  variant?: Variant;
+}
+
+/** A link that looks like the pill button (downloads such as "Export CSV"). */
+export function LinkButton({ variant = "outline", className = "", ...rest }: LinkProps) {
+  return <a className={`${BASE} ${VARIANTS[variant]} ${className}`} {...rest} />;
 }

@@ -34,6 +34,13 @@ export class StatsGate {
     }
   }
 
+  /** Drops a project's cached answers: its definitions (goals) changed, so they are stale. */
+  forget(projectId: string): void {
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(`${projectId}|`)) this.cache.delete(key);
+    }
+  }
+
   private acquire(projectId: string): Promise<void> {
     const slot = this.slots.get(projectId) ?? { active: 0, waiting: [] };
     this.slots.set(projectId, slot);

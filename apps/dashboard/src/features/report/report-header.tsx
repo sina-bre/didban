@@ -10,6 +10,7 @@ import {
   readCustomRange,
   readRange,
 } from "../../shared/lib/url-state";
+import { ReportFilters } from "./report-filters";
 
 interface Props {
   title: string;
@@ -17,7 +18,7 @@ interface Props {
   children?: ReactNode;
 }
 
-/** Report title, the active range and the URL-bound range picker (spec §13.4). */
+/** Report title, the active range, the URL-bound range picker and filters (spec §13.4). */
 export function ReportHeader({ title, children }: Props) {
   const { t, locale } = useLocale();
   const [params] = useSearchParams();
@@ -43,6 +44,7 @@ export function ReportHeader({ title, children }: Props) {
         <DateRangePicker />
         {children}
       </div>
+      <ReportFilters />
     </header>
   );
 }

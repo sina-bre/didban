@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-26 — Stage 5d (reports, URL filters, interval, export)
+
+- Lazy routes: Pages (top/entry/exit/discovered + `pages/detail`), Sources, Geo (GeoLite2-off and city-off states),
+  Devices, Events (event → keys → values → `prop.` filter), Goals (add/delete for managers), Data health. ADR 0042.
+- URL state: `?filter=` (contract parser), `?by=`/`?view=`/`?event=`/`?prop=`, `?interval=` (fits the range).
+  FilterBar values come from the picked field's breakdown; rows add filters; CSV = same-origin `<a download>`.
+- Fixes found by tests: duplicate filter on row click; old rows under a new dimension; API goal stats stale for 15 s
+  (`StatsGate.forget` on goal change); body-less DELETE failed CSRF (now sends `{}` as JSON).
+- Checks: lint, typecheck, build ok (initial JS 124.2 KB gz); tests 30 + 68 + 120 (unit 103 + browser 17) + 230 + 5;
+  e2e 28/28 (6 new, real ingested events). 9 mutations, each fails its test. Load flakes seen once each (5 s findBy).
+- **Next:** 5e settings, onboarding, members, sharing, audit, admin, `/share/:token`.
+
 ## 2026-10-26 — Fix: empty `/projects` message for owners
 
 - A fresh owner (`pnpm cli create-owner`) saw "ask an owner or admin for access". The switcher query now also

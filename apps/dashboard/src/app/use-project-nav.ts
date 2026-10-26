@@ -8,12 +8,14 @@ export interface ProjectNav {
 
 /** Navigation for the open project, or `null` outside a project (no report links then). */
 export function useProjectNav(): ProjectNav | null {
-  const match = useMatch("/projects/:projectId/:section?");
+  // `/*`: a report's sub-page (`pages/detail`) still belongs to its section.
+  const inSection = useMatch("/projects/:projectId/:section/*");
+  const match = useMatch("/projects/:projectId") ?? inSection;
   const { search } = useLocation();
   const projectId = match?.params.projectId;
   if (!projectId) return null;
   return {
-    current: findSection(match.params.section),
+    current: findSection(inSection?.params.section),
     href: (section) => sectionHref(projectId, section, search),
   };
 }
