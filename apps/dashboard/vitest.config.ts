@@ -25,7 +25,12 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["test/**/*.test.{ts,tsx}"], environment: "jsdom" },
+        test: {
+          name: "unit",
+          include: ["test/**/*.test.{ts,tsx}"],
+          environment: "jsdom",
+          testTimeout: 15_000, // app tests import lazy route chunks (cold in jsdom)
+        },
       },
       {
         extends: true,
