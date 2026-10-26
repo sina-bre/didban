@@ -14,3 +14,13 @@ export const SERVER_KEY = token("dsk", 4, "k");
 
 /** The real API under test (playwright.config.ts starts it on the test DB). */
 export const API_URL = "http://localhost:5306";
+
+/** The dashboard's production build (`vite preview`), same-origin with the API through `/api`. */
+export const DASHBOARD_URL = "http://127.0.0.1:5173";
+
+/** Dashboard accounts (seed-e2e.mjs stores Argon2id hashes). Test-only passwords. */
+export const USERS = {
+  owner: { email: "e2e-owner@example.com", password: "e2e owner passphrase 1" },
+  /** Created with a temporary password: must choose a new one at first login (ADR 0024). */
+  fresh: { email: "e2e-fresh@example.com", password: "TEMP-e2e-passphrase-2" },
+} as const;

@@ -1,20 +1,17 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { externalHosts, projectBase, signIn } from "./dashboard.js";
 
 // Stage 5a: the dashboard shell on the production build (desktop + mobile, en + fa).
-const BASE = "http://127.0.0.1:5173";
-const OVERVIEW = `${BASE}/projects/p1/overview`;
+let BASE = ""; // `/projects/<id>` of the seeded project
+let OVERVIEW = "";
+
+test.beforeEach(async ({ page }) => {
+  await signIn(page);
+  BASE = await projectBase();
+  OVERVIEW = `${BASE}/overview`;
+});
 
 test.use({ locale: "en-US" });
-
-/** Hosts other than the dashboard itself that the page talked to (must stay empty). */
-function externalHosts(page: Page): Set<string> {
-  const hosts = new Set<string>();
-  page.on("request", (req) => {
-    const { host } = new URL(req.url());
-    if (host !== "127.0.0.1:5173" && !req.url().startsWith("data:")) hosts.add(host);
-  });
-  return hosts;
-}
 
 test("desktop: pill nav, 30-day default, range kept across reports and history", async ({
   page,
@@ -32,7 +29,7 @@ test("desktop: pill nav, 30-day default, range kept across reports and history",
 
   await page.goto(`${OVERVIEW}?range=7d`);
   await pills.getByRole("link", { name: "Sources" }).click();
-  await expect(page).toHaveURL(`${BASE}/projects/p1/sources?range=7d`);
+  await expect(page).toHaveURL(`${BASE}/sources?range=7d`);
   await expect(page.getByTestId("range")).toContainText("Last 7 days");
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Overview");
@@ -84,7 +81,7 @@ test("mobile 360 px: tab bar, 44 px targets, no overflow, More sheet", async ({ 
   await tabs.getByRole("button", { name: "More" }).click();
   await sheet.getByRole("link", { name: "Goals" }).click();
   await expect(sheet).toBeHidden();
-  await expect(page).toHaveURL(`${BASE}/projects/p1/goals`);
+  await expect(page).toHaveURL(`${BASE}/goals`);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Goals");
 });
 

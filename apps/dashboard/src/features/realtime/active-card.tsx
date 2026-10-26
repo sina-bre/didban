@@ -19,20 +19,16 @@ export function ActiveCard({ data, timeZone }: Props) {
   }));
   return (
     <Card labelledBy="active-title">
-      <CardHeader
-        id="active-title"
-        icon={Radio}
-        title={t("realtime.active")}
-        subline={t("realtime.activeHint")}
-      />
+      <CardHeader id="active-title" icon={Radio} title={t("realtime.active")} />
       <div aria-live="polite" className="mb-4">
-        <StatCard label={t("realtime.active")} value={data.activeVisitors} hero />
+        <StatCard label={t("realtime.activeHint")} value={data.activeVisitors} hero />
       </div>
       <TimeSeriesChart
         title={t("realtime.perMinute")}
         valueLabel={t("metric.pageviews")}
         points={points}
         formatDate={(date) => formatBucket(locale, date, true, timeZone)}
+        dateLabel={t("realtime.time")}
       />
     </Card>
   );

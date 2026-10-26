@@ -11,13 +11,17 @@ export default defineConfig({
   // Pre-bundled up front: discovering them mid-run makes Vite reload the browser test page.
   optimizeDeps: {
     include: [
+      "@hookform/resolvers/zod",
       "@internationalized/date",
+      "@tanstack/react-query",
       "react-aria-components/ComboBox",
       "react-aria-components/DateRangePicker",
       "react-aria-components/Dialog",
       "react-aria-components/Heading",
       "react-aria-components/I18nProvider",
+      "react-hook-form",
       "recharts",
+      "zod",
     ],
   },
   test: {

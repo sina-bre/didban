@@ -27,3 +27,10 @@ export function storedEvents(slug: string, since: Date): Promise<StoredEvent[]> 
 
 export const storedPagePaths = (list: StoredEvent[]) =>
   list.filter((e) => e.type === 1).map((e) => e.pathname);
+
+/** The id the seed gave an e2e project (dashboard URLs need it). */
+export async function projectIdOf(slug: string): Promise<string> {
+  const [row] = await sql<{ id: string }[]>`SELECT id FROM projects WHERE slug = ${slug}`;
+  if (!row) throw new Error(`no e2e project ${slug}`);
+  return row.id;
+}
