@@ -1,0 +1,48 @@
+import type { Messages } from "../shared/lib/i18n";
+import type enFilters from "./en-filters";
+
+const faFilters: Pick<Messages, keyof typeof enFilters> = {
+  "filter.pickField": "یک فیلد انتخاب کنید",
+  "filter.by": "فیلتر با {value}",
+  "field.route": "صفحه",
+  "field.hostname": "نام میزبان",
+  "field.pathname": "مسیر",
+  "field.name": "رویداد",
+  "field.channel": "کانال",
+  "field.referrer": "ارجاع‌دهنده",
+  "field.utm_source": "منبع UTM",
+  "field.utm_medium": "رسانه UTM",
+  "field.utm_campaign": "کمپین UTM",
+  "field.utm_term": "عبارت UTM",
+  "field.utm_content": "محتوای UTM",
+  "field.country": "کشور",
+  "field.region": "استان",
+  "field.city": "شهر",
+  "field.browser": "مرورگر",
+  "field.os": "سیستم‌عامل",
+  "field.device_type": "نوع دستگاه",
+  "field.screen": "اندازه صفحه‌نمایش",
+  "field.language": "زبان",
+  "field.prop": "ویژگی {key}",
+  "value.none": "(ثبت نشده)",
+  "device.desktop": "رایانه رومیزی",
+  "device.mobile": "موبایل",
+  "device.tablet": "تبلت",
+  "device.tv": "تلویزیون",
+  "screen.phone": "گوشی",
+  "screen.tablet": "تبلت",
+  "screen.laptop": "لپ‌تاپ",
+  "screen.desktop": "رومیزی",
+  "interval.label": "بازه زمانی نمودار",
+  "interval.auto": "خودکار",
+  "interval.hour": "ساعتی",
+  "interval.day": "روزانه",
+  "interval.week": "هفتگی",
+  "interval.month": "ماهانه",
+  "report.dimension": "تفکیک بر اساس",
+  "report.truncated":
+    "{count} مورد اول نمایش داده شده است. برای حداکثر ۱۰٬۰۰۰ ردیف خروجی CSV بگیرید.",
+  "export.csv": "خروجی CSV",
+};
+
+export default faFilters;

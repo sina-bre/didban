@@ -17,22 +17,28 @@ interface Props {
   filters: readonly Filter[];
   /** Fields the report can filter on, with their labels. */
   fields: readonly ComboOption[];
-  /** Known values of a field (from the report data) to pick from. */
-  valuesFor: (field: string) => readonly ComboOption[];
+  /** The field being added ("" = none picked yet); the owner loads its values. */
+  field: string;
+  onFieldChange: (field: string) => void;
+  /** Known values of `field` to pick from. */
+  values: readonly ComboOption[];
+  /** A stored value in the user's words (`DE` → "Germany"); defaults to the value itself. */
+  valueLabel?: (field: string, value: string) => string;
   onChange: (filters: Filter[]) => void;
 }
 
 /**
  * Filter chips + "Add filter" (field select, then a searchable value: React Aria ComboBox, lazy).
- * Controlled: the report keeps the filters in the URL (Stage 5d).
+ * Controlled: reports keep the filters in the URL and load the values of the picked field.
  */
-export function FilterBar({ filters, fields, valuesFor, onChange }: Props) {
+export function FilterBar(props: Props) {
+  const { filters, fields, field, onFieldChange, values, onChange } = props;
   const { t } = useLocale();
   const [adding, setAdding] = useState(false);
-  const [field, setField] = useState(fields[0]?.id ?? "");
   const fieldLabel = (id: string) => fields.find((f) => f.id === id)?.label ?? id;
+  const valueLabel = props.valueLabel ?? ((_: string, value: string) => value);
   const describe = (f: Filter) =>
-    `${fieldLabel(f.field)} ${t(`filter.op.${f.op}` as MessageKey)} ${f.values.join(", ")}`;
+    `${fieldLabel(f.field)} ${t(`filter.op.${f.op}` as MessageKey)} ${f.values.map((v) => valueLabel(f.field, v)).join(", ")}`;
   const add = (value: string) => {
     onChange([...filters, { field, op: "eq", values: [value] }]);
     setAdding(false);
@@ -58,23 +64,27 @@ export function FilterBar({ filters, fields, valuesFor, onChange }: Props) {
           <SelectField
             label={t("filter.field")}
             value={field}
-            onChange={(e) => setField(e.currentTarget.value)}
+            onChange={(e) => onFieldChange(e.currentTarget.value)}
           >
+            <option value="">{t("filter.pickField")}</option>
             {fields.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.label}
               </option>
             ))}
           </SelectField>
-          <Suspense fallback={<Skeleton className="h-16" />}>
-            <ComboBox
-              key={field}
-              label={t("filter.value")}
-              options={valuesFor(field)}
-              onSelect={add}
-              emptyLabel={t("filter.noMatch")}
-            />
-          </Suspense>
+          {field && (
+            <Suspense fallback={<Skeleton className="h-16" />}>
+              <ComboBox
+                // Remount when the values arrive: RAC reads `defaultItems` once.
+                key={`${field}:${values.length}`}
+                label={t("filter.value")}
+                options={values}
+                onSelect={add}
+                emptyLabel={t("filter.noMatch")}
+              />
+            </Suspense>
+          )}
         </div>
       )}
     </section>

@@ -13,7 +13,7 @@ import { VisitorsCard } from "./visitors-card";
 /** Overview (spec §3.1): KPIs with deltas, visitors over time, channels. */
 export function OverviewPage() {
   const { t } = useLocale();
-  const { timeZone, compare, overview, series, channels, empty, cookielessNote } = useOverview();
+  const { chart, compare, overview, series, channels, empty, cookielessNote } = useOverview();
   return (
     <div className="flex flex-col gap-3 md:gap-4 lg:gap-5" aria-busy={overview.isFetching}>
       <ReportHeader title={t("nav.overview")}>
@@ -36,7 +36,7 @@ export function OverviewPage() {
             <QueryBlock query={series} skeleton="h-96">
               {(data) =>
                 overview.data && (
-                  <VisitorsCard series={data} totals={overview.data.metrics} timeZone={timeZone} />
+                  <VisitorsCard series={data} totals={overview.data.metrics} {...chart} />
                 )
               }
             </QueryBlock>
