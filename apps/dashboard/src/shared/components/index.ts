@@ -1,6 +1,11 @@
 // Domain wrappers over shared/ui (spec §13.2.4). Feature code imports UI from here and shared/ui.
 // ConsentBanner is for the example app only and lives there, not in the dashboard.
-export { type BreakdownRow, BreakdownTable } from "./breakdown-table";
+export {
+  type BreakdownMetric,
+  type BreakdownRow,
+  BreakdownTable,
+  type MetricKind,
+} from "./breakdown-table";
 export { ChannelBadge, type ChannelCode } from "./channel-badge";
 export { DateRangePicker } from "./date-range-picker";
 export { EmptyState } from "./empty-state";

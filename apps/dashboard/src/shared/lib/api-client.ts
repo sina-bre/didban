@@ -40,7 +40,8 @@ export const session = {
   expired: () => window.location.assign(loginHref(window.location)),
 };
 
-function urlOf(path: string, query: Query = {}): string {
+/** `/api/v1<path>?<query>`; repeated keys for arrays (`filter=…&filter=…`). Also download links. */
+export function apiUrl(path: string, query: Query = {}): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     for (const item of [value ?? []].flat()) params.append(key, item);
@@ -74,7 +75,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   if (body !== undefined) headers["content-type"] = "application/json";
   let response: Response;
   try {
-    response = await fetch(urlOf(path, query), {
+    response = await fetch(apiUrl(path, query), {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),

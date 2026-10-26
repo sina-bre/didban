@@ -29,9 +29,14 @@ function useProjectLists<T>(select: (lists: ProjectLists) => T) {
         api<OrganizationListResponse>("/organizations", { signal }),
         api<ProjectListResponse>("/projects", { signal }),
       ]);
+      const admin = new Set(orgs.organizations.filter((o) => o.role !== "member").map((o) => o.id));
       return {
         orgs: groupProjects(orgs.organizations, projects.projects),
-        canManage: orgs.organizations.some((org) => org.role !== "member"),
+        canManage: admin.size > 0,
+        // Spec §11: org owner/admin, or project admin of that project.
+        manageable: projects.projects
+          .filter((p) => admin.has(p.organizationId) || p.role === "project_admin")
+          .map((p) => p.id),
       };
     },
     select,
@@ -41,6 +46,8 @@ function useProjectLists<T>(select: (lists: ProjectLists) => T) {
 interface ProjectLists {
   orgs: SwitcherOrg[];
   canManage: boolean;
+  /** Projects the user may manage (goals, settings). Only hides controls: the API decides. */
+  manageable: string[];
 }
 
 const pickOrgs = (lists: ProjectLists) => lists.orgs;
@@ -48,3 +55,7 @@ const pickAll = (lists: ProjectLists) => lists;
 
 export const useSwitcherOrgs = () => useProjectLists(pickOrgs);
 export const useProjectsHome = () => useProjectLists(pickAll);
+
+/** Whether the user may manage this project (create and delete goals, later its settings). */
+export const useCanManage = (projectId: string) =>
+  useProjectLists((lists) => lists.manageable.includes(projectId)).data ?? false;
