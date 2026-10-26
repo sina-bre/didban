@@ -20,15 +20,31 @@ export function groupProjects(
     .filter((org) => org.projects.length > 0);
 }
 
-export function useSwitcherOrgs() {
+/** Both lists in one request pair; `canManage`: the user is owner or admin of some organization. */
+function useProjectLists<T>(select: (lists: ProjectLists) => T) {
   return useQuery({
     queryKey: ["switcher"],
-    queryFn: async ({ signal }) => {
+    queryFn: async ({ signal }): Promise<ProjectLists> => {
       const [orgs, projects] = await Promise.all([
         api<OrganizationListResponse>("/organizations", { signal }),
         api<ProjectListResponse>("/projects", { signal }),
       ]);
-      return groupProjects(orgs.organizations, projects.projects);
+      return {
+        orgs: groupProjects(orgs.organizations, projects.projects),
+        canManage: orgs.organizations.some((org) => org.role !== "member"),
+      };
     },
+    select,
   });
 }
+
+interface ProjectLists {
+  orgs: SwitcherOrg[];
+  canManage: boolean;
+}
+
+const pickOrgs = (lists: ProjectLists) => lists.orgs;
+const pickAll = (lists: ProjectLists) => lists;
+
+export const useSwitcherOrgs = () => useProjectLists(pickOrgs);
+export const useProjectsHome = () => useProjectLists(pickAll);

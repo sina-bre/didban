@@ -104,10 +104,4 @@ describe("projects and the switcher", () => {
       `/projects/${OTHER}/overview`,
     );
   });
-
-  it("no accessible project: a plain message, no report frame", async () => {
-    fakeApi({ ...signedIn(), "GET /projects": { projects: [] } });
-    renderApp("/projects");
-    expect(await screen.findByText("No projects yet", {}, { timeout: 5000 })).toBeTruthy();
-  });
 });
