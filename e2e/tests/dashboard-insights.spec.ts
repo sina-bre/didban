@@ -91,7 +91,7 @@ test("goals: add an event goal, see its conversion, delete it", async ({ page })
   await page.goto(`${BASE}/goals`);
   await page.getByRole("button", { name: "Add goal" }).click();
   const dialog = page.getByRole("dialog", { name: "Add goal" });
-  await dialog.getByLabel("Name").fill("E2E signup");
+  await dialog.getByLabel("Name", { exact: true }).fill("E2E signup");
   await dialog.getByLabel("Event name").fill(EVENT);
   await dialog.getByRole("button", { name: "Create goal" }).click();
   await expect(dialog).toBeHidden();
@@ -104,13 +104,14 @@ test("goals: add an event goal, see its conversion, delete it", async ({ page })
 });
 
 test("overview interval: weekly goes to the time series request", async ({ page }) => {
-  await page.goto(`${BASE}/overview`);
+  // 90 days: a range no earlier spec asked for, so the API's 15 s cache has no empty answer.
+  await page.goto(`${BASE}/overview?range=90d`);
   const weekly = page.waitForRequest(
     (r) => r.url().includes("/stats/timeseries") && r.url().includes("interval=week"),
   );
   await page.getByText("Weekly", { exact: true }).click();
   await weekly;
-  await expect(page).toHaveURL(`${BASE}/overview?interval=week`);
+  await expect(page).toHaveURL(`${BASE}/overview?range=90d&interval=week`);
 });
 
 test.describe("Persian, 360 px", () => {

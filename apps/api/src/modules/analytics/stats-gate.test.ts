@@ -64,3 +64,14 @@ it("gate: caches by (project, key) for 15 s; `null` key is never cached", async 
   expect(await gate.run("p1", null, work)).toBe(4);
   expect(await gate.run("p1", null, work)).toBe(5);
 });
+
+it("gate: forget(project) drops only that project's cached answers", async () => {
+  const gate = new StatsGate(() => 0);
+  let calls = 0;
+  const work = async () => ++calls;
+  await gate.run("p1", "q", work);
+  await gate.run("p2", "q", work);
+  gate.forget("p1");
+  expect(await gate.run("p1", "q", work)).toBe(3);
+  expect(await gate.run("p2", "q", work)).toBe(2);
+});

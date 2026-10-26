@@ -115,3 +115,19 @@ it("goal stats: counts + revenue per currency incl. server events, rate from bro
     revenue: [],
   });
 });
+
+it("goal stats: a new or deleted goal shows at once, not after the 15 s report cache", async () => {
+  const { ownerA } = tenants.cookies;
+  const stats = `/projects/${target.projectId}/stats/goals?from=2026-10-05T00:00:00Z&to=2026-10-12T00:00:00Z`;
+  expect((await call(t, "GET", stats, ownerA)).json().goals).toEqual([]);
+  const created = await call(t, "POST", url(), ownerA, {
+    kind: "event",
+    name: "Join",
+    eventName: "join",
+  });
+  expect(
+    (await call(t, "GET", stats, ownerA)).json().goals.map((g: { name: string }) => g.name),
+  ).toEqual(["Join"]);
+  await call(t, "DELETE", `${url()}/${created.json().id}`, ownerA);
+  expect((await call(t, "GET", stats, ownerA)).json().goals).toEqual([]);
+});
