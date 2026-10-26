@@ -4,6 +4,8 @@ import type enReports from "./en-reports";
 const faReports: Pick<Messages, keyof typeof enReports> = {
   "projects.none.title": "هنوز پروژه‌ای نیست",
   "projects.none.body": "هنوز به هیچ پروژه‌ای دسترسی ندارید. از مالک یا مدیر دسترسی بخواهید.",
+  "projects.empty.title": "هنوز پروژه‌ای نیست",
+  "projects.empty.body": "سازمان شما هنوز هیچ پروژه‌ای ندارد.",
   "metric.visitors": "بازدیدکننده",
   "metric.visits": "بازدید",
   "metric.pageviews": "نمایش صفحه",

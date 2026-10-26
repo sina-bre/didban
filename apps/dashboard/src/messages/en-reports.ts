@@ -2,6 +2,8 @@
 const enReports = {
   "projects.none.title": "No projects yet",
   "projects.none.body": "You cannot see any project yet. Ask an owner or admin to give you access.",
+  "projects.empty.title": "No projects yet",
+  "projects.empty.body": "Your organization has no projects yet.",
   "metric.visitors": "Visitors",
   "metric.visits": "Visits",
   "metric.pageviews": "Page views",

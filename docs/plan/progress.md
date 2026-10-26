@@ -2,6 +2,15 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-26 — Fix: empty `/projects` message for owners
+
+- A fresh owner (`pnpm cli create-owner`) saw "ask an owner or admin for access". The switcher query now also
+  returns `canManage` (owner/admin of any org); `/projects` then says "Your organization has no projects yet."
+  (en + fa). Members keep the access message. Switcher still lists only orgs with accessible projects.
+- Tests: `test/projects.test.tsx` (owner, admin, member); forcing `canManage` false fails owner/admin.
+- Checks: `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test` (dashboard 91 passed) green. `pnpm test:e2e`
+  not run: port 5173 held by the owner's running preview.
+
 ## 2026-10-26 — Stage 5c (auth pages, switcher, overview, realtime)
 
 - `/login` + `/set-password` (first-login change) instead of `/accept-invite`: A9/ADR 0024 removed invites, no
