@@ -23,7 +23,8 @@ const toEntry = ({ actorUserId, actorEmail, targetType, targetId, ...row }: Row)
 
 /**
  * Newest first, keyset pagination on `id` (`org:audit`: owners and admins, spec §11). Served by
- * `audit_logs_organization_idx`; one extra row tells whether another page exists.
+ * `audit_logs_organization_idx` (one project: `audit_logs_project_idx`); one extra row tells
+ * whether another page exists.
  */
 export async function listAuditLog(
   sql: Sql,
@@ -36,6 +37,7 @@ export async function listAuditLog(
     FROM audit_logs a LEFT JOIN users u ON u.id = a.actor_user_id
     WHERE a.organization_id = ${organizationInScope(scope, input.organizationId)}
       AND a.id < ${input.before ?? MAX_BIGINT}::bigint
+      ${input.projectId ? sql`AND a.project_id = ${input.projectId}` : sql``}
     ORDER BY a.id DESC
     LIMIT ${input.limit + 1}`;
   const page = rows.slice(0, input.limit);

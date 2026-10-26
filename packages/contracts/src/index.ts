@@ -1,3 +1,4 @@
+export * from "./admin.js";
 export * from "./api-keys.js";
 export * from "./audit.js";
 export * from "./auth.js";
@@ -8,6 +9,7 @@ export * from "./error-codes.js";
 export * from "./event.js";
 export * from "./goals.js";
 export * from "./limits.js";
+export * from "./members.js";
 export * from "./organizations.js";
 export * from "./projects.js";
 export * from "./properties.js";
