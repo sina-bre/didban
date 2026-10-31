@@ -58,6 +58,8 @@ export const auditLogQuerySchema = z.object({
     .regex(/^[1-9]\d{0,18}$/)
     .optional(),
   limit: z.coerce.number().int().min(1).max(AUDIT_PAGE_MAX).default(50),
+  /** Only this project's entries (the project settings' audit tab). */
+  projectId: z.uuid().optional(),
 });
 export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>;
 

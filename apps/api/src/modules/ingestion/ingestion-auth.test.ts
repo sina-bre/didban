@@ -2,6 +2,8 @@ import { LIMITS } from "@didban/contracts";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetDb } from "../../test-support/reset-db.js";
 import { batchBody, SITE, seedIngestTarget } from "../../test-support/seed-ingest.js";
+import { seedMember, seedSession } from "../../test-support/seed-org.js";
+import { call } from "../../test-support/tenant-fixture.js";
 import { startTestApp } from "../../test-support/test-app.js";
 
 // Spec §7 steps 1–3 and §6.1 over HTTP: body limit, JSON, write key, origin, CORS.
@@ -85,6 +87,20 @@ describe("ingestion: origin and CORS (spec §7 step 3, §6.1)", () => {
       headers: { "x-write-key": target.serverKey },
     });
     expect(server.statusCode).toBe(200);
+  });
+
+  it("an allowed-origin change applies to the next batch, despite the key cache", async () => {
+    const other = "https://www.heliumpark.example";
+    expect(await codeOf(ingest(batchBody(target.browserKey), { origin: other }))).toBe(
+      "ORIGIN_NOT_ALLOWED",
+    ); // the key is now cached for 60 s
+    const owner = await seedMember(t.sql, target.organizationId, "o@helium.test", "owner");
+    const url = `/projects/${target.projectId}/environments/${target.environmentId}`;
+    const patch = await call(t, "PATCH", url, await seedSession(t.sql, owner), {
+      allowedOrigins: [SITE, other],
+    });
+    expect(patch.statusCode).toBe(200);
+    expect((await ingest(batchBody(target.browserKey), { origin: other })).statusCode).toBe(200);
   });
 
   it("answers preflights with a cacheable CORS response", async () => {

@@ -7,5 +7,6 @@ export function useProject(projectId: string) {
   return useQuery({
     queryKey: ["project", projectId],
     queryFn: ({ signal }) => api<Project>(`/projects/${encodeURIComponent(projectId)}`, { signal }),
+    enabled: projectId !== "", // the public share view has no project route
   });
 }

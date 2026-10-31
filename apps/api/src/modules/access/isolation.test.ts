@@ -71,6 +71,9 @@ function routesOfA(): [string, string, object][] {
   const project = `/projects/${projectA}`;
   return [
     ["GET", `/organizations/${orgA}/audit-log`, {}],
+    ["GET", `/organizations/${orgA}/audit-log?projectId=${projectA}`, {}],
+    ["GET", `/organizations/${orgA}/members`, {}],
+    ["GET", `/projects/${projectA}/members`, {}],
     ["POST", `/organizations/${orgA}/users`, { email: "x@evil.test", role: "owner" }],
     ["POST", `/organizations/${orgA}/members/${memberA}/password-reset`, {}],
     ["GET", `/organizations/${orgA}/projects`, {}],

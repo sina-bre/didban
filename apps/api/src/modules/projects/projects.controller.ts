@@ -3,6 +3,7 @@ import {
   assignProjectMemberRequestSchema,
   type Project,
   type ProjectListResponse,
+  type ProjectMemberListResponse,
   type UpdateProjectRequest,
   updateProjectRequestSchema,
 } from "@didban/contracts";
@@ -13,6 +14,7 @@ import { UuidPipe } from "../../http/uuid-pipe.js";
 import { ZodPipe } from "../../http/zod-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
+import { listProjectMembers } from "./list-project-members.js";
 import { listProjects } from "./list-projects.js";
 import { assignProjectMember, removeProjectMember } from "./project-members.js";
 import { getProject, updateProject } from "./project-settings.js";
@@ -44,6 +46,15 @@ export class ProjectsController {
     @Body(new ZodPipe(updateProjectRequestSchema)) changes: UpdateProjectRequest,
   ): Promise<Project> {
     return updateProject(this.sql, scope, { projectId, changes });
+  }
+
+  @Requires("project:members")
+  @Get(":projectId/members")
+  members(
+    @CurrentScope() scope: AccessScope,
+    @Param("projectId", UuidPipe) projectId: string,
+  ): Promise<ProjectMemberListResponse> {
+    return listProjectMembers(this.sql, scope, projectId);
   }
 
   @Requires("project:members")

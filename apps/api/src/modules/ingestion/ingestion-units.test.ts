@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { batchBody } from "../../test-support/seed-ingest.js";
+import { type ResolvedKey, WriteKeyCache } from "../key-cache/write-key-cache.js";
 import { IngestDiagnostics, MAX_ORIGINS_PER_DAY } from "./ingest-diagnostics.js";
 import { IngestRateLimiter } from "./ingest-rate-limiter.js";
 import { readBatchBody, writeKeyOf } from "./read-batch-body.js";
 import { validateBatch } from "./validate-batch.js";
-import { type ResolvedKey, WriteKeyCache } from "./write-key-cache.js";
 
 const clock = (start = 1_000_000) => {
   const state = { now: start };
@@ -33,6 +33,15 @@ describe("write key cache (spec §7 step 2)", () => {
     expect(cache.get("unknown")).toBeUndefined();
     c.state.now += 50_000;
     expect(cache.get("known")).toBeUndefined();
+  });
+
+  it("forgets only the changed environment's keys", () => {
+    const cache = new WriteKeyCache();
+    cache.set("a", key);
+    cache.set("b", { ...key, environmentId: "other" });
+    cache.forgetEnvironment(key.environmentId);
+    expect(cache.get("a")).toBeUndefined();
+    expect(cache.get("b")?.environmentId).toBe("other");
   });
 });
 

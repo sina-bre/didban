@@ -16,8 +16,15 @@ export function uuidv7(): string {
 type Event = { type: "page" | "track"; path: string; name?: string; props?: object };
 
 /** One batch of browser events on the Vite example's project, one visitor, all now. */
-export async function sendBrowserEvents(request: APIRequestContext, events: Event[]) {
-  const { origin, key } = PROJECTS.vite;
+export function sendBrowserEvents(request: APIRequestContext, events: Event[]) {
+  return sendEvents(request, { ...PROJECTS.vite, events });
+}
+
+/** One batch with any browser write key from any Origin (the wizard's new key, a wrong site). */
+export async function sendEvents(
+  request: APIRequestContext,
+  { key, origin, events }: { key: string; origin: string; events: Event[] },
+) {
   const anonymousId = `e2e-${randomBytes(6).toString("hex")}`;
   const body = {
     schemaVersion: 1,

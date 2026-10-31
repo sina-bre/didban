@@ -1,7 +1,11 @@
+import enAdmin from "./en-admin";
 import enAuth from "./en-auth";
 import enFilters from "./en-filters";
 import enInsights from "./en-insights";
+import enIntegration from "./en-integration";
+import enPeople from "./en-people";
 import enReports from "./en-reports";
+import enSettings from "./en-settings";
 
 // Source of truth for message keys (ADR 0005). Other locales must provide every key.
 const en = {
@@ -9,6 +13,10 @@ const en = {
   ...enReports,
   ...enFilters,
   ...enInsights,
+  ...enSettings,
+  ...enIntegration,
+  ...enPeople,
+  ...enAdmin,
   "app.name": "didban",
   "app.skip": "Skip to content",
   "nav.label": "Reports",

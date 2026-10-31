@@ -1,10 +1,12 @@
 import type { ComponentType } from "react";
 import { Navigate, type RouteObject } from "react-router";
 import { NotFoundPage } from "../features/not-found/page";
+import { HomePage } from "../features/projects/home-page";
 import { ProjectsPage } from "../features/projects/page";
 import { AppShell } from "./app-shell";
 import { ProjectLayout } from "./project-layout";
 import { RequireAuth } from "./require-auth";
+import { accountRoutes, projectSettings, shareRoute } from "./settings-routes";
 
 // Spec §13.3. Auth pages are public and lazy (forms + Zod load only there); everything else
 // needs a session. Every report is its own lazy chunk; an unknown section is "not found".
@@ -32,18 +34,24 @@ export const routes: RouteObject[] = [
     "set-password",
     async () => (await import("../features/auth/set-password-page")).SetPasswordPage,
   ),
+  shareRoute,
   {
     Component: RequireAuth,
     children: [
       {
         Component: AppShell,
         children: [
-          { index: true, element: <Navigate to="/projects" replace /> },
+          { index: true, Component: HomePage },
           { path: "projects", Component: ProjectsPage },
+          ...accountRoutes,
           {
             path: "projects/:projectId",
             Component: ProjectLayout,
-            children: [{ index: true, element: <Navigate to="overview" replace /> }, ...reports],
+            children: [
+              { index: true, element: <Navigate to="overview" replace /> },
+              ...reports,
+              projectSettings,
+            ],
           },
           { path: "*", Component: NotFoundPage },
         ],

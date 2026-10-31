@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { hashApiKeyToken } from "../api-keys/api-key-token.js";
+import { type ResolvedKey, WriteKeyCache } from "../key-cache/write-key-cache.js";
 import { ingestError } from "./ingest-error.js";
 import { type SettingsRow, toIngestSettings } from "./ingest-settings.js";
 import { KeyUsage } from "./key-usage.js";
-import { type ResolvedKey, WriteKeyCache } from "./write-key-cache.js";
 
 // Spec §7 step 2. A token that cannot be ours (wrong shape) is rejected without a lookup.
 // Keys of archived projects or suspended organizations resolve like unknown keys.

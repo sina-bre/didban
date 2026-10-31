@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-10-31 — Stage 5e (settings, onboarding, members, sharing, audit, admin, share view)
+
+- Project settings (general, environments, keys, routes, members, sharing, data, audit), org settings (members
+  with temporary passwords, projects/restore, audit), `/admin/{organizations,users,instance}`, `/projects` list +
+  top-bar Menu, `/projects/new` wizard with live check (3 s Realtime, after 30 s Data Health → cause + "Allow").
+- `/share#token`: same report components via `StatsSourceContext`, token in a header only. ADR 0043.
+- API: member lists, admin reads, audit `projectId` + `audit_logs_project_idx` (EXPLAIN in ADR). Fix found by e2e
+  design: an environment change now forgets its cached write keys (the "Allow" fix waited 60 s before).
+- Data deletion by range/visitor/user ID stays with Stage 6's job runner (ADR 0043); data page = retention etc.
+- Checks (in order): lint, typecheck, build ok (initial JS 130.8 KB gz); tests 30 + 68 + 144 + 237 + 5; e2e 32/32
+  (4 new). 7 mutations (6 unit/API + 1 e2e), each fails its test. **Next:** 5f E2E flow, Lighthouse, RTL, a11y.
+
 ## 2026-10-26 — Stage 5d (reports, URL filters, interval, export)
 
 - Lazy routes: Pages (top/entry/exit/discovered + `pages/detail`), Sources, Geo (GeoLite2-off and city-off states),

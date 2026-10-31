@@ -2,6 +2,7 @@ import {
   type ChangeMemberRoleRequest,
   changeMemberRoleRequestSchema,
   type OrganizationListResponse,
+  type OrganizationMemberListResponse,
 } from "@didban/contracts";
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
@@ -11,6 +12,7 @@ import { ZodPipe } from "../../http/zod-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
 import { changeMemberRole } from "./change-member-role.js";
+import { listMembers } from "./list-members.js";
 import { listOrganizations } from "./list-organizations.js";
 import { removeMember } from "./remove-member.js";
 
@@ -22,6 +24,15 @@ export class OrganizationsController {
   @Get()
   list(@CurrentScope() scope: AccessScope): Promise<OrganizationListResponse> {
     return listOrganizations(this.sql, scope);
+  }
+
+  @Requires("org:users")
+  @Get(":organizationId/members")
+  members(
+    @CurrentScope() scope: AccessScope,
+    @Param("organizationId", UuidPipe) organizationId: string,
+  ): Promise<OrganizationMemberListResponse> {
+    return listMembers(this.sql, scope, organizationId);
   }
 
   @Requires("org:roles")

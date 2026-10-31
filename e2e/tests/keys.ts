@@ -23,4 +23,6 @@ export const USERS = {
   owner: { email: "e2e-owner@example.com", password: "e2e owner passphrase 1" },
   /** Created with a temporary password: must choose a new one at first login (ADR 0024). */
   fresh: { email: "e2e-fresh@example.com", password: "TEMP-e2e-passphrase-2" },
+  /** Platform admin (spec §11) and member of no organization. */
+  admin: { email: "e2e-admin@example.com", password: "e2e admin passphrase 3" },
 } as const;

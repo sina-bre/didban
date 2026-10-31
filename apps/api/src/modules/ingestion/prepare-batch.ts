@@ -5,6 +5,7 @@ import type { Env } from "../../config/env.js";
 import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
 import { RecentRejections } from "../diagnostics/recent-rejections.js";
+import type { ResolvedKey } from "../key-cache/write-key-cache.js";
 import { isOverQuota } from "./check-quota.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { ingestError } from "./ingest-error.js";
@@ -12,7 +13,6 @@ import { IngestRateLimiter } from "./ingest-rate-limiter.js";
 import { readBatchBody, writeKeyOf } from "./read-batch-body.js";
 import { WriteKeyResolver } from "./resolve-write-key.js";
 import { type ValidatedBatch, validateBatch } from "./validate-batch.js";
-import type { ResolvedKey } from "./write-key-cache.js";
 
 // Spec §7 steps 1–5 in order (step 1, the body limit, runs in Fastify before this). Every
 // rejection after the key is known is counted for Data Health; the caller only sees the code.

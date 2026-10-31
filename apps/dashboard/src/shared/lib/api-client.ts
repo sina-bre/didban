@@ -30,6 +30,8 @@ export interface RequestOptions {
   body?: unknown;
   query?: Query;
   signal?: AbortSignal;
+  /** Extra request headers (the public share view's `X-Share-Token`). */
+  headers?: Record<string, string>;
 }
 
 /** The one 401 that is an answer (wrong password at login or password change), not a lost session. */
@@ -73,7 +75,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const { method = "GET", query, signal } = options;
   // Every state change is JSON, even a body-less DELETE: the API's CSRF rule checks the type.
   const body = options.body ?? (method === "GET" ? undefined : {});
-  const headers: Record<string, string> = { accept: "application/json" };
+  const headers: Record<string, string> = { ...options.headers, accept: "application/json" };
   if (body !== undefined) headers["content-type"] = "application/json";
   let response: Response;
   try {
