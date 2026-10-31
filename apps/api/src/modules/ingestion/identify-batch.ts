@@ -1,6 +1,7 @@
 import { LIMITS } from "@didban/contracts";
 import { Injectable } from "@nestjs/common";
 import { anonymousVisitorId, cookielessVisitorId, userVisitorId } from "../../domain/visitor-id.js";
+import type { ResolvedKey } from "../key-cache/write-key-cache.js";
 import { DailySalt } from "./daily-salt.js";
 import type { EnrichedEvent } from "./enrich/enrich-batch.js";
 import type { Client } from "./enrich/request-traits.js";
@@ -8,7 +9,6 @@ import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { ingestError } from "./ingest-error.js";
 import { plainIp } from "./ingest-settings.js";
 import type { Rejection } from "./validate-batch.js";
-import type { ResolvedKey } from "../key-cache/write-key-cache.js";
 
 // Spec §7 step 7 + §4 identity modes + §6.2 server-key rules. Browser events: `persistent` mode
 // uses the SDK's `anonymousId` (cookieless hash when it is missing, e.g. before consent).

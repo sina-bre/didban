@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { batchBody } from "../../test-support/seed-ingest.js";
+import { type ResolvedKey, WriteKeyCache } from "../key-cache/write-key-cache.js";
 import { IngestDiagnostics, MAX_ORIGINS_PER_DAY } from "./ingest-diagnostics.js";
 import { IngestRateLimiter } from "./ingest-rate-limiter.js";
 import { readBatchBody, writeKeyOf } from "./read-batch-body.js";
 import { validateBatch } from "./validate-batch.js";
-import { type ResolvedKey, WriteKeyCache } from "../key-cache/write-key-cache.js";
 
 const clock = (start = 1_000_000) => {
   const state = { now: start };
