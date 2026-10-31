@@ -1,11 +1,14 @@
 interface Props {
   label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  /** Uncontrolled use inside a plain `<form>`: the value is read from FormData (`name` → "on"). */
+  name?: string;
+  defaultChecked?: boolean;
 }
 
 /** On/off toggle on a native checkbox with `role="switch"` (ADR 0004), e.g. "Compare". */
-export function Switch({ label, checked, onChange }: Props) {
+export function Switch({ label, checked, onChange, name, defaultChecked }: Props) {
   return (
     <label className="relative inline-flex min-h-11 cursor-pointer items-center gap-2 text-body">
       <input
@@ -13,7 +16,9 @@ export function Switch({ label, checked, onChange }: Props) {
         role="switch"
         aria-checked={checked}
         checked={checked}
-        onChange={(event) => onChange(event.currentTarget.checked)}
+        defaultChecked={defaultChecked}
+        name={name}
+        onChange={(event) => onChange?.(event.currentTarget.checked)}
         className="peer sr-only"
       />
       <span

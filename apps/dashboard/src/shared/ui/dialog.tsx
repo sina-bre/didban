@@ -8,6 +8,8 @@ interface Props {
   closeLabel: string;
   /** `sheet` slides from the bottom (mobile "More"); `center` is a regular modal. */
   placement?: "sheet" | "center";
+  /** After any close (button, Escape, backdrop): drop one-time content, stop polling. */
+  onClose?: () => void;
   children: ReactNode;
 }
 
@@ -21,13 +23,15 @@ const PLACEMENT = {
  * Modal on the native `<dialog>` (ADR 0004): focus trap, Escape and inert background come from
  * the browser; `closedby="any"` adds the backdrop tap (light dismiss). Open it with `showModal()`.
  */
-export function Dialog({ ref, title, closeLabel, placement = "center", children }: Props) {
+export function Dialog(props: Props) {
+  const { ref, title, closeLabel, placement = "center", onClose, children } = props;
   const titleId = useId();
   return (
     <dialog
       ref={ref}
       aria-labelledby={titleId}
       closedby="any"
+      onClose={onClose}
       className={`${PLACEMENT[placement]} bg-surface p-4 text-ink shadow-pop backdrop:bg-ink/40 md:p-5`}
     >
       <div className="mb-2 flex items-center justify-between gap-2">

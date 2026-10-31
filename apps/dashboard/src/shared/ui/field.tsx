@@ -1,21 +1,23 @@
 import { type ComponentProps, type ReactNode, type SelectHTMLAttributes, useId } from "react";
 
-interface Shared {
+export interface Shared {
   label: string;
   hint?: string;
   /** Validation message; marks the control invalid and is announced with it. */
   error?: string;
+  /** Label for screen readers only (a role picker inside a table row). */
+  hideLabel?: boolean;
 }
 
-const CONTROL =
+export const CONTROL =
   "min-h-11 w-full rounded-control border border-line bg-surface px-3 text-body text-ink " +
   "aria-invalid:border-down disabled:bg-subtle disabled:text-muted";
 
-function FieldFrame(props: Shared & { id: string; children: ReactNode }) {
-  const { id, label, hint, error, children } = props;
+export function FieldFrame(props: Shared & { id: string; children: ReactNode }) {
+  const { id, label, hint, error, hideLabel, children } = props;
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={id} className="text-body font-medium">
+      <label htmlFor={id} className={hideLabel ? "sr-only" : "text-body font-medium"}>
         {label}
       </label>
       {children}
@@ -33,7 +35,7 @@ function FieldFrame(props: Shared & { id: string; children: ReactNode }) {
   );
 }
 
-function describedBy(id: string, { hint, error }: Shared): string | undefined {
+export function describedBy(id: string, { hint, error }: Shared): string | undefined {
   const ids = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean);
   return ids.length ? ids.join(" ") : undefined;
 }
@@ -42,10 +44,11 @@ function describedBy(id: string, { hint, error }: Shared): string | undefined {
 type TextProps = Shared & ComponentProps<"input">;
 
 /** Labelled text input with hint and error wired to `aria-describedby` / `aria-invalid`. */
-export function TextField({ label, hint, error, className = "", ...rest }: TextProps) {
+export function TextField(props: TextProps) {
+  const { label, hint, error, hideLabel, className = "", ...rest } = props;
   const id = useId();
   return (
-    <FieldFrame id={id} label={label} hint={hint} error={error}>
+    <FieldFrame id={id} label={label} hint={hint} error={error} hideLabel={hideLabel}>
       <input
         id={id}
         aria-invalid={error ? true : undefined}
@@ -64,13 +67,14 @@ export function SelectField({
   label,
   hint,
   error,
+  hideLabel,
   className = "",
   children,
   ...rest
 }: SelectProps) {
   const id = useId();
   return (
-    <FieldFrame id={id} label={label} hint={hint} error={error}>
+    <FieldFrame id={id} label={label} hint={hint} error={error} hideLabel={hideLabel}>
       <select
         id={id}
         aria-invalid={error ? true : undefined}

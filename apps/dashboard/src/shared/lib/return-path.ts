@@ -1,7 +1,7 @@
 // Where the browser goes after login (spec §13.4: the 401 redirect preserves the return path).
 
 /** The landing page when there is no (usable) return path. */
-export const HOME = "/projects";
+export const HOME = "/";
 
 type Place = Pick<Location, "pathname" | "search">;
 

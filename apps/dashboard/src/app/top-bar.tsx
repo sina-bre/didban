@@ -3,6 +3,7 @@ import { PillNav } from "../shared/ui/pill-nav";
 import { LocaleSwitch } from "./locale-switch";
 import { ProjectSwitcher } from "./project-switcher";
 import { SECTIONS } from "./sections";
+import { SettingsMenu } from "./settings-menu";
 import { useProjectNav } from "./use-project-nav";
 
 /** Wordmark + (desktop) pill nav + utility buttons (design system §2). */
@@ -25,7 +26,8 @@ export function TopBar() {
           />
         )}
       </div>
-      <div className="ms-auto shrink-0 lg:ms-0">
+      <div className="ms-auto flex shrink-0 items-center gap-2 lg:ms-0">
+        <SettingsMenu />
         <LocaleSwitch />
       </div>
     </header>

@@ -1,14 +1,22 @@
 import type { Messages } from "../shared/lib/i18n";
+import faAdmin from "./fa-admin";
 import faAuth from "./fa-auth";
 import faFilters from "./fa-filters";
 import faInsights from "./fa-insights";
+import faIntegration from "./fa-integration";
+import faPeople from "./fa-people";
 import faReports from "./fa-reports";
+import faSettings from "./fa-settings";
 
 const fa: Messages = {
   ...faAuth,
   ...faReports,
   ...faFilters,
   ...faInsights,
+  ...faSettings,
+  ...faIntegration,
+  ...faPeople,
+  ...faAdmin,
   "app.name": "didban",
   "app.skip": "رفتن به محتوا",
   "nav.label": "گزارش‌ها",

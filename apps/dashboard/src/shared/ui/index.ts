@@ -22,6 +22,8 @@ export { Switch } from "./switch";
 export { TabBar } from "./tab-bar";
 export { TabBarItem } from "./tab-bar-item";
 export { type TabItem, Tabs } from "./tabs";
+export { Tag } from "./tag";
+export { TextAreaField } from "./textarea-field";
 export { ToastProvider, useToast } from "./toast";
 export { Tooltip } from "./tooltip";
 export { useAnchor } from "./use-anchor";

@@ -13,7 +13,7 @@ export function useProjectNav(): ProjectNav | null {
   const match = useMatch("/projects/:projectId") ?? inSection;
   const { search } = useLocation();
   const projectId = match?.params.projectId;
-  if (!projectId) return null;
+  if (!projectId || projectId === "new") return null; // `/projects/new` is the wizard
   return {
     current: findSection(inSection?.params.section),
     href: (section) => sectionHref(projectId, section, search),

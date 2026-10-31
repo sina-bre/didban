@@ -110,7 +110,8 @@ describe("Data health", () => {
     );
     expect(screen.getAllByText("ORIGIN_NOT_ALLOWED").length).toBe(2);
     expect(screen.getAllByText("https://evil.example").length).toBe(2);
-    expect(screen.getByRole("status").textContent).toContain("/__other__");
+    const statuses = screen.getAllByRole("status").map((el) => el.textContent);
+    expect(statuses.some((text) => text?.includes("/__other__"))).toBe(true);
   });
 
   it("no event yet: says so and where to look", async () => {
