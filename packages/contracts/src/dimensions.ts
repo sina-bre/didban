@@ -30,3 +30,28 @@ export const SCREEN_CLASSES = [
   { code: 3, name: "laptop", maxWidth: 1440 },
   { code: 4, name: "desktop", maxWidth: Number.POSITIVE_INFINITY },
 ] as const;
+
+// Breakdown choices (spec §10). Plain lists, kept apart from the Zod schemas that use them, so the
+// dashboard's report pages can import them without Zod (contracts is `sideEffects: false`).
+export const PAGE_VIEWS = ["top", "entry", "exit", "discovered"] as const;
+export const SOURCE_DIMENSIONS = [
+  "referrer",
+  "channel",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+] as const;
+export const GEO_DIMENSIONS = ["country", "region", "city"] as const;
+export const DEVICE_DIMENSIONS = ["browser", "os", "device_type", "screen", "language"] as const;
+
+/** `GET …/stats/export.csv?report=…` (catalog: ≤ 10 000 rows). */
+export const EXPORT_REPORTS = [
+  "pages",
+  "sources",
+  "geo",
+  "devices",
+  "events",
+  "properties",
+] as const;

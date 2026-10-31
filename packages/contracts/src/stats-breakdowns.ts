@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  DEVICE_DIMENSIONS,
+  EXPORT_REPORTS,
+  GEO_DIMENSIONS,
+  PAGE_VIEWS,
+  SOURCE_DIMENSIONS,
+} from "./dimensions.js";
 import { EVENT_NAME_PATTERN, PROPERTY_KEY_PATTERN } from "./limits.js";
 import { type StatsMeta, statsQueryBase, withRangeCheck } from "./stats.js";
 
@@ -6,19 +13,6 @@ import { type StatsMeta, statsQueryBase, withRangeCheck } from "./stats.js";
 // `meta.truncated` = there were more.
 export const MAX_BREAKDOWN_ROWS = 100;
 const limit = z.coerce.number().int().min(1).max(MAX_BREAKDOWN_ROWS).default(10);
-
-export const PAGE_VIEWS = ["top", "entry", "exit", "discovered"] as const;
-export const SOURCE_DIMENSIONS = [
-  "referrer",
-  "channel",
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_term",
-  "utm_content",
-] as const;
-export const GEO_DIMENSIONS = ["country", "region", "city"] as const;
-export const DEVICE_DIMENSIONS = ["browser", "os", "device_type", "screen", "language"] as const;
 
 export const pagesQuerySchema = withRangeCheck(
   statsQueryBase.extend({ limit, view: z.enum(PAGE_VIEWS).default("top") }),
@@ -90,14 +84,6 @@ export type PageDetailResponse = {
 };
 
 /** `GET …/stats/export.csv?report=…` plus that report's own parameters (catalog: ≤ 10 000 rows). */
-export const EXPORT_REPORTS = [
-  "pages",
-  "sources",
-  "geo",
-  "devices",
-  "events",
-  "properties",
-] as const;
 export const MAX_EXPORT_ROWS = 10_000;
 export const exportQuerySchema = z.object({
   report: z.enum(EXPORT_REPORTS),
