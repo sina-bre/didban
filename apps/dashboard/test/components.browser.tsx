@@ -56,7 +56,7 @@ describe("OrgProjectSwitcher", () => {
       { id: "o2", name: "Beta", projects: [{ id: "p3", name: "Docs" }] },
     ];
     renderUi(<OrgProjectSwitcher orgs={orgs} currentProjectId="p2" />, { locale: "fa" });
-    await userEvent.click(screen.getByRole("button", { name: /Acme \/ Blog/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Blog Acme/ }));
     const nav = screen.getByRole("navigation");
     const box = nav.getBoundingClientRect();
     expect(box.left).toBeGreaterThanOrEqual(0);

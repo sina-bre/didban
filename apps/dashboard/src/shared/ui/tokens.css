@@ -12,7 +12,7 @@
   --color-navy-900: #14213d; /* ink, dark bars, tooltip, active segment */
   --color-navy-700: #2b3a5c;
   --color-slate-400: #8e99ae; /* third series, inactive marks */
-  --color-slate-500: #6b7385; /* muted text: 4.7:1 on white */
+  --color-slate-500: #5f6779; /* muted text: 5.7:1 on white, 5.1:1 on canvas (axe, Stage 5f) */
   --color-gray-50: #f6f7f9;
   --color-gray-100: #f2f3f5;
   --color-gray-200: #e7e9ee;

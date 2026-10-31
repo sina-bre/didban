@@ -95,7 +95,7 @@ describe("projects and the switcher", () => {
     renderApp(`${base}/overview`);
     const trigger = await screen.findByRole(
       "button",
-      { name: /Switch organization and project: Acme \/ Shop/ },
+      { name: /Switch organization and project: Shop Acme/ },
       { timeout: 5000 },
     );
     expect(trigger).toBeTruthy();
