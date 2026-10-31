@@ -12,7 +12,6 @@ import { IngestionFlusher } from "./ingestion-flusher.js";
 import { KeyUsage } from "./key-usage.js";
 import { PrepareBatch } from "./prepare-batch.js";
 import { WriteKeyResolver } from "./resolve-write-key.js";
-import { WriteKeyCache } from "./write-key-cache.js";
 
 // The in-memory pieces take an optional clock, so they are built with factories (tests pass fakes).
 @Module({
@@ -27,7 +26,6 @@ import { WriteKeyCache } from "./write-key-cache.js";
     GeoLookup,
     WriteKeyResolver,
     IngestionFlusher,
-    { provide: WriteKeyCache, useFactory: () => new WriteKeyCache() },
     { provide: KeyUsage, useFactory: () => new KeyUsage() },
     { provide: IngestRateLimiter, useFactory: () => new IngestRateLimiter() },
     { provide: IngestDiagnostics, useFactory: () => new IngestDiagnostics() },

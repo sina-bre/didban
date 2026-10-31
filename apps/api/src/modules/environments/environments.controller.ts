@@ -13,12 +13,16 @@ import { UuidPipe } from "../../http/uuid-pipe.js";
 import { ZodPipe } from "../../http/zod-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
+import { WriteKeyCache } from "../key-cache/write-key-cache.js";
 import { createEnvironment } from "./create-environment.js";
 import { listEnvironments, updateEnvironment } from "./environments.js";
 
 @Controller("projects/:projectId/environments")
 export class EnvironmentsController {
-  constructor(@Inject(SQL) private readonly sql: Sql) {}
+  constructor(
+    @Inject(SQL) private readonly sql: Sql,
+    private readonly keys: WriteKeyCache,
+  ) {}
 
   @Requires("project:view")
   @Get()
@@ -41,12 +45,14 @@ export class EnvironmentsController {
 
   @Requires("project:manage")
   @Patch(":environmentId")
-  update(
+  async update(
     @CurrentScope() scope: AccessScope,
     @Param("projectId", UuidPipe) projectId: string,
     @Param("environmentId", UuidPipe) environmentId: string,
     @Body(new ZodPipe(updateEnvironmentRequestSchema)) changes: UpdateEnvironmentRequest,
   ): Promise<Environment> {
-    return updateEnvironment(this.sql, scope, { projectId, environmentId, changes });
+    const updated = await updateEnvironment(this.sql, scope, { projectId, environmentId, changes });
+    this.keys.forgetEnvironment(environmentId); // new origins/exclusions apply to the next event
+    return updated;
   }
 }
