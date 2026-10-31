@@ -35,13 +35,15 @@ for (const [name, { slug, origin, key }] of Object.entries(projects)) {
               VALUES (${project.id}, ${env.id}, ${kind}, ${prefix(token)}, ${hash(token)})`;
   }
 }
-// Dashboard accounts, owners of the e2e org. Same Argon2id parameters as the API (ADR 0017).
+// Dashboard accounts: owners of the e2e org, and a platform admin outside it. Same Argon2id
+// parameters as the API (ADR 0017).
 const ARGON2 = { algorithm: 2, memoryCost: 19_456, timeCost: 2, parallelism: 1, outputLen: 32 };
 for (const [name, { email, password }] of Object.entries(users ?? {})) {
   const passwordHash = await argon2(password, ARGON2);
   const [user] = await sql`
-    INSERT INTO users (email, password_hash, must_change_password)
-    VALUES (${email}, ${passwordHash}, ${name === "fresh"}) RETURNING id`;
+    INSERT INTO users (email, password_hash, must_change_password, is_platform_admin)
+    VALUES (${email}, ${passwordHash}, ${name === "fresh"}, ${name === "admin"}) RETURNING id`;
+  if (name === "admin") continue;
   await sql`INSERT INTO memberships (user_id, organization_id, role) VALUES (${user.id}, ${org.id}, 'owner')`;
 }
 await sql.end();
