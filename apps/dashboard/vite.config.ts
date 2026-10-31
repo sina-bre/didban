@@ -14,5 +14,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), optimizeLocales.vite({ locales: ["en-US"] })],
   server,
   preview: server,
-  build: { target: "es2023", assetsInlineLimit: 0 },
+  build: {
+    target: "es2023",
+    assetsInlineLimit: 0,
+    // Each icon became its own ~0.6 KB chunk (shared by several lazy routes); on a phone every
+    // extra request costs a round trip. One icon chunk instead (Lighthouse mobile, Stage 5f).
+    rolldownOptions: {
+      output: { codeSplitting: { groups: [{ name: "icons", test: /lucide-react/ }] } },
+    },
+  },
 });

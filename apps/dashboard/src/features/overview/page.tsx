@@ -10,6 +10,10 @@ import { KpiGrid } from "./kpi-grid";
 import { useOverview } from "./use-overview";
 import { VisitorsCard } from "./visitors-card";
 
+// Placeholders as tall as what replaces them (KPI grid + cookieless note), measured per
+// breakpoint, so loading does not shift the page (Lighthouse CLS, Stage 5f).
+const KPI_SKELETON = "h-96 md:h-47 lg:h-51 xl:h-28";
+
 /** Overview (spec §3.1): KPIs with deltas, visitors over time, channels. */
 export function OverviewPage() {
   const { t } = useLocale();
@@ -21,7 +25,7 @@ export function OverviewPage() {
       </ReportHeader>
       <Card labelledBy="kpi-title">
         <CardHeader id="kpi-title" icon={Gauge} title={t("overview.kpis")} />
-        <QueryBlock query={overview} skeleton="h-28">
+        <QueryBlock query={overview} skeleton={KPI_SKELETON}>
           {(data) =>
             empty ? <EmptyState /> : <KpiGrid data={data} compare={compare !== "none"} />
           }
@@ -33,7 +37,7 @@ export function OverviewPage() {
       {!empty && (
         <div className="grid gap-3 md:gap-4 lg:grid-cols-12 lg:gap-5">
           <div className="min-w-0 lg:col-span-8">
-            <QueryBlock query={series} skeleton="h-96">
+            <QueryBlock query={series} skeleton="h-156 md:h-132 lg:h-134">
               {(data) =>
                 overview.data && (
                   <VisitorsCard series={data} totals={overview.data.metrics} {...chart} />
@@ -42,7 +46,7 @@ export function OverviewPage() {
             </QueryBlock>
           </div>
           <div className="min-w-0 lg:col-span-4">
-            <QueryBlock query={channels} skeleton="h-96">
+            <QueryBlock query={channels} skeleton="h-32">
               {(data) => <ChannelsCard data={data} />}
             </QueryBlock>
           </div>
