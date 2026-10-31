@@ -13,18 +13,26 @@ export function uuidv7(): string {
   return v.replace(/^(.{8})(.{4})(.{4})(.{4})/, "$1-$2-$3-$4-");
 }
 
-type Event = { type: "page" | "track"; path: string; name?: string; props?: object };
+export type Event = { type: "page" | "track"; path: string; name?: string; props?: object };
 
 /** One batch of browser events on the Vite example's project, one visitor, all now. */
 export function sendBrowserEvents(request: APIRequestContext, events: Event[]) {
   return sendEvents(request, { ...PROJECTS.vite, events });
 }
 
+type Batch = {
+  key: string;
+  origin: string;
+  events: Event[];
+  /** `null` = a direct visit. */
+  referrer?: string | null;
+  /** The visitor's address, through `X-Forwarded-For` (the e2e API trusts one proxy hop). */
+  ip?: string;
+};
+
 /** One batch with any browser write key from any Origin (the wizard's new key, a wrong site). */
-export async function sendEvents(
-  request: APIRequestContext,
-  { key, origin, events }: { key: string; origin: string; events: Event[] },
-) {
+export async function sendEvents(request: APIRequestContext, batch: Batch) {
+  const { key, origin, events, referrer = "https://news.example/today", ip } = batch;
   const anonymousId = `e2e-${randomBytes(6).toString("hex")}`;
   const body = {
     schemaVersion: 1,
@@ -36,7 +44,7 @@ export async function sendEvents(
       type: e.type,
       occurredAt: new Date().toISOString(),
       url: `${origin}${e.path}`,
-      referrer: "https://news.example/today",
+      ...(referrer ? { referrer } : {}),
       title: `E2E ${e.path}`,
       anonymousId,
       ...(e.name ? { name: e.name } : {}),
@@ -44,7 +52,7 @@ export async function sendEvents(
     })),
   };
   const response = await request.post(`${API_URL}/api/v1/ingest/batch`, {
-    headers: { "content-type": "text/plain", origin },
+    headers: { "content-type": "text/plain", origin, ...(ip ? { "x-forwarded-for": ip } : {}) },
     data: JSON.stringify(body),
   });
   return { status: response.status(), json: await response.json() };
