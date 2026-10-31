@@ -42,7 +42,9 @@ describe("one-time secrets", () => {
     await waitFor(() => expect((dialog as HTMLDialogElement).open).toBe(false));
     expect(screen.queryByText(new RegExp(TOKEN))).toBeNull(); // gone with the dialog
   });
+});
 
+describe("one-time links and passwords", () => {
   it("a new share link: the URL carries the token in the fragment only", async () => {
     const link = {
       id: "00000000-0000-4000-8000-0000000000b2",

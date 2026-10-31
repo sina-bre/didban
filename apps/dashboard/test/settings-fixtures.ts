@@ -1,20 +1,18 @@
 import type {
-  AdminInstanceResponse,
-  AdminOrganizationListResponse,
   ApiKeyListResponse,
-  AuditLogResponse,
   Environment,
   OrganizationMemberListResponse,
   ProjectMemberListResponse,
   RouteTemplateListResponse,
   ShareLinkListResponse,
 } from "@didban/contracts";
+import { adminOrgs, auditPages, instance } from "./admin-fixtures";
 import { ORG, PROJECT } from "./fixtures";
 
 // Stage 5e API answers in the contract shapes (settings, members, audit, admin).
 export const ENV = "00000000-0000-4000-8000-0000000000e1";
 export const MEMBER = "00000000-0000-4000-8000-0000000000f2";
-const AT = "2026-10-20T10:00:00.000Z";
+export const AT = "2026-10-20T10:00:00.000Z";
 const P = `/projects/${PROJECT}`;
 const O = `/organizations/${ORG}`;
 
@@ -88,48 +86,6 @@ export const orgMembers: OrganizationMemberListResponse = {
       joinedAt: AT,
     },
   ],
-};
-
-const entry = (id: string, action: AuditLogResponse["entries"][number]["action"]) => ({
-  id,
-  createdAt: AT,
-  action,
-  actor: { id: "00000000-0000-4000-8000-0000000000f1", email: "owner@example.com" },
-  projectId: PROJECT,
-  target: { type: "share_link" as const, id: "00000000-0000-4000-8000-0000000000b1" },
-  details: { label: "Board" },
-  requestId: null,
-  ipPrefix: "203.0.113.0/24",
-});
-
-export const auditPages: Record<string, AuditLogResponse> = {
-  first: { entries: [entry("12", "share_link.created")], nextBefore: "12" },
-  "12": { entries: [entry("3", "api_key.revoked")], nextBefore: null },
-};
-
-export const adminOrgs: AdminOrganizationListResponse = {
-  organizations: [
-    {
-      id: ORG,
-      name: "Acme",
-      slug: "acme",
-      suspendedAt: null,
-      createdAt: AT,
-      members: 2,
-      projects: 2,
-      eventsLast30Days: 1234,
-      dailyEventQuota: null,
-    },
-  ],
-};
-
-export const instance: AdminInstanceResponse = {
-  node: "v24.18.0",
-  postgres: "18.0",
-  uptimeSeconds: 125,
-  databaseBytes: 50 * 1024 * 1024,
-  geoIp: false,
-  counts: { organizations: 1, users: 2, projects: 2, eventsToday: 77 },
 };
 
 /** Every 5e list route of the signed-in owner's project and organization. */
