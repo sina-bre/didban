@@ -13,17 +13,10 @@ import { StatsSourceContext } from "./stats-source";
 export const readCompare = (params: URLSearchParams): StatsCompare =>
   params.get("compare") === "previous_period" ? "previous_period" : "none";
 
-/**
- * The open project, its reporting zone and the URL's range, compare and filters as API query
- * fields. `interval` is separate: only time series send it.
- */
-export function useReportContext() {
-  const projectId = useParams().projectId ?? "";
-  const [params] = useSearchParams();
-  const source = use(StatsSourceContext);
-  // Loaded by ProjectLayout before any report renders, so this is a cache hit.
-  const project = useProject(projectId).data;
-  const timeZone = source?.timeZone ?? project?.reportingTimezone ?? "UTC";
+export type ReportContext = ReturnType<typeof reportContext>;
+
+/** The URL's range, compare and filters as API query fields, in the reporting zone. */
+export function reportContext(projectId: string, params: URLSearchParams, timeZone: string) {
   const range = statsRange(params, timeZone);
   const days = daysBetween(range.from, range.to);
   const filter = readFilters(params).map(formatFilter);
@@ -35,6 +28,26 @@ export function useReportContext() {
     query: { ...range, compare: readCompare(params), filter },
   };
 }
+
+/**
+ * The open project, its reporting zone and the URL's range, compare and filters as API query
+ * fields. `interval` is separate: only time series send it.
+ */
+export function useReportContext(): ReportContext {
+  const projectId = useParams().projectId ?? "";
+  const [params] = useSearchParams();
+  const source = use(StatsSourceContext);
+  // Loaded by ProjectLayout before any report renders, so this is a cache hit.
+  const project = useProject(projectId).data;
+  return reportContext(projectId, params, source?.timeZone ?? project?.reportingTimezone ?? "UTC");
+}
+
+/** A project's report as query options (the first screen prefetches with the same key). */
+export const statsQuery = <T>(projectId: string, report: string, query: Query) => ({
+  queryKey: ["stats", projectId, report, query],
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    api<T>(`/projects/${encodeURIComponent(projectId)}/stats/${report}`, { query, signal }),
+});
 
 /** Range and filters without compare: what breakdowns send (they have no previous period). */
 export function useBreakdownQuery(): { projectId: string; query: Query } {
@@ -61,13 +74,15 @@ const sameTable = (a: QueryKey, b: QueryKey) => {
  */
 export function useStats<T>(projectId: string, report: string, query: Query, enabled = true) {
   const source = use(StatsSourceContext);
-  const queryKey = ["stats", source?.key ?? projectId, report, query];
-  const path = source
-    ? source.path(report)
-    : `/projects/${encodeURIComponent(projectId)}/stats/${report}`;
+  const own = statsQuery<T>(projectId, report, query);
+  const queryKey = source ? ["stats", source.key, report, query] : own.queryKey;
+  const queryFn = source
+    ? ({ signal }: { signal: AbortSignal }) =>
+        api<T>(source.path(report), { query, signal, headers: source.headers })
+    : own.queryFn;
   return useQuery<T>({
     queryKey,
-    queryFn: ({ signal }) => api<T>(path, { query, signal, headers: source?.headers }),
+    queryFn,
     placeholderData: (previous, previousQuery) =>
       previousQuery && sameTable(previousQuery.queryKey, queryKey) ? previous : undefined,
     enabled,
