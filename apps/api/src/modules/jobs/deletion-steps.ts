@@ -7,6 +7,7 @@ import {
   type Tx,
   WINDOW_MS,
 } from "./deletion-windows.js";
+import { eventSpan } from "./event-span.js";
 
 // Spec §12 deletion by range / visitor / user ID. Events are scanned one day window at a time over
 // `events_range_idx` (bounded statements, no extra index on hot ingest columns); `cursor_at` saves
@@ -19,7 +20,7 @@ const range: Step = async (ctx, request) => {
   await eachWindow(
     ctx,
     request,
-    [from, to],
+    [from, to, (await eventSpan(ctx.sql, request.projectId)).environments],
     (tx, a, b) => tx`occurred_at >= ${a} AND occurred_at < ${b}`,
   );
   for (const [a, b] of dayWindows(from, to)) {
@@ -63,10 +64,12 @@ function visitChunks(
   });
 }
 
-/** Oldest event of the project to one day past now (allowed clock skew). */
-async function projectSpan({ sql }: JobContext, projectId: string): Promise<[Date, Date]> {
-  const [row] = await sql<{ oldest: Date | null }[]>`
-    SELECT min(occurred_at) AS oldest FROM events WHERE project_id = ${projectId}`;
+/** Oldest event of the project to one day past now (allowed clock skew), per environment. */
+async function projectSpan(
+  { sql }: JobContext,
+  projectId: string,
+): Promise<[Date, Date, string[]]> {
+  const span = await eventSpan(sql, projectId);
   const end = new Date(Date.now() + WINDOW_MS);
-  return [row?.oldest ?? end, end];
+  return [span.oldest ?? end, end, span.environments];
 }

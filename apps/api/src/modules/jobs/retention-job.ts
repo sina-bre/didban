@@ -5,6 +5,7 @@ import {
   type JobContext,
   untilShort,
 } from "./chunked-delete.js";
+import { eventSpan } from "./event-span.js";
 
 // Spec §9.4 nightly retention: expired events in chunks, then expired visits, then expired auth
 // sessions. Also the 14-day diagnostics window (catalog 23.2). Archived projects are included:
@@ -14,33 +15,42 @@ const DAY_MS = 86_400_000;
 const SESSION_IDLE = "7 days"; // auth-session.repository.ts: idle timeout
 const DIAGNOSTICS_DAYS = 14;
 
-type Project = { id: string; retentionDays: number; events: Date | null; visits: Date | null };
+type Project = { id: string; retentionDays: number; visits: Date | null };
 
 /** Returns the number of rows deleted. */
 export async function runRetention(ctx: JobContext, now = new Date()): Promise<number> {
   const { sql } = ctx;
-  // Oldest row per table: where the day windows start.
   const projects = await sql<Project[]>`
     SELECT p.id, p.retention_days,
-           (SELECT min(occurred_at) FROM events e WHERE e.project_id = p.id) AS events,
            (SELECT min(started_at) FROM visits v WHERE v.project_id = p.id) AS visits
     FROM projects p WHERE p.retention_days IS NOT NULL ORDER BY p.id`;
   let rows = 0;
   for (const project of projects) {
     const cutoff = new Date(now.getTime() - project.retentionDays * DAY_MS);
-    for (const [a, b] of dayWindows(project.events ?? cutoff, cutoff)) {
-      const where = sql`occurred_at >= ${a} AND occurred_at < ${b}`;
-      rows += await untilShort(
-        ctx,
-        async () => (await deleteEventChunk(sql, project.id, where, ctx.chunk)).length,
-      );
-    }
+    rows += await expireEvents(ctx, project.id, cutoff);
     for (const [a, b] of dayWindows(project.visits ?? cutoff, cutoff)) {
       const where = sql`started_at >= ${a} AND started_at < ${b}`;
       rows += await untilShort(ctx, () => deleteVisitChunk(sql, project.id, where, ctx.chunk));
     }
   }
   return rows + (await expireHousekeeping(ctx, now));
+}
+
+/** Day windows from the oldest event to the cutoff, one environment at a time. */
+async function expireEvents(ctx: JobContext, projectId: string, cutoff: Date): Promise<number> {
+  const { sql } = ctx;
+  const span = await eventSpan(sql, projectId);
+  let rows = 0;
+  for (const [a, b] of dayWindows(span.oldest ?? cutoff, cutoff)) {
+    for (const env of span.environments) {
+      const where = sql`environment_id = ${env} AND occurred_at >= ${a} AND occurred_at < ${b}`;
+      rows += await untilShort(
+        ctx,
+        async () => (await deleteEventChunk(sql, projectId, where, ctx.chunk)).length,
+      );
+    }
+  }
+  return rows;
 }
 
 /** Small tables: one statement each. */
