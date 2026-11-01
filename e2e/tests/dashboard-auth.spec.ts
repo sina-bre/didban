@@ -23,8 +23,9 @@ test("a deep link without a session: login, then back to the same report and ran
   await page.getByLabel("Password").press("Enter");
   await expect(page).toHaveURL(target);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Overview");
+  // The name holds the visible text in its order: project, then organization (WCAG 2.5.3).
   await expect(
-    page.getByRole("button", { name: /Switch organization and project: e2e \/ e2e-vite/ }),
+    page.getByRole("button", { name: "Switch organization and project: e2e-vite e2e" }),
   ).toBeVisible();
 });
 
@@ -55,6 +56,11 @@ test("a lost session sends the next request to /login with the return path", asy
   const base = await projectBase();
   await page.goto(`${base}/overview`);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Overview");
+  // The shell's last reads (org and project lists) are in once the switcher shows; a 401 on one of
+  // them would leave for /login before the click.
+  await expect(
+    page.getByRole("button", { name: /^Switch organization and project/ }),
+  ).toBeVisible();
   await context.clearCookies();
   await page.getByText("7 days", { exact: true }).click(); // a new range → new requests → 401
   await expect(page).toHaveURL(

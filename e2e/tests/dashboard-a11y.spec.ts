@@ -1,8 +1,8 @@
 import { type Page, test } from "@playwright/test";
 import { auditPage } from "./audit.js";
 import { projectBase, signIn } from "./dashboard.js";
-import { sendBrowserEvents } from "./ingest.js";
-import { DASHBOARD_URL } from "./keys.js";
+import { type Event, sendEvents } from "./ingest.js";
+import { DASHBOARD_URL, PROJECTS } from "./keys.js";
 
 // Stage 5f: every page in Persian (the RTL proof) on a phone and a desktop, with real rows:
 // right to left, no sideways scrolling, no axe WCAG 2.2 AA violations, 44 px targets on phones.
@@ -20,11 +20,14 @@ async function auditAll(page: Page, urls: string[]) {
   for (const width of WIDTHS) for (const url of urls) await auditPage(page, url, width);
 }
 
+// Its own visitor (address): cookieless visits are keyed by address, so a shared one would open the
+// visit other specs' events then join, with this spec's (campaign-less) attribution.
 test.beforeAll(async ({ request }) => {
-  await sendBrowserEvents(request, [
+  const events: Event[] = [
     { type: "page", path: "/a11y?utm_source=audit" },
     { type: "track", path: "/a11y", name: "a11y_check", props: { step: "one" } },
-  ]);
+  ];
+  await sendEvents(request, { ...PROJECTS.vite, events, ip: "203.0.113.50" });
 });
 
 test("reports, project settings and the wizard", async ({ page }) => {
