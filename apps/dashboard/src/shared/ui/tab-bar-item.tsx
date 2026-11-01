@@ -11,10 +11,18 @@ interface Props {
   active?: boolean;
 }
 
-const BASE = "flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-caption w-full";
-const tone = (active: boolean) => (active ? "text-accent-text font-medium" : "text-muted");
+const BASE =
+  "flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-caption w-full";
+const tone = (active: boolean) =>
+  active ? "text-accent-text font-medium" : "text-muted";
 
-export function TabBarItem({ label, icon: Icon, to, onClick, active = false }: Props) {
+export function TabBarItem({
+  label,
+  icon: Icon,
+  to,
+  onClick,
+  active = false,
+}: Props) {
   const body = (
     <>
       <Icon aria-hidden="true" className="size-5" />
@@ -24,11 +32,18 @@ export function TabBarItem({ label, icon: Icon, to, onClick, active = false }: P
   return (
     <li>
       {to ? (
-        <NavLink to={to} className={({ isActive }) => `${BASE} ${tone(isActive)}`}>
+        <NavLink
+          to={to}
+          className={({ isActive }) => `${BASE} ${tone(isActive)}`}
+        >
           {body}
         </NavLink>
       ) : (
-        <button type="button" onClick={onClick} className={`${BASE} ${tone(active)}`}>
+        <button
+          type="button"
+          onClick={onClick}
+          className={`${BASE} ${tone(active)}`}
+        >
           {body}
         </button>
       )}
