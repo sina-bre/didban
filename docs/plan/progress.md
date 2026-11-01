@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-11-01 — Stage 5f (E2E trace, Lighthouse mobile, fa RTL + a11y audit) — gate NOT fully met
+
+- Trace E2E: wizard project's KPIs, Top pages, Sources == SQL on events/visits. a11y spec: every page in fa at
+  360/1280 px, axe WCAG 2.2 AA + no sideways scroll + 44 px targets; 3/3 pass. ADR 0044 (axe, method, muted token).
+- Fixes: muted `#5f6779`, `dl` groups, names holding visible text, 44 px filter links, role selects ≥ 112 px.
+- Perf: contracts side-effect free, Intl ranges, first-screen prefetch, chart on view, measured skeletons, icons +
+  core chunks (initial JS 135.3 KB gz, 13 files). `docs/dashboard-performance.md` has all runs, before/after.
+- LCP (Lighthouse mobile, 3 runs): Login 0.8 s, Pages 0.8 s, Sources 0.8–3.0 s (Lantern spread), **Overview en
+  2.9–3.0 s, fa 0.8–3.2 s: over the 2.5 s budget** (data chain JS → project → stats; HTTP/1.1 preview). CLS ≤ 0.04.
+- Checks: see the 5f report (lint, typecheck, build, test, test:e2e). Owner: design-system README line 53 still
+  says `slate-500 (4.7:1)`; it should say `#5f6779 (5.7:1 on white, 5.1:1 on canvas)`.
+- **Next:** owner decides on merge + Overview LCP (stats relative range, or accept and re-measure behind Caddy).
+
 ## 2026-10-31 — Stage 5e (settings, onboarding, members, sharing, audit, admin, share view)
 
 - Project settings (general, environments, keys, routes, members, sharing, data, audit), org settings (members
