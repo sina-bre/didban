@@ -9,7 +9,12 @@ export class ShutdownState implements BeforeApplicationShutdown {
     return this.shuttingDown;
   }
 
-  beforeApplicationShutdown(): void {
+  /** Called on SIGTERM, before the drain wait (http/graceful-shutdown.ts). */
+  begin(): void {
     this.shuttingDown = true;
+  }
+
+  beforeApplicationShutdown(): void {
+    this.begin();
   }
 }

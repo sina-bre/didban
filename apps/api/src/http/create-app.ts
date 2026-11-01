@@ -48,6 +48,6 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
   useJsonBodyParser(app, LIMITS.maxBodyBytes);
   app.setGlobalPrefix("api/v1");
   app.useGlobalFilters(new ErrorFilter());
-  app.enableShutdownHooks();
+  // Signals are handled in main.ts (graceful-shutdown.ts), not by Nest: drain before closing.
   return app;
 }
