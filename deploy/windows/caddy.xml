@@ -1,0 +1,24 @@
+<!-- Caddy as a Windows service through WinSW (caddy.exe from caddyserver.com, next to caddy-svc.exe,
+     a copy of WinSW-x64.exe renamed with this file to caddy-svc.xml). Same Caddyfile as on Linux.
+     Install from an elevated shell: caddy-svc.exe install; Start-Service caddy (docs/deployment.md). -->
+<service>
+  <id>caddy</id>
+  <name>Caddy (Didban)</name>
+  <description>TLS, the Didban dashboard and /api/* to the two API instances.</description>
+  <executable>C:\didban\caddy\caddy.exe</executable>
+  <arguments>run --config C:\didban\config\Caddyfile --adapter caddyfile</arguments>
+  <workingdirectory>C:\didban\caddy</workingdirectory>
+  <env name="DIDBAN_HOST" value="analytics.example.com" />
+  <env name="DIDBAN_TLS" value="ops@example.com" />
+  <env name="DIDBAN_WWW" value="C:\didban\www" />
+  <!-- Certificates and Caddy's state stay under C:\didban\caddy, not the service profile. -->
+  <env name="XDG_DATA_HOME" value="C:\didban\caddy\data" />
+  <env name="XDG_CONFIG_HOME" value="C:\didban\caddy\config" />
+  <stoptimeout>15 sec</stoptimeout>
+  <onfailure action="restart" delay="2 sec" />
+  <logpath>C:\didban\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+</service>

@@ -39,3 +39,31 @@ requests on HTTP/1.1's six connections; production runs behind Caddy with h2. In
 show 0.77 s for the same element: Lantern sometimes leaves the data requests out of the LCP graph,
 which is also why Sources varies. Next steps, not in 5f: a stats query that takes a relative range and
 resolves it in the project's zone (removes the `project` hop), and measuring behind Caddy (Stage 6).
+
+## Stage 6b: behind Caddy with HTTP/2 (2026-11-01)
+Production layout (ADR 0047) on Ubuntu 24.04 in WSL2: Caddy 2.11.7, `tls internal`, h2, two API
+instances, PostgreSQL 18, ~11 k events. Same Lighthouse 13.6.0 mobile profile from Windows
+(Chrome 156) against `https://localhost:8443`, signed in by cookie header, 3 runs each.
+**Before** = the 6a dashboard (f3a7ecb, stats wait for the project), **after** = this branch
+(presets sent as `range`, ADR 0046), same server, published one after the other.
+
+| Page | LCP before (s) | LCP after (s) | TBT after (ms) | CLS after |
+|---|---|---|---|---|
+| Login | 0.78 / 0.78 / 0.78 | 0.79 / 0.77 / 0.77 | 65 / 117 / 35 | 0 |
+| Overview (en) | 1.95 / 1.98 / 0.77 | 2.02 / 1.98 / 0.78 | 133 / 100 / 181 | 0–0.04 |
+| Overview (fa) | 2.23 / 2.22 / 2.22 | 2.24 / 0.77 / 2.21 | 285 / 109 / 178 | 0–0.06 |
+| Pages | 0.78 / 0.77 / 0.77 | – / 0.76 / 0.77 | 151 / 117 | 0 |
+| Sources | 0.77 / 0.79 / 0.76 | 0.79 / 2.18 / 0.77 | 83 / 374 / 93 | 0 |
+
+Accessibility 1.00 everywhere (one Pages run produced no report). **Verdict: every page meets
+LCP ≤ 2.5 s behind Caddy.** The 5f miss (2.9–3.0 s) came from the HTTP/1.1 preview server:
+with h2 no request waits for one of six connections. The relative range works as designed (the
+three stats reads now start with the project read, 88 ms vs 157 ms in the observed trace, one
+round trip less on a real network) but does not move Lantern's LCP: what remains on the critical
+path is JS parse and run on the 4× slowed CPU (the LCP element is a KPI value; render delay
+~0.4 s after the data). Next lever, if needed: less JS before the first KPI paints.
+
+Method notes: Lighthouse 13.6 cannot trace a page sent with `Cross-Origin-Opener-Policy`
+(NO_NAVSTART, reproduced on a one-line test page with and without the header), so the measured
+Caddy ran the shipped Caddyfile minus that header, restored afterwards. Caddy's local CA was
+trusted through `--ignore-certificate-errors-spki-list` with the CA's SPKI hashes.

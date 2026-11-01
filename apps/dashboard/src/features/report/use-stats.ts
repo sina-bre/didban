@@ -1,4 +1,4 @@
-import { formatFilter, type StatsCompare } from "@didban/contracts";
+import { formatFilter, rangeDays, type StatsCompare } from "@didban/contracts";
 import { type QueryKey, useQuery } from "@tanstack/react-query";
 import { use } from "react";
 import { useParams, useSearchParams } from "react-router";
@@ -15,16 +15,17 @@ export const readCompare = (params: URLSearchParams): StatsCompare =>
 
 export type ReportContext = ReturnType<typeof reportContext>;
 
-/** The URL's range, compare and filters as API query fields, in the reporting zone. */
+/** The URL's range, compare and filters as API query fields (a custom range in the reporting zone). */
 export function reportContext(projectId: string, params: URLSearchParams, timeZone: string) {
   const range = statsRange(params, timeZone);
-  const days = daysBetween(range.from, range.to);
+  const days = "range" in range ? rangeDays(range.range) : daysBetween(range.from, range.to);
   const filter = readFilters(params).map(formatFilter);
   return {
     projectId,
     timeZone,
     days,
     interval: readInterval(params, days),
+    range,
     query: { ...range, compare: readCompare(params), filter },
   };
 }
@@ -51,12 +52,12 @@ export const statsQuery = <T>(projectId: string, report: string, query: Query) =
 
 /** Range and filters without compare: what breakdowns send (they have no previous period). */
 export function useBreakdownQuery(): { projectId: string; query: Query } {
-  const { projectId, query } = useReportContext();
-  return { projectId, query: { from: query.from, to: query.to, filter: query.filter } };
+  const { projectId, range, query } = useReportContext();
+  return { projectId, query: { ...range, filter: query.filter } };
 }
 
 /** Fields that narrow the same table; any other change (`by`, `view`, project) is a new table. */
-const NARROWING = new Set(["from", "to", "compare", "filter", "interval"]);
+const NARROWING = new Set(["range", "from", "to", "compare", "filter", "interval"]);
 
 const sameTable = (a: QueryKey, b: QueryKey) => {
   const rest = (key: QueryKey) =>

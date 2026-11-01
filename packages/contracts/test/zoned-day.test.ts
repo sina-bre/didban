@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, dayIn, parseDay, startOf } from "../src/shared/lib/zoned-day";
+import { addDays, dayIn, parseDay, startOf } from "../src/zoned-day.js";
 
 // The Intl replacement for @internationalized/date on the report path (Stage 5f).
 const start = (iso: string, zone: string) => startOf(parseDay(iso), zone).toISOString();

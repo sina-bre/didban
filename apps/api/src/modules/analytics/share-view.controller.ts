@@ -60,8 +60,10 @@ export class ShareViewController {
     const report = Object.hasOwn(REPORTS, name) ? REPORTS[name as keyof typeof REPORTS] : null;
     if (!report) throw notFound();
     const shared = await resolveShare(this.sql, token);
-    const parsed = report.schema.safeParse(raw);
-    if (!parsed.success) throw new AppError(400, "VALIDATION_FAILED", "Invalid request");
+    const resolved = c.resolveRelativeRange(raw, shared.timezone);
+    const parsed = report.schema.safeParse(resolved);
+    if (!resolved || !parsed.success)
+      throw new AppError(400, "VALIDATION_FAILED", "Invalid request");
     const query = parsed.data as c.StatsQuery;
     const input = { projectId: shared.projectId, query: query as never };
     const work = () => report.run(this.sql, shareScope(shared), input);

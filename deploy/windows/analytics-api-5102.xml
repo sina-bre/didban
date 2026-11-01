@@ -1,0 +1,27 @@
+<!-- Didban API instance 5102 as a Windows service (WinSW, https://github.com/winsw/winsw, MIT).
+     Next to it: analytics-api-5102.exe (a copy of WinSW-x64.exe). Install from an elevated shell:
+     analytics-api-5102.exe install, then Start-Service analytics-api-5102 (docs/deployment.md). -->
+<service>
+  <id>analytics-api-5102</id>
+  <name>Didban analytics API (5102)</name>
+  <description>Didban analytics API, instance on 127.0.0.1:5102. scripts/deploy.mjs restarts it.</description>
+  <executable>C:\Program Files\nodejs\node.exe</executable>
+  <!-- api.env: same variables as on Linux, without PORT (process variables win over the file). -->
+  <arguments>--enable-source-maps --env-file=C:\didban\config\api.env dist\main.js</arguments>
+  <workingdirectory>C:\didban\current\apps\api</workingdirectory>
+  <env name="PORT" value="5102" />
+  <env name="NODE_ENV" value="production" />
+  <!-- Stop = Ctrl-C: /ready turns 503, the API drains SHUTDOWN_DRAIN_MS, then closes (ADR 0047). -->
+  <stoptimeout>30 sec</stoptimeout>
+  <onfailure action="restart" delay="2 sec" />
+  <resetfailure>1 hour</resetfailure>
+  <!-- A low-privilege built-in account, not LocalSystem; it needs read access to C:\didban. -->
+  <serviceaccount>
+    <username>NT AUTHORITY\LocalService</username>
+  </serviceaccount>
+  <logpath>C:\didban\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+</service>

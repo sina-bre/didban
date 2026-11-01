@@ -1,0 +1,55 @@
+# Didban behind Caddy (spec §14.2): TLS, the dashboard as a static SPA, /api/* to two API
+# instances with active health checks. Set in a drop-in (`systemctl edit caddy`, docs/deployment.md):
+#   DIDBAN_HOST=analytics.example.com   the dashboard's own hostname (= PUBLIC_ORIGIN)
+#   DIDBAN_TLS=ops@example.com          ACME account email; `internal` = Caddy's local CA (tests)
+#   DIDBAN_WWW=C:\didban\www            only where the dashboard is not in /srv/didban/www (Windows)
+{
+	servers {
+		protocols h1 h2 h3
+	}
+}
+
+{$DIDBAN_HOST} {
+	tls {$DIDBAN_TLS}
+	encode zstd gzip
+
+	# Caddy is the edge, so the client IP is the TCP peer; the API trusts one hop (TRUST_PROXY=1).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:5101 127.0.0.1:5102 {
+			lb_policy round_robin
+			# A refused connection (an instance restarting) is retried on the other one.
+			lb_try_duration 5s
+			lb_try_interval 250ms
+			health_uri /api/v1/health/ready
+			health_interval 2s
+			health_timeout 3s
+			health_status 200
+		}
+	}
+
+	handle {
+		root * {$DIDBAN_WWW:/srv/didban/www}
+		# Spec §12: CSP for the SPA, no inline scripts or styles; the API answers JSON only.
+		header {
+			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+			X-Frame-Options "DENY"
+			Cross-Origin-Opener-Policy "same-origin"
+		}
+		@hashed path /assets/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+		@shell not path /assets/*
+		header @shell Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+
+	# No access log: it would persist raw client IPs (spec §12). The API logs requests without them.
+}

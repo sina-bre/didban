@@ -33,18 +33,29 @@ describe("prefetchFirstScreen", () => {
     return spy.mock.calls.map(([options]) => options.queryKey);
   };
 
-  it("on a project's Overview asks for the session and its three reports in the project's zone", async () => {
+  it("on a project's Overview asks for its three reports together with the project", async () => {
     const asked = await keys(`/projects/${ID}/overview`, "?range=7d&compare=previous_period");
+    expect(asked.map((key) => key?.slice(0, 3))).toEqual([
+      ["me"],
+      ["project", ID],
+      ["stats", ID, "overview"],
+      ["stats", ID, "timeseries"],
+      ["stats", ID, "sources"],
+    ]);
+    // A preset needs no zone: the API resolves `range` in the project's (ADR 0046).
+    expect(asked[2]?.[3]).toMatchObject({ range: "7d", compare: "previous_period" });
+    expect(await keys(`/projects/${ID}`)).toHaveLength(5); // the index is the Overview
+  });
+
+  it("a custom range waits for the project's zone", async () => {
+    const asked = await keys(`/projects/${ID}`, "?from=2026-10-01&to=2026-10-07");
     expect(asked.map((key) => key?.slice(0, 3))).toEqual([
       ["me"],
       ["stats", ID, "overview"],
       ["stats", ID, "timeseries"],
       ["stats", ID, "sources"],
     ]);
-    const query = asked[1]?.[3] as { from: string; compare: string };
-    expect(query.compare).toBe("previous_period");
-    expect(query.from).toMatch(/T20:30:00\.000Z$/); // midnight in Tehran
-    expect(await keys(`/projects/${ID}`)).toHaveLength(4); // the index is the Overview
+    expect(asked[1]?.[3]).toMatchObject({ from: "2026-09-30T20:30:00.000Z" }); // Tehran midnight
   });
 
   it("elsewhere asks for the session and the project in the URL", async () => {

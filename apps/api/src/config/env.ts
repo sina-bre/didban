@@ -39,6 +39,8 @@ const envSchema = z
     // Spec §9.4 + §12 background jobs (ADR 0045): `off` only for tests and ingest-only boxes.
     JOBS: z.enum(["on", "off"]).default("on"),
     JOB_DELETE_CHUNK: z.coerce.number().int().min(100).max(50_000).default(10_000),
+    // ADR 0047: after SIGTERM, keep serving this long with /ready = 503 (> the proxy's health interval).
+    SHUTDOWN_DRAIN_MS: z.coerce.number().int().min(0).max(20_000).default(5000),
   })
   .superRefine((env, ctx) => {
     const url = new URL(env.PUBLIC_ORIGIN);

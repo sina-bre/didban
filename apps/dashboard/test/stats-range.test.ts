@@ -8,21 +8,11 @@ describe("statsRange", () => {
   // 2026-10-26 01:30 UTC = 26 Oct 05:00 in Tehran (+03:30), still 25 Oct 21:30 in New York.
   const now = new Date(Date.UTC(2026, 9, 26, 1, 30));
 
-  it("presets are whole reporting days ending with today, in the project's zone", () => {
-    expect(statsRange(params("range=7d"), "Asia/Tehran", now)).toEqual({
-      from: "2026-10-19T20:30:00.000Z",
-      to: "2026-10-26T20:30:00.000Z",
-    });
-    expect(statsRange(params("range=today"), "America/New_York", now)).toEqual({
-      from: "2026-10-25T04:00:00.000Z",
-      to: "2026-10-26T04:00:00.000Z",
-    });
-  });
-
-  it("defaults to 30 days and stays the same within a day (stable cache key)", () => {
-    const later = new Date(Date.UTC(2026, 9, 26, 19, 0));
-    expect(statsRange(params(""), "UTC", now)).toEqual(statsRange(params(""), "UTC", later));
-    expect(statsRange(params(""), "UTC", now).from).toBe("2026-09-27T00:00:00.000Z");
+  it("presets go to the API as `range` (it resolves them in the project's zone, ADR 0046)", () => {
+    expect(statsRange(params("range=7d"), "Asia/Tehran", now)).toEqual({ range: "7d" });
+    expect(statsRange(params("range=today"), "America/New_York", now)).toEqual({ range: "today" });
+    expect(statsRange(params(""), "UTC", now)).toEqual({ range: "30d" });
+    expect(statsRange(params("range=365d"), "UTC", now)).toEqual({ range: "30d" });
   });
 
   it("a custom range covers its first day through the end of its last day", () => {
@@ -33,7 +23,8 @@ describe("statsRange", () => {
   });
 
   it("a day with a DST change is 25 hours long, not 24", () => {
-    const { from, to } = statsRange(params("from=2026-10-25&to=2026-10-25"), "Europe/Berlin", now);
+    const range = statsRange(params("from=2026-10-25&to=2026-10-25"), "Europe/Berlin", now);
+    const { from, to } = range as { from: string; to: string };
     expect((Date.parse(to) - Date.parse(from)) / 3_600_000).toBe(25);
   });
 });

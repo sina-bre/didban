@@ -1,0 +1,16 @@
+# Nightly `pg_dump -Fc` with retention (scripts/backup.mjs), started by didban-backup.timer.
+[Unit]
+Description=Didban database backup
+After=postgresql.service
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=BACKUP_DIR=/var/backups/didban BACKUP_KEEP_DAYS=14
+ExecStart=/usr/bin/node /opt/didban/current/scripts/backup.mjs
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/backups/didban

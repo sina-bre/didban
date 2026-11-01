@@ -1,7 +1,12 @@
-import { type CreateDataDeletionRequest, createDataDeletionRequestSchema } from "@didban/contracts";
+import {
+  addDays,
+  type CreateDataDeletionRequest,
+  createDataDeletionRequestSchema,
+  parseDay,
+  startOf,
+} from "@didban/contracts";
 import { useState } from "react";
 import { useLocale } from "../../shared/lib/locale-context";
-import { addDays, parseDay, startOf } from "../../shared/lib/zoned-day";
 import { Segmented } from "../../shared/ui";
 import { FormFooter } from "../settings/form-footer";
 import { useSettingsForm } from "../settings/use-settings-form";

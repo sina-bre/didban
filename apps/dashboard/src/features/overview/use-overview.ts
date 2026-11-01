@@ -7,10 +7,10 @@ import type {
 import { type ReportContext, useReportContext, useStats } from "../report/use-stats";
 
 /** The query fields of the three Overview reports (the first screen prefetches the same). */
-export const overviewQueries = ({ query, interval }: ReportContext) => ({
+export const overviewQueries = ({ range, query, interval }: ReportContext) => ({
   overview: query,
   timeseries: { ...query, ...(interval === "auto" ? {} : { interval }) },
-  sources: { from: query.from, to: query.to, filter: query.filter, by: "channel", limit: "6" },
+  sources: { ...range, filter: query.filter, by: "channel", limit: "6" },
 });
 
 /** The three Overview requests, run in parallel: KPIs, the time series and channels. */

@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param, Query, Res } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Query, Res, UseInterceptors } from "@nestjs/common";
 import type { FastifyReply } from "fastify";
 import { SQL, type Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
@@ -6,11 +6,13 @@ import { UuidPipe } from "../../http/uuid-pipe.js";
 import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
 import { exportCsv } from "./export-csv.js";
+import { RelativeRange } from "./relative-range.js";
 import { StatsGate } from "./stats-gate.js";
 
 // `GET …/stats/export.csv?report=…`: a download, never cached, under the per-project semaphore.
 // The raw query is validated in exportCsv with the chosen report's own schema.
 @Controller("projects/:projectId/stats")
+@UseInterceptors(RelativeRange)
 export class ExportController {
   constructor(
     @Inject(SQL) private readonly sql: Sql,

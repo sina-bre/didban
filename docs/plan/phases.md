@@ -54,7 +54,7 @@ Skills installed, MCP config, CLAUDE.md files, spec split by section, addendum, 
 ## Stage 6 — Hardening and release
 - 6a Job runner (advisory lock, `job_runs`), nightly retention, data deletion by range/visitor/user ID
   (chunked job + progress record, API + Data page).
-- 6b `deploy/` systemd + Caddy (+ Nginx sample), `deploy.sh`, `backup.sh`, `restore-check.sh`, executed on a
+- 6b `deploy/` systemd + Caddy (+ Nginx sample, Windows services), `deploy`, `backup`, `restore-check` (Node, ADR 0048), executed on a
   clean Ubuntu VM (rolling restart, graceful shutdown); Overview LCP: relative-range stats + re-measure on h2.
 - 6c `/metrics` (spec §15), full load + abuse tests (DoD 7), `pnpm audit`.
 - 6d Docs complete (operations runbooks, deployment, known limitations), Changesets + release workflow (dry
