@@ -31,13 +31,22 @@ const chunk = (
   LIMIT 10000) DELETE FROM events e USING doomed d WHERE e.project_id = $1 AND e.event_id = d.event_id
   RETURNING e.visit_id`;
 const STATEMENTS = [
-  ["retention: one events chunk", chunk("occurred_at < $2"), [project.id, cutoff]],
   [
-    "retention: one visits chunk",
+    "retention: oldest event (window start)",
+    "SELECT min(occurred_at) FROM events WHERE project_id = $1",
+    [project.id],
+  ],
+  [
+    "retention: one events chunk (first day window)",
+    chunk("occurred_at >= $2 AND occurred_at < $3"),
+    [project.id, ...day(project.oldest)],
+  ],
+  [
+    "retention: one visits chunk (first day window)",
     `WITH doomed AS (SELECT visit_id FROM visits WHERE project_id = $1
-    AND started_at < $2 LIMIT 10000) DELETE FROM visits v USING doomed d
+    AND started_at >= $2 AND started_at < $3 LIMIT 10000) DELETE FROM visits v USING doomed d
     WHERE v.project_id = $1 AND v.visit_id = d.visit_id`,
-    [project.id, cutoff],
+    [project.id, ...day(project.oldest)],
   ],
   [
     "user: one day window",
