@@ -2,6 +2,7 @@
 # instances with active health checks. Set in a drop-in (`systemctl edit caddy`, docs/deployment.md):
 #   DIDBAN_HOST=analytics.example.com   the dashboard's own hostname (= PUBLIC_ORIGIN)
 #   DIDBAN_TLS=ops@example.com          ACME account email; `internal` = Caddy's local CA (tests)
+#   DIDBAN_WWW=C:\didban\www            only where the dashboard is not in /srv/didban/www (Windows)
 {
 	servers {
 		protocols h1 h2 h3
@@ -35,7 +36,7 @@
 	}
 
 	handle {
-		root * /srv/didban/www
+		root * {$DIDBAN_WWW:/srv/didban/www}
 		# Spec §12: CSP for the SPA, no inline scripts or styles; the API answers JSON only.
 		header {
 			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"

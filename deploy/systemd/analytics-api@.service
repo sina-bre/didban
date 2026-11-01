@@ -1,5 +1,5 @@
 # Didban API, one instance per port (spec §14.2): `systemctl enable --now analytics-api@5101
-# analytics-api@5102`. Two instances let scripts/deploy.sh restart one while the other serves.
+# analytics-api@5102`. Two instances let scripts/deploy.mjs restart one while the other serves.
 # Configuration: /etc/didban/api.env (root:didban 0640, see docs/deployment.md). PORT comes from
 # the instance name, never from that file.
 [Unit]

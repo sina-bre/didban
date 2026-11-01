@@ -7,7 +7,7 @@ try {
   const env = loadEnv(process.env);
   const app = await createApp(env);
   await app.listen(env.PORT, env.HOST);
-  closeOnSignals(app, env.SHUTDOWN_DRAIN_MS);
+  closeOnSignals(app, env.SHUTDOWN_DRAIN_MS, env.NODE_ENV === "production");
 } catch (error) {
   if (!(error instanceof InvalidEnvError)) throw error;
   console.error(error.message);
