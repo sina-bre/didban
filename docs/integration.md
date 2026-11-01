@@ -124,3 +124,12 @@ export async function reportPurchase(order: { userId: string; total: number; cur
 
 The response is `{ accepted, duplicates, rejected: [{ index, code, path }], requestId }`.
 `$revenue` is limited to ±1e9 and never converted between currencies.
+
+## Retention and deleting a person's data
+- **Retention** (project Data page, 7–3650 days, empty = forever): a nightly job deletes older
+  events and visits in 10 000-row chunks (ADR 0045).
+- **Delete data** (same page, project admins and org owners/admins): by date range (whole days in
+  the project's zone), by **user ID** (as sent with `identify`; the rest of those visits goes too) or
+  by **visitor**: the `didban_aid` value from the visitor's `localStorage` (persistent mode only).
+  Cookieless visitors cannot be singled out: their IDs come from a salt deleted after a day, so only
+  a range deletion reaches them. Requests run in the background; the list shows progress.

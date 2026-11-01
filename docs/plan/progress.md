@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-11-01 — Stage 6a (job runner, retention, data deletion)
+
+- Stage 6 split into 6a–6d (`docs/plan/phases.md`); design-system README muted token fixed.
+- Migration 0014 (`job_runs`, `data_deletions`); `modules/jobs`: advisory-locked runner on management
+  instances (`JOBS`, `JOB_DELETE_CHUNK`), deletions then retention (23 h), day × environment windows,
+  10 000-row chunks, resumable. `GET|POST /projects/:id/deletions` (project:manage, ≤ 10 open, audited);
+  Data page "Delete data" card (en + fa, confirm, polling). ADR 0045.
+- 10 M dataset found 3 plan bugs (dead-row rescans, no environment in the index prefix, seq-scan join);
+  fixed. ~8 M events: retention 2.09 M rows in 313 s, user/visitor deletion ~2 min (`explain:jobs`).
+- Checks: lint ok, typecheck ok, build ok (initial JS 135.7 KB gz); tests 30 + 68 + 160 + 246 (rerun:
+  2 dashboard findBy and 1 API seed collision under load, all pass alone); e2e 36/36. 3 mutations fail.
+- **Next:** 6b deploy + backup on Ubuntu, Overview LCP. Open: autovacuum on `events` (6c), metrics (6c).
+
 ## 2026-11-01 — Stage 5f (E2E trace, Lighthouse mobile, fa RTL + a11y audit) — gate NOT fully met
 
 - Trace E2E: wizard project's KPIs, Top pages, Sources == SQL on events/visits. a11y spec: every page in fa at
