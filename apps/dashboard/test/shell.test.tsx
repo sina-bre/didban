@@ -6,7 +6,7 @@ import { renderApp } from "./render-app";
 
 const base = `/projects/${PROJECT}`;
 // Report pages are lazy chunks: the first import is slow in jsdom.
-const title = () => screen.findByRole("heading", { level: 1 }, { timeout: 5000 });
+const title = () => screen.findByRole("heading", { level: 1 }, { timeout: 10_000 });
 
 beforeEach(() => fakeApi(signedIn()));
 

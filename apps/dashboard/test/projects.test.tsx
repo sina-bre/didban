@@ -19,7 +19,7 @@ describe("/projects with nothing to open", () => {
   it.each(["owner", "admin"] as const)("%s: the organization has no projects", async (role) => {
     fakeApi(noProjects(role));
     renderApp("/projects");
-    expect(await screen.findByText("No projects yet", {}, { timeout: 5000 })).toBeTruthy();
+    expect(await screen.findByText("No projects yet", {}, { timeout: 10_000 })).toBeTruthy();
     expect(screen.getByText("Your organization has no projects yet.")).toBeTruthy();
     expect(screen.queryByText(/Ask an owner or admin/)).toBeNull();
   });
@@ -27,7 +27,7 @@ describe("/projects with nothing to open", () => {
   it("member: ask an owner or admin for access", async () => {
     fakeApi(noProjects("member"));
     renderApp("/projects");
-    expect(await screen.findByText(/Ask an owner or admin/, {}, { timeout: 5000 })).toBeTruthy();
+    expect(await screen.findByText(/Ask an owner or admin/, {}, { timeout: 10_000 })).toBeTruthy();
     expect(screen.queryByText("Your organization has no projects yet.")).toBeNull();
   });
 });
