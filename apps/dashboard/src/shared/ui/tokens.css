@@ -25,9 +25,7 @@
   /* ---- semantic ---- */
   --color-canvas: var(--color-gray-100); /* app background behind cards */
   --color-surface: var(--color-white); /* cards */
-  --color-subtle: var(
-    --color-gray-50
-  ); /* segmented track, inset panels, table hover */
+  --color-subtle: var(--color-gray-50); /* segmented track, inset panels, table hover */
   --color-line: var(--color-gray-200); /* borders, dashed row separators */
   --color-ink: var(--color-navy-900); /* primary text, numbers */
   --color-muted: var(--color-slate-500); /* labels, captions, axis ticks */
