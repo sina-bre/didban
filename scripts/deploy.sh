@@ -17,8 +17,9 @@ MIGRATOR_ENV=/etc/didban/migrator.env
 release="$ROOT/releases/$(date -u +%Y%m%dT%H%M%SZ)"
 
 log() { printf '%s deploy: %s\n' "$(date -u +%H:%M:%S)" "$*"; }
-as_app() {
-  runuser -u "$APP_USER" -- env HOME="/var/lib/didban" CI=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 "$@"
+as_app() { # a clean environment: nothing of root's leaks into the build
+  runuser -u "$APP_USER" -- env -i PATH="$PATH" HOME=/var/lib/didban LANG=C.UTF-8 CI=1 \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 "$@" </dev/null
 }
 wait_ready() {
   for _ in $(seq 1 60); do
@@ -31,6 +32,9 @@ wait_ready() {
 
 [[ $EUID -eq 0 ]] || { echo "deploy.sh: run as root" >&2; exit 1; }
 [[ -r $MIGRATOR_ENV ]] || { echo "deploy.sh: $MIGRATOR_ENV missing" >&2; exit 1; }
+
+# A failed build leaves no half-built release behind; after the switch the release is kept.
+trap '[[ -L $ROOT/current && $(readlink "$ROOT/current") == "$release" ]] || rm -rf "$release"' EXIT
 
 log "build $release from $SRC ($(git -C "$SRC" rev-parse --short HEAD 2>/dev/null || echo '?'))"
 install -d -o "$APP_USER" -g "$APP_USER" "$release"
