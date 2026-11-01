@@ -3,6 +3,7 @@ import type { MessageKey, Translate } from "../../shared/lib/i18n";
 
 /** Management errors the UI explains; anything else is the generic failure with retry advice. */
 const KNOWN = new Set([
+  "DELETION_LIMIT_REACHED",
   "EMAIL_TAKEN",
   "ENVIRONMENT_EXISTS",
   "FORBIDDEN",

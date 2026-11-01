@@ -5,6 +5,7 @@ import faFilters from "./fa-filters";
 import faInsights from "./fa-insights";
 import faIntegration from "./fa-integration";
 import faPeople from "./fa-people";
+import faPrivacy from "./fa-privacy";
 import faReports from "./fa-reports";
 import faSettings from "./fa-settings";
 
@@ -14,6 +15,7 @@ const fa: Messages = {
   ...faFilters,
   ...faInsights,
   ...faSettings,
+  ...faPrivacy,
   ...faIntegration,
   ...faPeople,
   ...faAdmin,

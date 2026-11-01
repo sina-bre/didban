@@ -50,6 +50,7 @@ const faAdmin: Pick<Messages, keyof typeof enAdmin> = {
   "audit.type.route_template": "الگوی مسیر",
   "audit.type.goal": "هدف",
   "audit.type.share_link": "پیوند اشتراک",
+  "audit.type.data_deletion": "حذف داده",
   "audit.auth.login_succeeded": "وارد شد",
   "audit.auth.login_failed": "ورود ناموفق",
   "audit.auth.logout": "خارج شد",
@@ -82,6 +83,7 @@ const faAdmin: Pick<Messages, keyof typeof enAdmin> = {
   "audit.goal.deleted": "هدفی را حذف کرد",
   "audit.share_link.created": "پیوند اشتراکی ساخت",
   "audit.share_link.revoked": "پیوند اشتراکی را باطل کرد",
+  "audit.data_deletion.requested": "درخواست حذف داده ثبت کرد",
 };
 
 export default faAdmin;

@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { useParams } from "react-router";
 import { useLocale } from "../../shared/lib/locale-context";
 import { SelectField, Switch, TextField } from "../../shared/ui";
+import { DeletionsCard } from "../deletions/deletions-card";
 import { useProject } from "../projects/use-project";
 import { useOrgRole } from "../projects/use-projects";
 import { ArchiveProject } from "./archive-project";
@@ -17,7 +18,7 @@ const FIELDS = {
   siteSearchParams: "list",
 } as const;
 
-/** What is kept and for how long (spec §12 privacy controls), and archiving the project. */
+/** What is kept and for how long (spec §12 privacy controls), deletions, archiving the project. */
 export function DataSettingsPage() {
   const { t } = useLocale();
   const project = useProject(useParams().projectId ?? "").data;
@@ -27,6 +28,7 @@ export function DataSettingsPage() {
       <ProjectForm id="data-title" icon={ShieldCheck} title={t("settings.data")} fields={FIELDS}>
         {(p, errors) => <DataFields project={p} errors={errors} />}
       </ProjectForm>
+      {project && <DeletionsCard project={project} />}
       {project && (role === "owner" || role === "admin") && <ArchiveProject project={project} />}
     </>
   );
