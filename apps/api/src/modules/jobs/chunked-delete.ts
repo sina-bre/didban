@@ -33,6 +33,19 @@ export async function untilShort(ctx: JobContext, step: () => Promise<number>): 
   }
 }
 
+const DAY_MS = 86_400_000;
+
+/**
+ * `[from, to)` one-day steps from `start` to `end`. Chunks walk one window at a time: a single
+ * open-ended `occurred_at < cutoff` would re-scan every row the earlier chunks left dead (no
+ * vacuum in between), so each chunk got slower until it hit the statement timeout (10 M events).
+ */
+export function* dayWindows(start: Date, end: Date): Generator<[Date, Date]> {
+  for (let from = start.getTime(); from < end.getTime(); from += DAY_MS) {
+    yield [new Date(from), new Date(Math.min(from + DAY_MS, end.getTime()))];
+  }
+}
+
 /** Deletes up to `chunk` of the project's events matching `where`; returns their visit IDs. */
 export async function deleteEventChunk(
   tx: Tx,

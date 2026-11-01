@@ -1,4 +1,5 @@
 import {
+  dayWindows,
   deleteEventChunk,
   deleteVisitChunk,
   type JobContext,
@@ -13,23 +14,31 @@ const DAY_MS = 86_400_000;
 const SESSION_IDLE = "7 days"; // auth-session.repository.ts: idle timeout
 const DIAGNOSTICS_DAYS = 14;
 
-type Project = { id: string; retentionDays: number };
+type Project = { id: string; retentionDays: number; events: Date | null; visits: Date | null };
 
 /** Returns the number of rows deleted. */
 export async function runRetention(ctx: JobContext, now = new Date()): Promise<number> {
   const { sql } = ctx;
+  // Oldest row per table: where the day windows start.
   const projects = await sql<Project[]>`
-    SELECT id, retention_days FROM projects WHERE retention_days IS NOT NULL ORDER BY id`;
+    SELECT p.id, p.retention_days,
+           (SELECT min(occurred_at) FROM events e WHERE e.project_id = p.id) AS events,
+           (SELECT min(started_at) FROM visits v WHERE v.project_id = p.id) AS visits
+    FROM projects p WHERE p.retention_days IS NOT NULL ORDER BY p.id`;
   let rows = 0;
   for (const project of projects) {
     const cutoff = new Date(now.getTime() - project.retentionDays * DAY_MS);
-    rows += await untilShort(ctx, async () => {
-      const where = sql`occurred_at < ${cutoff}`;
-      return (await deleteEventChunk(sql, project.id, where, ctx.chunk)).length;
-    });
-    rows += await untilShort(ctx, () =>
-      deleteVisitChunk(sql, project.id, sql`started_at < ${cutoff}`, ctx.chunk),
-    );
+    for (const [a, b] of dayWindows(project.events ?? cutoff, cutoff)) {
+      const where = sql`occurred_at >= ${a} AND occurred_at < ${b}`;
+      rows += await untilShort(
+        ctx,
+        async () => (await deleteEventChunk(sql, project.id, where, ctx.chunk)).length,
+      );
+    }
+    for (const [a, b] of dayWindows(project.visits ?? cutoff, cutoff)) {
+      const where = sql`started_at >= ${a} AND started_at < ${b}`;
+      rows += await untilShort(ctx, () => deleteVisitChunk(sql, project.id, where, ctx.chunk));
+    }
   }
   return rows + (await expireHousekeeping(ctx, now));
 }

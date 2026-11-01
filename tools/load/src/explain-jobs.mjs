@@ -87,6 +87,12 @@ for (const [name, query, params] of STATEMENTS) {
   console.log(name, /Execution Time: ([\d.]+)/.exec(plan)?.[1], "ms");
 }
 
+mkdirSync("results", { recursive: true });
+const file = `results/job-plans-${new Date().toISOString().slice(0, 10)}.md`;
+/** Written after every step, so a failed real run still leaves the plans. */
+const save = () => writeFileSync(file, `${out.join("\n")}\n`);
+save();
+
 const ctx = { sql, chunk: 10_000, pauseMs: 100, stopping: () => false };
 async function timed(name, run) {
   const started = Date.now();
@@ -94,6 +100,7 @@ async function timed(name, run) {
   const line = `${name}: ${rows} rows in ${((Date.now() - started) / 1000).toFixed(1)} s`;
   console.log(line);
   out.push(`- ${line}`);
+  save();
 }
 out.push("", "## Real runs (built job functions, chunk 10 000, 100 ms pause)", "");
 await sql`INSERT INTO data_deletions (project_id, kind, user_id) VALUES (${project.id}, 'user', 'explain-user')`;
@@ -104,8 +111,5 @@ const days = Math.ceil((Date.now() - cutoff.getTime()) / 86_400_000);
 await sql`UPDATE projects SET retention_days = ${days} WHERE id = ${project.id}`;
 await timed(`retention (${days} days kept, oldest ~30 days cut)`, () => runRetention(ctx));
 
-mkdirSync("results", { recursive: true });
-const file = `results/job-plans-${new Date().toISOString().slice(0, 10)}.md`;
-writeFileSync(file, `${out.join("\n")}\n`);
 console.log(`wrote ${file}`);
 await sql.end();

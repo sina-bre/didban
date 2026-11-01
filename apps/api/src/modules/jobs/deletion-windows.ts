@@ -1,5 +1,5 @@
 import type postgres from "postgres";
-import { deleteEventChunk, type JobContext, untilShort } from "./chunked-delete.js";
+import { dayWindows, deleteEventChunk, type JobContext, untilShort } from "./chunked-delete.js";
 
 // The shared mechanics of a deletion request: one-day windows over `events_range_idx` with the
 // cursor saved after each window, and chunks that commit together with the request's counters.
@@ -29,9 +29,8 @@ export async function eachWindow(
   where: Where,
   wholeVisits = false,
 ) {
-  let cursor = request.cursorAt && request.cursorAt > start ? request.cursorAt : start;
-  while (cursor < end) {
-    const [from, to] = [cursor, new Date(Math.min(cursor.getTime() + WINDOW_MS, end.getTime()))];
+  const resume = request.cursorAt && request.cursorAt > start ? request.cursorAt : start;
+  for (const [from, to] of dayWindows(resume, end)) {
     await chunks(ctx, request, async (tx) => {
       const visitIds = await deleteEventChunk(
         tx,
@@ -49,7 +48,6 @@ export async function eachWindow(
       };
     });
     await ctx.sql`UPDATE data_deletions SET cursor_at = ${to} WHERE id = ${request.id}`;
-    cursor = to;
   }
 }
 

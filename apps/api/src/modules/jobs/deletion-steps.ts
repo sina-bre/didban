@@ -1,5 +1,5 @@
 import type postgres from "postgres";
-import { deleteVisitChunk, type JobContext } from "./chunked-delete.js";
+import { dayWindows, deleteVisitChunk, type JobContext } from "./chunked-delete.js";
 import {
   chunks,
   type DeletionRequest,
@@ -22,7 +22,9 @@ const range: Step = async (ctx, request) => {
     [from, to],
     (tx, a, b) => tx`occurred_at >= ${a} AND occurred_at < ${b}`,
   );
-  await visitChunks(ctx, request, (tx) => tx`started_at >= ${from} AND started_at < ${to}`);
+  for (const [a, b] of dayWindows(from, to)) {
+    await visitChunks(ctx, request, (tx) => tx`started_at >= ${a} AND started_at < ${b}`);
+  }
 };
 
 const visitor: Step = async (ctx, request) => {
