@@ -45,3 +45,11 @@ gate). Raw plans of every 90-day statement: `tools/load/results/plans-2026-10-18
   - Both need ~110 k events/day **in one project** for 90 days. The answer is a §20 trigger
     (daily rollups of counts, or partitioning), not a bigger timeout. Until then the dashboard
     (Stage 5) must default to a 30-day range, where every measured query answers in < 3.5 s.
+
+## Jobs (Stage 6a, ADR 0045)
+`pnpm -C tools/load explain:jobs` explains one chunk of each retention/deletion statement (rolled
+back), then runs the built job functions for real (destroys part of the dataset: reseed after).
+On ~8 M events: retention cut 2.09 M rows in 313 s; a user or visitor deletion over the whole span
+takes 1.7–2 min. Every event statement names one environment and one day window; see the ADR for
+the plans that forced it. Raw plans: `tools/load/results/job-plans-2026-11-01.md`.
+

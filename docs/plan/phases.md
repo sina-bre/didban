@@ -52,6 +52,11 @@ Skills installed, MCP config, CLAUDE.md files, spec split by section, addendum, 
 - **Gate:** every number traces to persisted events; E2E green; budgets in addendum A2 met.
 
 ## Stage 6 — Hardening and release
-- Retention/deletion jobs, backup + restore-check executed, systemd/Caddy validated on a clean Ubuntu VM,
-  full load + abuse tests, `pnpm audit`, docs complete, Changesets + release workflow (dry run only).
+- 6a Job runner (advisory lock, `job_runs`), nightly retention, data deletion by range/visitor/user ID
+  (chunked job + progress record, API + Data page).
+- 6b `deploy/` systemd + Caddy (+ Nginx sample), `deploy.sh`, `backup.sh`, `restore-check.sh`, executed on a
+  clean Ubuntu VM (rolling restart, graceful shutdown); Overview LCP: relative-range stats + re-measure on h2.
+- 6c `/metrics` (spec §15), full load + abuse tests (DoD 7), `pnpm audit`.
+- 6d Docs complete (operations runbooks, deployment, known limitations), Changesets + release workflow (dry
+  run only), Definition-of-Done final report.
 - **Gate:** Definition of Done (`docs/spec/19`).

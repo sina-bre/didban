@@ -4,6 +4,7 @@ import enFilters from "./en-filters";
 import enInsights from "./en-insights";
 import enIntegration from "./en-integration";
 import enPeople from "./en-people";
+import enPrivacy from "./en-privacy";
 import enReports from "./en-reports";
 import enSettings from "./en-settings";
 
@@ -14,6 +15,7 @@ const en = {
   ...enFilters,
   ...enInsights,
   ...enSettings,
+  ...enPrivacy,
   ...enIntegration,
   ...enPeople,
   ...enAdmin,

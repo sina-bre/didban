@@ -99,6 +99,8 @@ function routesOfA(): [string, string, object][] {
     ["GET", `${project}/shares`, {}],
     ["POST", `${project}/shares`, { label: "Stolen" }],
     ["DELETE", `${project}/shares/${shareA}`, {}],
+    ["GET", `${project}/deletions`, {}],
+    ["POST", `${project}/deletions`, { kind: "user", userId: "u-1" }],
     ["PATCH", `/organizations/${orgA}/members/${memberA}`, { role: "admin" }],
     ["DELETE", `/organizations/${orgA}/members/${memberA}`, {}],
     ["PUT", `/projects/${projectA}/members/${memberA}`, { role: "viewer" }],
@@ -161,7 +163,8 @@ describe("tenant isolation (spec §11, §16)", () => {
              (SELECT count(*)::int FROM projects WHERE archived_at IS NOT NULL) AS archived,
              (SELECT string_agg(pattern, ',') FROM route_templates) AS routes,
              (SELECT string_agg(name, ',') FROM goals) AS goals,
-             (SELECT count(*)::int FROM share_links WHERE revoked_at IS NULL) AS shares`;
+             (SELECT count(*)::int FROM share_links WHERE revoked_at IS NULL) AS shares,
+             (SELECT count(*)::int FROM data_deletions) AS deletions`;
     const routes = "/products/:id";
     expect(state).toEqual({
       projects: 2,
@@ -171,6 +174,7 @@ describe("tenant isolation (spec §11, §16)", () => {
       routes,
       goals: "Signup",
       shares: 1,
+      deletions: 0,
     });
   });
 

@@ -36,6 +36,9 @@ const envSchema = z
     INGEST_INSERT_CHUNK: z.coerce.number().int().min(1).max(5000).default(500),
     // Spec §7 step 6: optional GeoLite2 Country/City `.mmdb`; unset = no geo (ADR 0026).
     GEOIP_DB_PATH: z.string().min(1).optional(),
+    // Spec §9.4 + §12 background jobs (ADR 0045): `off` only for tests and ingest-only boxes.
+    JOBS: z.enum(["on", "off"]).default("on"),
+    JOB_DELETE_CHUNK: z.coerce.number().int().min(100).max(50_000).default(10_000),
   })
   .superRefine((env, ctx) => {
     const url = new URL(env.PUBLIC_ORIGIN);

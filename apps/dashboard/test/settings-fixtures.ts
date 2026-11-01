@@ -94,6 +94,7 @@ export const settingsApi = () => ({
   [`GET ${P}/keys`]: keys,
   [`GET ${P}/routes`]: routes,
   [`GET ${P}/shares`]: shares,
+  [`GET ${P}/deletions`]: { deletions: [] },
   [`GET ${P}/members`]: projectMembers,
   [`GET ${O}/members`]: orgMembers,
   [`GET ${O}/projects`]: {

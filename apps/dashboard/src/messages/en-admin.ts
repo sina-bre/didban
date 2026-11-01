@@ -47,6 +47,7 @@ const enAdmin = {
   "audit.type.route_template": "Route template",
   "audit.type.goal": "Goal",
   "audit.type.share_link": "Share link",
+  "audit.type.data_deletion": "Data deletion",
   "audit.auth.login_succeeded": "Signed in",
   "audit.auth.login_failed": "Sign-in failed",
   "audit.auth.logout": "Signed out",
@@ -79,6 +80,7 @@ const enAdmin = {
   "audit.goal.deleted": "Deleted a goal",
   "audit.share_link.created": "Created a share link",
   "audit.share_link.revoked": "Revoked a share link",
+  "audit.data_deletion.requested": "Requested a data deletion",
 } as const;
 
 export default enAdmin;
