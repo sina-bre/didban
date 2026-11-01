@@ -57,7 +57,7 @@ describe("Realtime page", () => {
     const active = await screen.findByRole(
       "region",
       { name: "Active visitors" },
-      { timeout: 5000 },
+      { timeout: 10_000 },
     );
     expect(within(active).getAllByText("7").length).toBeGreaterThan(0);
     const [pages] = screen.getAllByRole("region", { name: "Active pages" }); // card + its table

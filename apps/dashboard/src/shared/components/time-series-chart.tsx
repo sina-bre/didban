@@ -1,9 +1,8 @@
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import { formatDay, formatNumber } from "../lib/format";
 import { useLocale } from "../lib/locale-context";
-import { Button, type Column, DataTable, Skeleton } from "../ui";
-
-const TimeSeriesPlot = lazy(() => import("./time-series-plot"));
+import { Button, type Column, DataTable } from "../ui";
+import { LazyPlot } from "./lazy-plot";
 
 export interface SeriesPoint {
   date: Date;
@@ -25,7 +24,7 @@ interface Props {
 
 /**
  * Time series with a visible "View as table" toggle (design system §4): the chart is lazy
- * Recharts; the table is the same data in a DataTable, also the fallback while it loads.
+ * Recharts (loaded when in view); the table is the same data in a DataTable.
  */
 export function TimeSeriesChart(props: Props) {
   const { title, valueLabel, points, formatDate } = props;
@@ -60,17 +59,15 @@ export function TimeSeriesChart(props: Props) {
           rowKey={(p) => p.date.toISOString()}
         />
       ) : (
-        <Suspense fallback={<Skeleton className="h-64" />}>
-          <TimeSeriesPlot
-            points={points}
-            valueLabel={valueLabel}
-            dateLabel={dateLabel}
-            previousLabel={t("chart.previous")}
-            formatDay={day}
-            formatValue={value}
-            rtl={locale === "fa"}
-          />
-        </Suspense>
+        <LazyPlot
+          points={points}
+          valueLabel={valueLabel}
+          dateLabel={dateLabel}
+          previousLabel={t("chart.previous")}
+          formatDay={day}
+          formatValue={value}
+          rtl={locale === "fa"}
+        />
       )}
     </figure>
   );

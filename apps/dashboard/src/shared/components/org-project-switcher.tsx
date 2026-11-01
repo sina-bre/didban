@@ -24,17 +24,18 @@ export function OrgProjectSwitcher({ orgs, currentProjectId }: Props) {
   const { id, trigger, popover } = useAnchor();
   const org = orgs.find((o) => o.projects.some((p) => p.id === currentProjectId));
   const project = org?.projects.find((p) => p.id === currentProjectId);
+  // The name is the content, so it always holds the visible text (WCAG 2.5.3 label in name).
   return (
     <>
       <button
         type="button"
         popoverTarget={id}
-        aria-label={`${t("switcher.label")}: ${org?.name ?? ""} / ${project?.name ?? ""}`}
         style={trigger}
         className="flex min-h-11 min-w-0 items-center gap-2 rounded-pill px-2 text-start hover:bg-subtle"
       >
+        <span className="sr-only">{t("switcher.label")}:</span>{" "}
         <span className="flex min-w-0 flex-col">
-          <span className="truncate text-body font-medium">{project?.name}</span>
+          <span className="truncate text-body font-medium">{project?.name}</span>{" "}
           <span className="truncate text-caption text-muted">{org?.name}</span>
         </span>
         <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-muted" />

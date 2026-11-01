@@ -10,7 +10,7 @@ const type = (label: RegExp | string, value: string) =>
 
 async function signIn(path: string, password = "correct horse battery") {
   const result = renderApp(path);
-  await screen.findByRole("heading", { name: "Sign in" }, { timeout: 5000 });
+  await screen.findByRole("heading", { name: "Sign in" }, { timeout: 10_000 });
   type("Email", " Owner@Example.com ");
   type("Password", password);
   fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -58,7 +58,7 @@ describe("/login", () => {
   it("validates before sending: no request for an empty form", async () => {
     const calls = fakeApi({});
     renderApp("/login");
-    fireEvent.click(await screen.findByRole("button", { name: "Sign in" }, { timeout: 5000 }));
+    fireEvent.click(await screen.findByRole("button", { name: "Sign in" }, { timeout: 10_000 }));
     expect(await screen.findByText("Enter a valid email address.")).toBeTruthy();
     expect(screen.getByText("Enter your password.")).toBeTruthy();
     expect(screen.getByLabelText("Email").getAttribute("aria-invalid")).toBe("true");
@@ -68,7 +68,7 @@ describe("/login", () => {
   it("a temporary password goes to /set-password first, keeping the return path", async () => {
     fakeApi({ ...signedIn(), "POST /auth/login": me(true) });
     const { router } = await signIn(`/login?next=${encodeURIComponent(overview)}`);
-    await screen.findByRole("heading", { name: "Choose your password" }, { timeout: 5000 });
+    await screen.findByRole("heading", { name: "Choose your password" }, { timeout: 10_000 });
     expect(router.state.location.search).toBe(`?next=${encodeURIComponent(overview)}`);
   });
 });

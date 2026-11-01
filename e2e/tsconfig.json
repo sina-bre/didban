@@ -7,5 +7,5 @@
     "lib": ["ES2023", "DOM"],
     "types": ["node"]
   },
-  "include": ["tests", "playwright.config.ts"]
+  "include": ["tests", "lighthouse", "playwright.config.ts", "lighthouse.config.ts"]
 }

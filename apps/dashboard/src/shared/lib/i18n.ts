@@ -37,6 +37,7 @@ export function createT(messages: Messages, locale: Locale): Translate {
       typeof entry === "string"
         ? entry
         : (entry[plurals.select(Number(params.count))] ?? entry.other);
+    if (!template.includes("{")) return template; // most messages: no placeholder to fill
     return template.replace(/\{(\w+)\}/g, (match, name: string) => {
       const value = params[name];
       if (value === undefined) return match;

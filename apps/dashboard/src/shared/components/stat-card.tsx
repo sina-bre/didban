@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { formatDuration, formatNumber, formatPercent } from "../lib/format";
 import type { Locale } from "../lib/i18n";
 import { useLocale } from "../lib/locale-context";
@@ -26,9 +27,11 @@ function display(locale: Locale, kind: Kind, value: number, compact: boolean): s
 /** Big confident number with a muted label under it; compact digits below `md` (design §4). */
 export function StatCard({ label, value, kind = "count", delta, hero = false }: Props) {
   const { t, locale } = useLocale();
+  const id = useId();
   const size = hero ? "text-metric lg:text-display" : "text-metric";
   return (
-    <div className="flex min-w-0 flex-col gap-1">
+    // A figure named by its caption: a screen reader (and a test) pairs the number with its label.
+    <figure aria-labelledby={id} className="flex min-w-0 flex-col gap-1">
       <div className="flex flex-wrap items-center gap-2">
         <p className={`${size} font-semibold tabular-nums`}>
           {value === null ? (
@@ -48,7 +51,9 @@ export function StatCard({ label, value, kind = "count", delta, hero = false }: 
           />
         )}
       </div>
-      <p className="text-body text-muted">{label}</p>
-    </div>
+      <figcaption id={id} className="text-body text-muted">
+        {label}
+      </figcaption>
+    </figure>
   );
 }

@@ -1,5 +1,5 @@
-import { type CalendarDate, fromDate, parseDate, toCalendarDate } from "@internationalized/date";
 import { rangeDays, readCustomRange, readRange } from "./url-state";
+import { addDays, dayIn, parseDay, startOf } from "./zoned-day";
 
 // Spec §3.1: report days are days in the project's reporting time zone, not the browser's.
 // Ranges are whole days, so the query (and its cache key) stays the same all day long.
@@ -10,8 +10,6 @@ export interface StatsRange {
   to: string;
 }
 
-const midnight = (day: CalendarDate, timeZone: string) => day.toDate(timeZone).toISOString();
-
 /** The URL's range (custom `?from=&to=` or a preset ending today) as instants in `timeZone`. */
 export function statsRange(
   params: URLSearchParams,
@@ -19,9 +17,8 @@ export function statsRange(
   now = new Date(),
 ): StatsRange {
   const custom = readCustomRange(params, now);
-  const last = custom ? parseDate(custom.to) : toCalendarDate(fromDate(now, timeZone));
-  const first = custom
-    ? parseDate(custom.from)
-    : last.subtract({ days: rangeDays(readRange(params)) - 1 });
-  return { from: midnight(first, timeZone), to: midnight(last.add({ days: 1 }), timeZone) };
+  const last = custom ? parseDay(custom.to) : dayIn(now, timeZone);
+  const first = custom ? parseDay(custom.from) : addDays(last, 1 - rangeDays(readRange(params)));
+  const midnight = (day: number) => startOf(day, timeZone).toISOString();
+  return { from: midnight(first), to: midnight(addDays(last, 1)) };
 }

@@ -61,7 +61,7 @@ describe("overview page", () => {
     expect(getComputedStyle(name).display).toBe("none"); // the switcher takes its room on mobile
     const label = await screen.findByText(
       "نمایش در هر بازدید",
-      { selector: "p" },
+      { selector: "figcaption" },
       { timeout: 5000 },
     );
     const kpis = label.closest(".grid") as HTMLElement;
@@ -74,7 +74,7 @@ describe("overview page", () => {
     fakeApi(signedIn());
     const { router } = renderApp(`/projects/${PROJECT}/overview`);
     await userEvent.click(
-      await screen.findByRole("button", { name: /Acme \/ Shop/ }, { timeout: 5000 }),
+      await screen.findByRole("button", { name: /Shop Acme/ }, { timeout: 5000 }),
     );
     const blog = await screen.findByRole("link", { name: "Blog" });
     await userEvent.click(blog);

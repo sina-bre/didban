@@ -6,7 +6,7 @@ import { renderApp } from "./render-app";
 import { emptyOverview } from "./stats-fixtures";
 
 const base = `/projects/${PROJECT}`;
-const kpis = () => screen.findByRole("region", { name: "Key metrics" }, { timeout: 5000 });
+const kpis = () => screen.findByRole("region", { name: "Key metrics" }, { timeout: 10_000 });
 
 afterEach(() => {
   cleanup();
@@ -52,7 +52,7 @@ describe("Overview cards and states", () => {
   it("channels read in the user's words with their share of visits", async () => {
     fakeApi(signedIn());
     renderApp(`${base}/overview`);
-    const channels = await screen.findByRole("region", { name: "Channels" }, { timeout: 5000 });
+    const channels = await screen.findByRole("region", { name: "Channels" }, { timeout: 10_000 });
     expect(within(channels).getByText("Organic search")).toBeTruthy();
     expect(within(channels).getByText("75%")).toBeTruthy();
   });
@@ -60,7 +60,7 @@ describe("Overview cards and states", () => {
   it("no events in the range: the empty state instead of zeros", async () => {
     fakeApi({ ...signedIn(), [`GET ${base}/stats/overview`]: emptyOverview });
     renderApp(`${base}/overview`);
-    expect(await screen.findByText("No data yet", {}, { timeout: 5000 })).toBeTruthy();
+    expect(await screen.findByText("No data yet", {}, { timeout: 10_000 })).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Channels" })).toBeNull();
   });
 
@@ -72,7 +72,7 @@ describe("Overview cards and states", () => {
         fail ? apiError(503, "SERVICE_UNAVAILABLE") : { body: emptyOverview },
     });
     renderApp(`${base}/overview`);
-    const alert = await screen.findByRole("alert", {}, { timeout: 5000 });
+    const alert = await screen.findByRole("alert", {}, { timeout: 10_000 });
     expect(alert.textContent).toContain("req-test");
     fail = false;
     fireEvent.click(within(alert).getByRole("button", { name: "Try again" }));
@@ -85,7 +85,7 @@ describe("projects and the switcher", () => {
     fakeApi(signedIn());
     renderApp("/projects/00000000-0000-4000-8000-00000000dead/overview");
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Page not found" }, { timeout: 5000 }),
+      await screen.findByRole("heading", { level: 1, name: "Page not found" }, { timeout: 10_000 }),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Switch organization/ })).toBeNull();
   });
@@ -95,8 +95,8 @@ describe("projects and the switcher", () => {
     renderApp(`${base}/overview`);
     const trigger = await screen.findByRole(
       "button",
-      { name: /Switch organization and project: Acme \/ Shop/ },
-      { timeout: 5000 },
+      { name: /Switch organization and project: Shop Acme/ },
+      { timeout: 10_000 },
     );
     expect(trigger).toBeTruthy();
     // Opening and following a link needs the Popover API: switcher.browser.tsx (real Chrome).

@@ -9,16 +9,19 @@ interface Props {
   children?: ReactNode;
   /** `alert` for failures so they are announced; empty and denied states stay quiet. */
   role?: "alert";
+  /** 1 when the panel is the whole page (a dead share link), so the page still has its `h1`. */
+  level?: 1 | 2;
 }
 
 /** Centered icon, title and body inside a card: empty, error and 403 states share it. */
-export function StatePanel({ icon: Icon, title, body, children, role }: Props) {
+export function StatePanel({ icon: Icon, title, body, children, role, level = 2 }: Props) {
+  const Heading = level === 1 ? "h1" : "h2";
   return (
     <div role={role} className="flex flex-col items-center gap-2 px-4 py-10 text-center">
       <span className="flex size-10 items-center justify-center rounded-pill bg-subtle text-muted">
         <Icon aria-hidden="true" className="size-5" />
       </span>
-      <h2 className="text-title font-medium">{title}</h2>
+      <Heading className="text-title font-medium">{title}</Heading>
       <p className="max-w-prose text-body text-muted">{body}</p>
       {children}
     </div>

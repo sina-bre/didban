@@ -19,7 +19,7 @@ export function FilterLink({ field, value, label }: Props) {
     <Link
       to={{ search: `?${withEquals(params, field, value)}` }}
       aria-label={t("filter.by", { value: label })}
-      className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+      className="inline-flex min-h-11 min-w-11 items-center underline-offset-4 hover:underline"
     >
       <bdi className="truncate">{label}</bdi>
     </Link>

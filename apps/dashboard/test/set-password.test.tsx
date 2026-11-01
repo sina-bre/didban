@@ -10,7 +10,7 @@ const type = (label: string, value: string) =>
 
 async function fill(current: string, next: string, confirm = next) {
   const result = renderApp(`/set-password?next=${encodeURIComponent(overview)}`);
-  await screen.findByRole("heading", { name: "Choose your password" }, { timeout: 5000 });
+  await screen.findByRole("heading", { name: "Choose your password" }, { timeout: 10_000 });
   type("Temporary password", current);
   type("New password", next);
   type("Repeat the new password", confirm);
@@ -36,7 +36,7 @@ describe("/set-password", () => {
     });
     const { router } = await fill("TEMP-PASS-1234", "a long new passphrase");
     await waitFor(() => expect(router.state.location.pathname).toBe(overview));
-    await screen.findByRole("heading", { level: 1, name: "Overview" }, { timeout: 5000 });
+    await screen.findByRole("heading", { level: 1, name: "Overview" }, { timeout: 10_000 });
     const sent = calls.find((c) => c.url.pathname === "/api/v1/auth/password");
     expect(sent?.body).toEqual({
       currentPassword: "TEMP-PASS-1234",

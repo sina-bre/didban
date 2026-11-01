@@ -3,7 +3,7 @@ import postgres from "postgres";
 // Reads what the real API committed to the local test DB (seeded by seed-e2e.mjs).
 const url = process.env.TEST_DATABASE_URL;
 if (!url) throw new Error("TEST_DATABASE_URL is not set. Run `pnpm db:setup`.");
-const sql = postgres(url, { max: 1, idle_timeout: 1, onnotice: () => {} });
+export const sql = postgres(url, { max: 1, idle_timeout: 1, onnotice: () => {} });
 
 export interface StoredEvent {
   type: number; // 1 page, 2 track (packages/contracts EVENT_TYPES)

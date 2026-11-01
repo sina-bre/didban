@@ -34,6 +34,7 @@ export function SharePage() {
       <Card className="mt-4">
         <StatePanel
           icon={Link2Off}
+          level={1}
           title={t("shareView.missing.title")}
           body={t("shareView.missing.body")}
         />

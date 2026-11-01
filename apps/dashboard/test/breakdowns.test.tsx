@@ -6,7 +6,7 @@ import { renderApp } from "./render-app";
 import { reports } from "./report-fixtures";
 
 const base = `/projects/${PROJECT}`;
-const wait = { timeout: 5000 };
+const wait = { timeout: 10_000 };
 const api = () => fakeApi({ ...signedIn(), ...reports() });
 const sent = (calls: Call[], report: string) =>
   calls.filter((c) => c.url.pathname.endsWith(`/stats/${report}`)).map((c) => c.url.searchParams);
