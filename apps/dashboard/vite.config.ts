@@ -7,6 +7,16 @@ import { defineConfig } from "vite";
 // (spec §11 CSRF rule). `preview` serves the production build the same way (E2E uses it).
 const proxy = { "/api": { target: process.env.API_URL ?? "http://127.0.0.1:5100" } };
 const server = { host: "127.0.0.1", port: 5173, strictPort: true, proxy };
+// TanStack Query and the modules the entry's prefetch and every report load first.
+const FIRST_SCREEN =
+  /[\\/]features[\\/](auth[\\/]use-me|projects[\\/]use-projects?|overview[\\/]use-overview)\./;
+const REPORT_PARTS = /[\\/]features[\\/]report[\\/](use-stats|query-|report-header|channel-label)/;
+const CORE = {
+  name: "core",
+  test: (id: string) =>
+    /[\\/]@tanstack[\\/]/.test(id) || FIRST_SCREEN.test(id) || REPORT_PARTS.test(id),
+  includeDependenciesRecursively: false,
+};
 
 export default defineConfig({
   // React Aria ships strings for ~34 locales; it has none for `fa`, so only en-US is kept
@@ -17,10 +27,11 @@ export default defineConfig({
   build: {
     target: "es2023",
     assetsInlineLimit: 0,
-    // Each icon became its own ~0.6 KB chunk (shared by several lazy routes); on a phone every
-    // extra request costs a round trip. One icon chunk instead (Lighthouse mobile, Stage 5f).
+    // Shared code became many ~0.5 KB chunks (each icon, each query hook); on a phone every extra
+    // request costs a round trip. One icon chunk, and one core chunk for what the first screen
+    // and every report share (Lighthouse mobile, Stage 5f).
     rolldownOptions: {
-      output: { codeSplitting: { groups: [{ name: "icons", test: /lucide-react/ }] } },
+      output: { codeSplitting: { groups: [{ name: "icons", test: /lucide-react/ }, CORE] } },
     },
   },
 });
