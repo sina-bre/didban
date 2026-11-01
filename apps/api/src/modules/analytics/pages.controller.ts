@@ -6,7 +6,7 @@ import {
   pageDetailQuerySchema,
   pagesQuerySchema,
 } from "@didban/contracts";
-import { Controller, Get, Inject, Param, Query } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Query, UseInterceptors } from "@nestjs/common";
 import { SQL, type Sql } from "../../db/db.module.js";
 import type { AccessScope } from "../../domain/permissions.js";
 import { UuidPipe } from "../../http/uuid-pipe.js";
@@ -15,9 +15,11 @@ import { CurrentScope } from "../access/current-scope.js";
 import { Requires } from "../access/requires.decorator.js";
 import { getPageDetail } from "./page-detail.js";
 import { getPages, type PagesRow } from "./pages.js";
+import { RelativeRange } from "./relative-range.js";
 import { queryKey, StatsGate } from "./stats-gate.js";
 
 @Controller("projects/:projectId/stats/pages")
+@UseInterceptors(RelativeRange)
 export class PagesController {
   constructor(
     @Inject(SQL) private readonly sql: Sql,

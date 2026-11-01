@@ -20,4 +20,6 @@ export * from "./stats.js";
 export * from "./stats-breakdowns.js";
 export * from "./stats-filters.js";
 export * from "./stats-live.js";
+export * from "./stats-relative.js";
 export * from "./users.js";
+export * from "./zoned-day.js";
