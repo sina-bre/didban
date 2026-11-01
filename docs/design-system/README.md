@@ -54,7 +54,7 @@ Form fields, Tabs.
 ## 4. Rules
 
 - **Color:** semantic tokens only. Orange is never used for body text on white; use `accent-text`.
-  Muted text is `slate-500` (4.7:1). Up/down deltas pair color with a sign and an arrow icon.
+  Muted text is `#5f6779` (5.7:1 on white, 5.1:1 on canvas). Up/down deltas pair color with a sign and an arrow icon.
 - **Numbers:** `tabular-nums` everywhere; formatted via `format.ts` (`Intl`). Wrap numbers inside RTL text
   in `<bdi>`. Large numbers use compact notation on mobile (`12.4K`), full on desktop.
 - **Charts:** Recharts, lazy-loaded. Max 3 series + compare. Series differ by color **and** hatch/dash.
