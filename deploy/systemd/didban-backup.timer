@@ -1,0 +1,11 @@
+# `systemctl enable --now didban-backup.timer`: every night at 03:15 local time (± 10 min).
+[Unit]
+Description=Nightly Didban database backup
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

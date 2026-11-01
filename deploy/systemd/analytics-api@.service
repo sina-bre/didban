@@ -1,0 +1,59 @@
+# Didban API, one instance per port (spec §14.2): `systemctl enable --now analytics-api@5101
+# analytics-api@5102`. Two instances let scripts/deploy.sh restart one while the other serves.
+# Configuration: /etc/didban/api.env (root:didban 0640, see docs/deployment.md). PORT comes from
+# the instance name, never from that file.
+[Unit]
+Description=Didban analytics API (port %i)
+Documentation=file:///opt/didban/current/docs/deployment.md
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=didban
+Group=didban
+WorkingDirectory=/opt/didban/current/apps/api
+EnvironmentFile=/etc/didban/api.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/env PORT=%i /usr/bin/node --enable-source-maps dist/main.js
+Restart=on-failure
+RestartSec=2
+# SIGTERM: /ready answers 503, in-flight requests and the ingest buffer drain, a running job stops
+# at its next chunk and resumes on the other instance (ADR 0045). After 30 s systemd kills.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+LimitNOFILE=65536
+
+# Hardening. Logs go to journald (stdout); the only writable path is the state dir, which also
+# holds the GeoLite2 file (GEOIP_DB_PATH=/var/lib/didban/GeoLite2-City.mmdb).
+StateDirectory=didban
+StateDirectoryMode=0750
+ReadWritePaths=/var/lib/didban
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RemoveIPC=yes
+UMask=0077
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# Not MemoryDenyWriteExecute: V8's JIT needs writable executable memory.
+
+[Install]
+WantedBy=multi-user.target
