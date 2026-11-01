@@ -15,6 +15,7 @@ export function testEnv(overrides: Record<string, string> = {}): Env {
     DATABASE_URL: requireVar("TEST_DATABASE_URL"),
     DB_POOL_MAX: "2",
     SESSION_COOKIE: "insecure-dev",
+    JOBS: "off",
     ...overrides,
   });
 }

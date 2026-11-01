@@ -2,6 +2,7 @@ export * from "./admin.js";
 export * from "./api-keys.js";
 export * from "./audit.js";
 export * from "./auth.js";
+export * from "./data-deletions.js";
 export * from "./dimensions.js";
 export * from "./envelope.js";
 export * from "./environments.js";

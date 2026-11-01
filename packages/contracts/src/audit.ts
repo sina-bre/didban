@@ -34,6 +34,7 @@ export const AUDIT_ACTIONS = [
   "goal.deleted",
   "share_link.created",
   "share_link.revoked",
+  "data_deletion.requested",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -46,6 +47,7 @@ export const AUDIT_TARGET_TYPES = [
   "route_template",
   "goal",
   "share_link",
+  "data_deletion",
 ] as const;
 export type AuditTargetType = (typeof AUDIT_TARGET_TYPES)[number];
 
