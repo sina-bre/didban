@@ -2,6 +2,18 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-11-01 — Stage 6b (deploy, backup, restore on Linux + Windows; Overview LCP)
+
+- `deploy/` systemd unit (exposure 1.3 OK), Caddyfile (h2, CSP, health checks), Nginx sample, WinSW services;
+  `scripts/{deploy,backup,restore-check}.mjs` for Linux and Windows (owner: Windows too, no Docker). ADR 0047/0048.
+- Ubuntu 24.04 (WSL2): rolling deploy under traffic 0 errors after a fix: SIGTERM now drains 5 s with /ready 503
+  (was 2/3 000 lost). Deletion job resumed on the other instance after SIGTERM. Backup + restore check OK.
+  Windows: deploy (junction), backup, restore-check OK; WinSW services need an admin (not run). docs/deployment.md.
+- `?range=` stats (ADR 0046): Overview stats start with the project. Lighthouse behind Caddy h2: Overview en
+  2.0 s, fa 2.2 s, all pages ≤ 2.5 s; gain is h2, not the range (same LCP before/after). COOP breaks LH traces.
+- Checks: lint, typecheck, build ok (135.6 KB gz); test 40 + 68 + 156 + 250 + 5 (earlier runs: dashboard findBy
+  under load, a killed run's leftover test function); e2e 36/36. **Next:** 6c `/metrics`, load, `pnpm audit`.
+
 ## 2026-11-01 — Stage 6a (job runner, retention, data deletion)
 
 - Stage 6 split into 6a–6d (`docs/plan/phases.md`); design-system README muted token fixed.
