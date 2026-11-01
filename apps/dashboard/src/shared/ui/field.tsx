@@ -79,7 +79,7 @@ export function SelectField({
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, { label, hint, error })}
-        className={`${CONTROL} ${className}`}
+        className={`${CONTROL} min-w-28 ${className}`}
         {...rest}
       >
         {children}
