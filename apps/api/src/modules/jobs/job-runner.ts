@@ -8,6 +8,7 @@ import {
 import { ENV } from "../../config/config.module.js";
 import type { Env } from "../../config/env.js";
 import { SQL, type Sql } from "../../db/db.module.js";
+import { Metrics } from "../metrics/metrics.js";
 import { type JobContext, JobStopped } from "./chunked-delete.js";
 import { runDeletions } from "./deletion-job.js";
 import { withJobLock } from "./job-lock.js";
@@ -32,6 +33,7 @@ export class JobRunner implements OnModuleInit, BeforeApplicationShutdown {
   constructor(
     @Inject(SQL) private readonly sql: Sql,
     @Inject(ENV) private readonly env: Env,
+    private readonly metrics: Metrics,
   ) {}
 
   onModuleInit(): void {
@@ -76,6 +78,7 @@ export class JobRunner implements OnModuleInit, BeforeApplicationShutdown {
   private async run(ctx: JobContext, job: JobName, work: () => Promise<number>): Promise<void> {
     const started = Date.now();
     const rows = await recordRun(ctx.sql, job, work);
+    this.metrics.jobRowsDeleted.inc({ job }, rows);
     if (rows > 0 || job === "retention") {
       this.logger.log(`${job}: ${rows} rows deleted in ${Date.now() - started} ms`);
     }

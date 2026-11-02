@@ -1,6 +1,7 @@
 import { EVENT_SOURCES } from "@didban/contracts";
 import { Injectable } from "@nestjs/common";
 import { EventWriter } from "../events/event-writer.js";
+import { Metrics } from "../metrics/metrics.js";
 import { EnrichBatch } from "./enrich/enrich-batch.js";
 import { IdentifyBatch } from "./identify-batch.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
@@ -19,10 +20,13 @@ export type IngestInput = IngestRequest & { userAgent: string | undefined };
 
 const RETRYABLE_PG_CODES = new Set(["40001", "40P01", "55P03", "57014", "53300", "57P01", "08006"]);
 
-function isRetryable(error: unknown): boolean {
+/** The PostgreSQL / driver code of a retryable failure, or null. */
+function retryableCode(error: unknown): string | null {
   const code = (error as { code?: unknown })?.code;
-  if (typeof code !== "string") return false;
-  return RETRYABLE_PG_CODES.has(code) || code.startsWith("CONNECT") || code.startsWith("ECONN");
+  if (typeof code !== "string") return null;
+  const retryable =
+    RETRYABLE_PG_CODES.has(code) || code.startsWith("CONNECT") || code.startsWith("ECONN");
+  return retryable ? code : null;
 }
 
 @Injectable()
@@ -33,11 +37,13 @@ export class IngestBatch {
     private readonly identify: IdentifyBatch,
     private readonly writer: EventWriter,
     private readonly diagnostics: IngestDiagnostics,
+    private readonly metrics: Metrics,
   ) {}
 
   async execute(input: IngestInput): Promise<IngestResult> {
     const batch = await this.prepare.execute(input);
     const { key } = batch;
+    this.metrics.batchSize.observe(batch.events.length + batch.rejected.length);
     const client = { ip: input.ip, userAgent: input.userAgent };
     const enriched = this.enrich.execute(batch, client);
     const identified = await this.identify.execute(key, enriched.events, client);
@@ -53,13 +59,17 @@ export class IngestBatch {
         this.diagnostics.record(key, "PAGES_SEEN_OVERFLOW", written.pagesOverflowed);
       if (written.duplicates > 0)
         this.diagnostics.record(key, "DUPLICATE_EVENT", written.duplicates);
+      const accepted = written.inserted + enriched.filtered + identified.filtered;
+      this.metrics.ingestEvents.inc({ outcome: "accepted", code: "" }, accepted);
       return {
-        accepted: written.inserted + enriched.filtered + identified.filtered,
+        accepted,
         duplicates: written.duplicates,
         rejected: [...batch.rejected, ...identified.rejected].sort((a, b) => a.index - b.index),
       };
     } catch (error) {
-      if (!isRetryable(error)) throw error;
+      const cause = retryableCode(error);
+      if (cause === null) throw error;
+      this.metrics.ingestUnavailable.inc({ cause });
       this.diagnostics.record(key, "SERVICE_UNAVAILABLE");
       throw ingestError("SERVICE_UNAVAILABLE", "Event storage is temporarily unavailable");
     }

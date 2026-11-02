@@ -18,7 +18,10 @@ export class StatsGate {
   private readonly slots = new Map<string, Slot>();
   private readonly cache = new Map<string, Cached>();
 
-  constructor(private readonly now: () => number = Date.now) {}
+  constructor(
+    private readonly now: () => number = Date.now,
+    private readonly onLimited: () => void = () => {},
+  ) {}
 
   async run<T>(projectId: string, key: string | null, work: () => Promise<T>): Promise<T> {
     const cacheKey = key === null ? null : `${projectId}|${key}`;
@@ -56,6 +59,7 @@ export class StatsGate {
       };
       const timer = setTimeout(() => {
         slot.waiting = slot.waiting.filter((g) => g !== grant);
+        this.onLimited();
         reject(
           new AppError(429, "RATE_LIMITED", "Too many stats queries for this project", {
             "retry-after": "1",

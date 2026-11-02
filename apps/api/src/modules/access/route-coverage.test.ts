@@ -17,6 +17,8 @@ const PUBLIC_ALLOWLIST = [
   "OPTIONS ingest/batch",
   "GET share",
   "GET share/stats/:report",
+  // No session, but a bearer token (METRICS_TOKEN) and outside /api/v1 (ADR 0049).
+  "GET metrics",
 ];
 
 type Route = { route: string; isPublic: boolean; permission: unknown };

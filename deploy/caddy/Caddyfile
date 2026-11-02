@@ -22,6 +22,8 @@
 		-Server
 	}
 
+	# Only /api/* reaches the API: GET /metrics (outside /api) is scraped on 127.0.0.1:510x
+	# directly with a bearer token and is never proxied (spec §15, ADR 0049).
 	handle /api/* {
 		reverse_proxy 127.0.0.1:5101 127.0.0.1:5102 {
 			lb_policy round_robin

@@ -72,6 +72,9 @@ root, restart both instances one after the other. Migrations are expand/contract
   folder off the box. Monthly: `restore-check.mjs` (Linux: `sudo -u postgres node …`; Windows:
   `node --env-file=…\backup.env …`, with `DIDBAN_SCRATCH_DB` if the role lacks CREATEDB), then
   record the date below.
+- **Metrics:** set `METRICS_TOKEN` (≥ 32 chars) in the env file; Prometheus on the box scrapes
+  `127.0.0.1:5101/metrics` and `:5102` with `authorization: { credentials_file: … }` (the proxy
+  never forwards `/metrics`, ADR 0049). Alerts and runbooks: `docs/operations.md`.
 
 ## Validation record
 **2026-11-01, Stage 6b, Linux:** clean Ubuntu 24.04.5 LTS in WSL2 (systemd on; 6 vCPU, 7.7 GB),

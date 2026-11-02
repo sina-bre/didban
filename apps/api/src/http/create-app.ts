@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { LIMITS } from "@didban/contracts";
-import { ConsoleLogger } from "@nestjs/common";
+import { ConsoleLogger, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { AppModule } from "../app.module.js";
 import type { Env } from "../config/env.js";
+import { httpMetricsHook } from "../modules/metrics/http-metrics.js";
+import { Metrics } from "../modules/metrics/metrics.js";
 import { csrfHook } from "./csrf-hook.js";
 import { ErrorFilter } from "./error-filter.js";
 import { ingestCorsHook } from "./ingest-cors.js";
@@ -45,8 +47,10 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule.register(env), adapter, {
     logger: nestLogger(env),
   });
+  adapter.getInstance().addHook("onResponse", httpMetricsHook(app.get(Metrics)));
   useJsonBodyParser(app, LIMITS.maxBodyBytes);
-  app.setGlobalPrefix("api/v1");
+  // `/metrics` stays at the root, outside the `/api/*` path the proxies forward (ADR 0049).
+  app.setGlobalPrefix("api/v1", { exclude: [{ path: "metrics", method: RequestMethod.GET }] });
   app.useGlobalFilters(new ErrorFilter());
   // Signals are handled in main.ts (graceful-shutdown.ts), not by Nest: drain before closing.
   return app;
