@@ -1,5 +1,5 @@
 import { EVENT_SOURCES } from "@didban/contracts";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { EventWriter } from "../events/event-writer.js";
 import { Metrics } from "../metrics/metrics.js";
 import { EnrichBatch } from "./enrich/enrich-batch.js";
@@ -31,6 +31,8 @@ function retryableCode(error: unknown): string | null {
 
 @Injectable()
 export class IngestBatch {
+  private readonly logger = new Logger(IngestBatch.name);
+
   constructor(
     private readonly prepare: PrepareBatch,
     private readonly enrich: EnrichBatch,
@@ -70,6 +72,7 @@ export class IngestBatch {
       const cause = retryableCode(error);
       if (cause === null) throw error;
       this.metrics.ingestUnavailable.inc({ cause });
+      this.logger.warn(`ingest 503: ${cause} (${(error as Error).message.slice(0, 120)})`);
       this.diagnostics.record(key, "SERVICE_UNAVAILABLE");
       throw ingestError("SERVICE_UNAVAILABLE", "Event storage is temporarily unavailable");
     }
