@@ -6,3 +6,10 @@ packages:
   - tools/*
 allowBuilds:
   '@swc/core': true
+# pnpm audit fixes (Stage 6c, ADR 0051): patched versions the parents pin or have not picked up yet.
+overrides:
+  fastify@5.12.5: 5.12.6
+  fast-uri@>=3.0.0 <3.1.9: 3.1.9
+  fast-uri@>=4.0.0 <4.2.3: 4.2.3
+  uuid@<11.1.1: 11.1.1
+  minimatch@<11.0.1: 11.0.1
