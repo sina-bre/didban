@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-11-02 — Stage 6d (docs, Changesets dry run, Definition-of-Done report): DoD 9/11, 2 partly
+
+- Docs audit: added spec §17 files that never existed (`api`, `architecture`, `security`, `tenancy`,
+  `privacy`, `licenses`) + `known-limitations`, `releasing`; README quickstart (said "Phase 0").
+  Root `pnpm dev`; the API watch was broken (`@swc/cli` needs `chokidar`), fixed.
+- Changesets 3.0.3 (`fixed` SDK + React; private packages unversioned, so contracts stays private
+  per A7), `.github/workflows/release.yml` (publish job behind environment `npm`, OIDC, SHA-pinned),
+  `pnpm release:dry-run` OK, nothing published. ADR 0052.
+- DoD report: `docs/plan/definition-of-done.md`, `final-report.md`, `dod-evidence.md`. Unmet: TOTP
+  (DoD 3), Windows services (DoD 10), clean-machine run, OpenAPI, CI, Linux load, 90-day stats at 10 M.
+- Checks, first run, in order: lint, typecheck, build ok; test 40 + 68 + 156 + 255 + 5; e2e 36/36;
+  audit 0; check:packages ok. **Next:** owner decides merge 6a–6d → develop → main (Stage 6 gate); TOTP.
+
 ## 2026-11-02 — Stage 6c (/metrics, load + abuse tests, pnpm audit, autovacuum, runbooks)
 
 - `GET /metrics` (prom-client 15.1.3, ADR 0049): outside `/api/v1` (proxies forward only `/api/*`),

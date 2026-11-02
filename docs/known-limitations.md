@@ -22,6 +22,10 @@ State at Stage 6d (2026-11-02). Each line says what is missing or unproven and w
   server. TLS was Caddy's internal CA, not ACME.
 - **Windows services were never installed** (WinSW for the API and Caddy, Task Scheduler backup):
   that needs an administrator. Deploy, backup and restore-check ran without services.
+- **Large stats ranges are slow at 10 M events in one project** (PostgreSQL defaults, dev box):
+  30-day overview 3.3 s, 90-day top pages and event-property keys exceed the 10 s timeout. The
+  dashboard defaults to 30 days; spec §20's rollup trigger (overview p95 > 500 ms on 30 days) is
+  met at that volume ([database](database.md)). Not re-measured with production PostgreSQL tuning.
 - Lighthouse LCP behind Caddy h2 was measured without the COOP header (Lighthouse 13.6 + Chrome
   156 fail with it: NO_NAVSTART).
 
