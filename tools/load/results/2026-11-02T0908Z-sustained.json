@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-02T09:08:57.128Z",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz (6 logical)",
+    "memoryGb": 16,
+    "os": "Windows_NT 10.0.19045",
+    "node": "v24.18.0",
+    "postgres": {
+      "autovacuum_vacuum_insert_scale_factor": "0.2",
+      "autovacuum_vacuum_scale_factor": "0.2",
+      "fsync": "on",
+      "max_connections": "100",
+      "server_version": "18.4",
+      "shared_buffers": "16384 8kB",
+      "synchronous_commit": "on",
+      "wal_level": "replica",
+      "work_mem": "4096 kB"
+    },
+    "note": "client (autocannon), API and PostgreSQL share this machine"
+  },
+  "api": {
+    "TRUST_PROXY": "1",
+    "DB_POOL_MAX": "10",
+    "INGEST_RATE_PER_KEY": "1000000",
+    "METRICS_TOKEN": "(set)",
+    "INGEST_INSERT_CHUNK": "500 (default)",
+    "NODE_ENV": "production"
+  },
+  "results": {
+    "sustained": {
+      "about": "steady SDK traffic: 20 connections, 5-event batches, 5000 visitors",
+      "http": {
+        "durationS": 60.12,
+        "connections": 20,
+        "requests": 19341,
+        "requestsPerS": 321.7065868263473,
+        "batchesOkPerS": 321.7065868263473,
+        "eventsOkPerS": 1608.5329341317365,
+        "latencyMs": {
+          "p50": 48.0643,
+          "p95": 95.5021,
+          "p99": 418.8094,
+          "max": 2605.4953
+        },
+        "statuses": {
+          "200": 19341
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 38905,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 96805,
+        "visits": 4900,
+        "busyMax": 10,
+        "busyAvg": 9.822784810126583,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 234,
+        "samples": 237,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 1373,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 37,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 16,
+          "transactionid:  INSERT INTO project_usage_daily (project_id, day, events) V": 2
+        }
+      },
+      "api": {
+        "rssMaxMb": 310.19140625,
+        "cpuAvg": 86.00622709666173
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 19341,
+        "didban_ingest_request_duration_seconds_sum": 1181.0311221000088,
+        "didban_ingest_request_duration_seconds_count": 19341,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 96805,
+        "didban_ingest_batch_size_sum": 96805,
+        "didban_ingest_batch_size_count": 19361,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 576.6434981999968,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 19361,
+        "didban_db_pool_wait_seconds_sum": 272.54738239999966,
+        "didban_db_pool_wait_seconds_count": 19361,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793610534.654,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793610534.623
+      }
+    }
+  }
+}

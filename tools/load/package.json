@@ -7,7 +7,8 @@
     "load": "node --env-file-if-exists=../../.env src/run.mjs",
     "seed:large": "node --env-file-if-exists=../../.env src/seed-large.mjs",
     "explain": "node --env-file-if-exists=../../.env src/explain-stats.mjs",
-    "explain:jobs": "node --env-file-if-exists=../../.env src/explain-jobs.mjs"
+    "explain:jobs": "node --env-file-if-exists=../../.env src/explain-jobs.mjs",
+    "vacuum:check": "node --env-file-if-exists=../../.env src/vacuum-check.mjs"
   },
   "devDependencies": {
     "autocannon": "8.0.0",
