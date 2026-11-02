@@ -1,0 +1,10 @@
+14:12:47 vacuumed: 2.3 ms, 5 buffers
+14:14:34 deleted 690158 events older than 2026-08-16T11:13:10.477Z
+14:19:14 after delete: 280123.2 ms, 1231725 buffers
+14:19:15 defaults (20 %) start {"n_live_tup":"6136521","n_dead_tup":"676830","last_autovacuum":"2026-11-02T11:54:52.190Z","autovacuum_count":"48","options":null}
+14:23:15 defaults (20 %) end {"n_live_tup":"6136521","n_dead_tup":"676830","last_autovacuum":"2026-11-02T11:54:52.190Z","autovacuum_count":"48","options":null}
+14:23:18 defaults (20 %): probe: 3170.5 ms, 6365 buffers
+14:23:18 migration 0015 (2 %) start {"n_live_tup":"6136521","n_dead_tup":"676830","last_autovacuum":"2026-11-02T11:54:52.190Z","autovacuum_count":"48","options":["autovacuum_vacuum_scale_factor=0.02","autovacuum_vacuum_insert_scale_factor=0.05","autovacuum_analyze_scale_factor=0.02"]}
+14:27:18 migration 0015 (2 %) end {"n_live_tup":"6136521","n_dead_tup":"676830","last_autovacuum":"2026-11-02T11:54:52.190Z","autovacuum_count":"48","options":["autovacuum_vacuum_scale_factor=0.02","autovacuum_vacuum_insert_scale_factor=0.05","autovacuum_analyze_scale_factor=0.02"]}
+14:27:18 migration 0015 (2 %): probe: 0.2 ms, 7 buffers
+14:30:05 autovacuum of events finished (autovacuum_count 48 → 49, n_dead_tup 676830 → 0), polled from pg_stat_user_tables

@@ -43,7 +43,8 @@ async function waitForAutovacuum(label) {
   const end = Date.now() + WAIT_MS;
   while (Date.now() < end) {
     await new Promise((resolve) => setTimeout(resolve, 10_000));
-    const [row] = await sql`SELECT autovacuum_count FROM pg_stat_user_tables WHERE relname = 'events'`;
+    const [row] =
+      await sql`SELECT autovacuum_count FROM pg_stat_user_tables WHERE relname = 'events'`;
     if (Number(row.autovacuum_count) > before) break;
   }
   await tableState(`${label} end`);
