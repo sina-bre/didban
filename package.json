@@ -9,6 +9,7 @@
     "pnpm": ">=11"
   },
   "scripts": {
+    "dev": "pnpm --parallel -F @didban/api -F @didban/dashboard dev",
     "lint": "biome check . && node scripts/check-file-size.mjs && node scripts/check-logical-css.mjs",
     "format": "biome check --write .",
     "typecheck": "pnpm -r --if-present typecheck",
