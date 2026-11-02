@@ -1,5 +1,5 @@
-// Abuse cases of DoD 7 beyond `abusive`: oversized bodies, a disallowed Origin, a bot flood (many
-// IPs, crawler UA: filtered, answered 200) and a revoked-looking key, mixed with real SDK batches.
+// Abuse cases of DoD 7 beyond `abusive`: oversized bodies; a disallowed Origin and a bot flood
+// (many IPs, crawler UA: filtered, answered 200) mixed with real SDK batches.
 import { batchBody, SITE, visitor } from "./batch.mjs";
 
 const PATH = "/api/v1/ingest/batch";
@@ -12,10 +12,15 @@ function request(writeKey, { ip, ua, origin = SITE, body }) {
   return { method: "POST", path: PATH, headers, body: body ?? batchBody(writeKey, 5, 0) };
 }
 
+/** 130 KiB bodies only: Fastify must answer 413 without reading them into the app. */
+export function oversizedTraffic(writeKey) {
+  let n = 0;
+  return () => request(writeKey, { ...visitor(n++), body: `{"pad":"${OVERSIZED}"}` });
+}
+
 export function hostileTraffic(writeKey) {
   let n = 0;
   const kinds = [
-    () => request(writeKey, { ...visitor(n), body: `{"pad":"${OVERSIZED}"}` }),
     () => request(writeKey, { ...visitor(n), origin: "https://evil.example" }),
     () => request(writeKey, { ip: visitor(n).ip, ua: BOT_UA }),
     () => request(writeKey, { ...visitor(n) }), // real traffic must still get through

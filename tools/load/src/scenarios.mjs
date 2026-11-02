@@ -1,7 +1,7 @@
 // Load scenarios (spec §16): sustained ingestion, burst, mixed ingestion + stats, abusive input. Each request is built
 // fresh (new UUIDv7s, sentAt = now). Visitors arrive through one trusted proxy hop (X-Forwarded-For).
 import { batchBody, SITE, visitor } from "./batch.mjs";
-import { hostileTraffic } from "./hostile.mjs";
+import { hostileTraffic, oversizedTraffic } from "./hostile.mjs";
 import { statsTraffic } from "./stats-traffic.mjs";
 
 const PATH = "/api/v1/ingest/batch";
@@ -61,8 +61,14 @@ export const SCENARIOS = {
     build: (key) => abusiveTraffic(key),
     eventsPerBatch: 5,
   },
+  oversized: {
+    about: "oversized: 130 KiB bodies (limit 128 KiB), 20 connections",
+    options: { connections: 20, duration: 20 },
+    build: (key) => oversizedTraffic(key),
+    eventsPerBatch: 0,
+  },
   hostile: {
-    about: "hostile: 130 KiB bodies, bad Origin, Googlebot flood from many IPs, + real batches",
+    about: "hostile: bad Origin, Googlebot flood from many IPs, + real SDK batches, in turn",
     options: { connections: 50, duration: 20 },
     build: (key) => hostileTraffic(key),
     eventsPerBatch: 5,
