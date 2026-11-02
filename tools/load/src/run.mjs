@@ -8,11 +8,18 @@ import { delta, sampleActivity, snapshot } from "./db-stats.mjs";
 import { describeEnvironment, localDatabaseUrl } from "./environment.mjs";
 import { runScenario } from "./run-scenario.mjs";
 import { SCENARIOS } from "./scenarios.mjs";
+import { METRICS_TOKEN, scrapeMetrics } from "./scrape-metrics.mjs";
 import { seedTarget } from "./seed.mjs";
+import { seedShareToken } from "./stats-traffic.mjs";
 
 // The API under test. One write key carries all traffic, so its per-key limit is lifted; the
 // per-IP limit stays at its default (the abusive scenario measures it).
-const API_SETTINGS = { TRUST_PROXY: "1", DB_POOL_MAX: "10", INGEST_RATE_PER_KEY: "1000000" };
+const API_SETTINGS = {
+  TRUST_PROXY: "1",
+  DB_POOL_MAX: "10",
+  INGEST_RATE_PER_KEY: "1000000",
+  METRICS_TOKEN,
+};
 const PORT = 5390;
 
 const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(SCENARIOS);
@@ -22,6 +29,7 @@ if (unknown.length) throw new Error(`unknown scenario(s): ${unknown.join(", ")}`
 const databaseUrl = localDatabaseUrl("TEST_DATABASE_URL");
 const sql = postgres(databaseUrl, { max: 2, onnotice: () => {} });
 const target = await seedTarget(sql);
+const shareToken = await seedShareToken(sql, target.projectId);
 const api = await startApi({ databaseUrl, port: PORT, settings: API_SETTINGS });
 const results = {};
 try {
@@ -31,7 +39,10 @@ try {
     const before = await snapshot(sql, target.projectId);
     const firstSample = api.samples.length;
     const stopSampling = sampleActivity(sql);
-    const http = await runScenario(api.base, scenario, target.writeKey);
+    const [http, stats] = await Promise.all([
+      runScenario(api.base, scenario, target.writeKey),
+      scenario.stats ? runScenario(api.base, scenario.stats, shareToken) : undefined,
+    ]);
     const activity = await stopSampling();
     await new Promise((resolve) => setTimeout(resolve, 2000)); // let in-flight batches commit
     const db = delta(before, await snapshot(sql, target.projectId));
@@ -41,8 +52,10 @@ try {
     results[name] = {
       about: scenario.about,
       http,
+      ...(stats ? { stats } : {}),
       db: { ...db, ...activity },
       api: { rssMaxMb, cpuAvg },
+      metricsSinceApiStart: await scrapeMetrics(api.base),
     };
     console.log(JSON.stringify(results[name], null, 2));
   }
@@ -52,7 +65,12 @@ try {
 const report = {
   date: new Date().toISOString(),
   environment: await describeEnvironment(sql),
-  api: { ...API_SETTINGS, INGEST_INSERT_CHUNK: "500 (default)", NODE_ENV: "production" },
+  api: {
+    ...API_SETTINGS,
+    METRICS_TOKEN: "(set)",
+    INGEST_INSERT_CHUNK: "500 (default)",
+    NODE_ENV: "production",
+  },
   results,
 };
 await sql.end();
