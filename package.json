@@ -20,11 +20,14 @@
     "check:packages": "node scripts/check-packages.mjs",
     "db:setup": "node scripts/dev-db.mjs",
     "db:migrate": "pnpm -C apps/api migrate",
-    "db:migrate:test": "pnpm -C apps/api migrate:test"
+    "db:migrate:test": "pnpm -C apps/api migrate:test",
+    "changeset": "changeset",
+    "release:dry-run": "node scripts/release-dry-run.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
     "@biomejs/biome": "2.5.15",
+    "@changesets/cli": "3.0.3",
     "publint": "0.3.25",
     "typescript": "6.0.3"
   }
