@@ -53,7 +53,7 @@ so the spec wins (see ADR 0004).
 
 ## Commands (exist from Stage 1)
 `pnpm dev` · `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm test:e2e` · `pnpm build` ·
-`pnpm db:migrate` · `pnpm db:seed` · `pnpm cli <cmd>` · `pnpm load` · `pnpm check:packages`
+`pnpm db:setup` · `pnpm db:migrate` · `pnpm cli <cmd>` · `pnpm load` · `pnpm check:packages` · `pnpm release:dry-run`
 
 ## Environment facts
 Windows 10 dev box, Git Bash. Node 24 LTS, pnpm 11, PostgreSQL 18 native (spec minimum 16).
