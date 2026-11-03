@@ -41,6 +41,11 @@ const envSchema = z
     JOB_DELETE_CHUNK: z.coerce.number().int().min(100).max(50_000).default(10_000),
     // ADR 0047: after SIGTERM, keep serving this long with /ready = 503 (> the proxy's health interval).
     SHUTDOWN_DRAIN_MS: z.coerce.number().int().min(0).max(20_000).default(5000),
+    // Spec §15 + ADR 0049: bearer token for `GET /metrics`; unset = the route answers 404.
+    METRICS_TOKEN: z
+      .string()
+      .regex(/^\S{32,}$/, "at least 32 non-space characters")
+      .optional(),
   })
   .superRefine((env, ctx) => {
     const url = new URL(env.PUBLIC_ORIGIN);

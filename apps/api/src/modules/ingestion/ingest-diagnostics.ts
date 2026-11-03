@@ -20,9 +20,13 @@ export class IngestDiagnostics {
   private origins = new Map<string, OriginRow>();
   private originsPerDay = new Map<string, number>();
 
-  constructor(private readonly now: () => number = Date.now) {}
+  constructor(
+    private readonly now: () => number = Date.now,
+    private readonly onCode: (code: string, count: number) => void = () => {},
+  ) {}
 
   record(target: DiagnosticTarget, code: string, count = 1): void {
+    this.onCode(code, count);
     const hour = new Date(Math.floor(this.now() / 3_600_000) * 3_600_000).toISOString();
     const id = `${target.environmentId}|${hour}|${code}`;
     const row = this.counters.get(id);

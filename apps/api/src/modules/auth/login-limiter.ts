@@ -19,7 +19,10 @@ const keys = (ip: string, email: string) => ({
 export class LoginLimiter {
   private readonly buckets = new Map<string, Bucket>();
 
-  constructor(private readonly now: () => number = Date.now) {}
+  constructor(
+    private readonly now: () => number = Date.now,
+    private readonly onLimited: () => void = () => {},
+  ) {}
 
   /** Seconds the caller must wait before this attempt may run; 0 = go ahead. */
   retryAfter(ip: string, email: string): number {
@@ -30,6 +33,7 @@ export class LoginLimiter {
       this.hardWait(key.pair, MAX_PER_PAIR, now),
       this.accountWait(key.account, now),
     );
+    if (waitMs > 0) this.onLimited();
     return Math.max(0, Math.ceil(waitMs / 1000));
   }
 

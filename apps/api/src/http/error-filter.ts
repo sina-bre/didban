@@ -1,5 +1,6 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { noteErrorCode } from "../modules/metrics/http-metrics.js";
 import { AppError } from "./app-error.js";
 
 // Fixed public messages: never echo the request (URLs can carry tokens; spec §11 needs identical
@@ -38,6 +39,7 @@ export class ErrorFilter implements ExceptionFilter {
     const reply = http.getResponse<FastifyReply>();
     const mapped = map(error);
     if (mapped.status === 500) request.log.error({ err: error }, "unhandled error");
+    noteErrorCode(request, mapped.code);
     reply
       .headers(mapped.headers)
       .status(mapped.status)

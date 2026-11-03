@@ -14,6 +14,7 @@ import { GoalsModule } from "./modules/goals/goals.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { IngestionModule } from "./modules/ingestion/ingestion.module.js";
 import { JobsModule } from "./modules/jobs/jobs.module.js";
+import { MetricsModule } from "./modules/metrics/metrics.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
 import { ProjectsModule } from "./modules/projects/projects.module.js";
 import { RoutesModule } from "./modules/routes/routes.module.js";
@@ -21,7 +22,7 @@ import { SharesModule } from "./modules/shares/shares.module.js";
 import { UsersModule } from "./modules/users/users.module.js";
 
 /**
- * INSTANCE_ROLE (spec §14.0) decides which feature modules are mounted. Health is always on.
+ * INSTANCE_ROLE (spec §14.0) decides which feature modules are mounted. Health + metrics: always.
  * Ingestion joins for `all|ingest`, management modules (and the job runner) for `all|management`.
  */
 @Module({})
@@ -51,6 +52,7 @@ export class AppModule {
       module: AppModule,
       imports: [
         ConfigModule.register(env),
+        MetricsModule,
         DbModule.register(env),
         HealthModule,
         DiagnosticsModule,

@@ -6,6 +6,7 @@ import { SQL, type Sql } from "../../db/db.module.js";
 import { AppError } from "../../http/app-error.js";
 import { RecentRejections } from "../diagnostics/recent-rejections.js";
 import type { ResolvedKey } from "../key-cache/write-key-cache.js";
+import { Metrics } from "../metrics/metrics.js";
 import { isOverQuota } from "./check-quota.js";
 import { IngestDiagnostics } from "./ingest-diagnostics.js";
 import { ingestError } from "./ingest-error.js";
@@ -31,6 +32,7 @@ export class PrepareBatch {
     private readonly limiter: IngestRateLimiter,
     private readonly diagnostics: IngestDiagnostics,
     private readonly recent: RecentRejections,
+    private readonly metrics: Metrics,
   ) {}
 
   async execute(request: IngestRequest): Promise<PreparedBatch> {
@@ -62,15 +64,16 @@ export class PrepareBatch {
 
   private async checkLimits(key: ResolvedKey, ip: string): Promise<void> {
     // Server keys send from the operator's own servers: one IP for everyone, so no IP bucket.
-    const waits = [
-      key.kind === "write_browser" ? this.limiter.take(`ip:${ip}`, this.env.INGEST_RATE_PER_IP) : 0,
-      this.limiter.take(`key:${key.keyId}`, this.env.INGEST_RATE_PER_KEY),
-    ];
-    const wait = Math.max(...waits);
+    const ipWait =
+      key.kind === "write_browser" ? this.limiter.take(`ip:${ip}`, this.env.INGEST_RATE_PER_IP) : 0;
+    const keyWait = this.limiter.take(`key:${key.keyId}`, this.env.INGEST_RATE_PER_KEY);
+    const wait = Math.max(ipWait, keyWait);
     if (wait > 0) {
+      this.metrics.rateLimited.inc({ bucket: ipWait > 0 ? "ingest_ip" : "ingest_key" });
       throw ingestError("RATE_LIMITED", "Too many requests", { "retry-after": String(wait) });
     }
     if (await isOverQuota(this.sql, key.organizationId)) {
+      this.metrics.rateLimited.inc({ bucket: "ingest_quota" });
       const retryAfter = String(secondsToUtcMidnight(Date.now()));
       throw ingestError("QUOTA_EXCEEDED", "Daily event quota exceeded", {
         "retry-after": retryAfter,

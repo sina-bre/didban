@@ -9,6 +9,8 @@ const PG_SETTINGS = [
   "synchronous_commit",
   "wal_level",
   "fsync",
+  "autovacuum_vacuum_scale_factor",
+  "autovacuum_vacuum_insert_scale_factor",
 ];
 
 export async function describeEnvironment(sql) {

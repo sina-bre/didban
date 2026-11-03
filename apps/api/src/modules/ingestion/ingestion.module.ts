@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { EventsModule } from "../events/events.module.js";
+import { countIngestCode } from "../metrics/ingest-codes.js";
+import { Metrics } from "../metrics/metrics.js";
 import { DailySalt } from "./daily-salt.js";
 import { EnrichBatch } from "./enrich/enrich-batch.js";
 import { GeoLookup } from "./enrich/geo-lookup.js";
@@ -28,7 +30,12 @@ import { WriteKeyResolver } from "./resolve-write-key.js";
     IngestionFlusher,
     { provide: KeyUsage, useFactory: () => new KeyUsage() },
     { provide: IngestRateLimiter, useFactory: () => new IngestRateLimiter() },
-    { provide: IngestDiagnostics, useFactory: () => new IngestDiagnostics() },
+    {
+      provide: IngestDiagnostics,
+      useFactory: (metrics: Metrics) =>
+        new IngestDiagnostics(Date.now, (code, count) => countIngestCode(metrics, code, count)),
+      inject: [Metrics],
+    },
   ],
 })
 export class IngestionModule {}

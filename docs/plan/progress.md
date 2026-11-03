@@ -2,6 +2,19 @@
 
 Newest first. ≤ 10 lines per entry: what was done, checks run + result, what is next, open questions.
 
+## 2026-11-02 — Stage 6c (/metrics, load + abuse tests, pnpm audit, autovacuum, runbooks)
+
+- `GET /metrics` (prom-client 15.1.3, ADR 0049): outside `/api/v1` (proxies forward only `/api/*`),
+  bearer `METRICS_TOKEN` (unset = 404). All §15 series; pool measured by wrapping `sql.begin`; job
+  gauges from `job_runs`; 503 causes counted and logged. Route-coverage allowlist + tests updated.
+- `pnpm load`: + `mixed` (ingest + share-view stats), `oversized`, `hostile`; abuse behaves as
+  specified (400/401/403/413/429, bots filtered). Throughput budgets broken today; the 3f baseline
+  commit breaks them too on this busy box (±20 % spread), so not a regression. docs/load-baseline.md.
+- Autovacuum 2 % on `events`/`visits` (migration 0015, ADR 0050: a post-delete probe 280 s → 0.2 ms).
+  `pnpm audit`: 11 low/moderate fixed via fastify 5.12.6 + overrides, 0 left (ADR 0051). docs/operations.md.
+- Checks in order: lint, typecheck, build ok; test 40 + 68 + 156 + 255 + 5 (first run: 4 dashboard
+  + 2 API timeouts under load, rerun green); e2e 36/36 (first run 27 failed with login 401 under the same load; rerun green). **Next:** 6d.
+
 ## 2026-11-01 — Stage 6b (deploy, backup, restore on Linux + Windows; Overview LCP)
 
 - `deploy/` systemd unit (exposure 1.3 OK), Caddyfile (h2, CSP, health checks), Nginx sample, WinSW services;

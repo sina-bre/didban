@@ -1,0 +1,447 @@
+{
+  "date": "2026-11-02T09:24:11.461Z",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz (6 logical)",
+    "memoryGb": 16,
+    "os": "Windows_NT 10.0.19045",
+    "node": "v24.18.0",
+    "postgres": {
+      "autovacuum_vacuum_insert_scale_factor": "0.2",
+      "autovacuum_vacuum_scale_factor": "0.2",
+      "fsync": "on",
+      "max_connections": "100",
+      "server_version": "18.4",
+      "shared_buffers": "16384 8kB",
+      "synchronous_commit": "on",
+      "wal_level": "replica",
+      "work_mem": "4096 kB"
+    },
+    "note": "client (autocannon), API and PostgreSQL share this machine"
+  },
+  "api": {
+    "TRUST_PROXY": "1",
+    "DB_POOL_MAX": "10",
+    "INGEST_RATE_PER_KEY": "1000000",
+    "METRICS_TOKEN": "(set)",
+    "INGEST_INSERT_CHUNK": "500 (default)",
+    "NODE_ENV": "production"
+  },
+  "results": {
+    "sustained": {
+      "about": "steady SDK traffic: 20 connections, 5-event batches, 5000 visitors",
+      "http": {
+        "durationS": 60.13,
+        "connections": 20,
+        "requests": 18948,
+        "requestsPerS": 315.1172459670713,
+        "batchesOkPerS": 315.1172459670713,
+        "eventsOkPerS": 1575.5862298353566,
+        "latencyMs": {
+          "p50": 51.5181,
+          "p95": 105.3651,
+          "p99": 293.9807,
+          "max": 2990.2078
+        },
+        "statuses": {
+          "200": 18948
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 38101,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 94840,
+        "visits": 4898,
+        "busyMax": 10,
+        "busyAvg": 9.827004219409282,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 234,
+        "samples": 237,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 1266,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 14,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 2,
+          "transactionid:  INSERT INTO project_usage_daily (project_id, day, events) V": 1
+        }
+      },
+      "api": {
+        "rssMaxMb": 309.0390625,
+        "cpuAvg": 89.2012090515357
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 18948,
+        "didban_ingest_request_duration_seconds_sum": 1179.7209757999979,
+        "didban_ingest_request_duration_seconds_count": 18948,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 94840,
+        "didban_ingest_batch_size_sum": 94840,
+        "didban_ingest_batch_size_count": 18968,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 572.9347420000036,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 18968,
+        "didban_db_pool_wait_seconds_sum": 277.2057207000005,
+        "didban_db_pool_wait_seconds_count": 18968,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611297.215,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611297.187
+      }
+    },
+    "burst": {
+      "about": "burst: 200 connections, full 20-event batches (SDK default batch size)",
+      "http": {
+        "durationS": 20.09,
+        "connections": 200,
+        "requests": 5869,
+        "requestsPerS": 292.13539074166255,
+        "batchesOkPerS": 292.13539074166255,
+        "eventsOkPerS": 5842.70781483325,
+        "latencyMs": {
+          "p50": 668.5611,
+          "p95": 771.089,
+          "p99": 1084.0525,
+          "max": 2241.8145
+        },
+        "statuses": {
+          "200": 5869
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 12393,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 121380,
+        "visits": 69,
+        "busyMax": 10,
+        "busyAvg": 9.708860759493671,
+        "lockWaitMax": 7,
+        "lockWaitSamples": 78,
+        "samples": 79,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 418,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 30,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 1
+        }
+      },
+      "api": {
+        "rssMaxMb": 362.3359375,
+        "cpuAvg": 96.86537809774572
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 24817,
+        "didban_ingest_request_duration_seconds_sum": 5095.658666899998,
+        "didban_ingest_request_duration_seconds_count": 24817,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 216220,
+        "didban_ingest_batch_size_sum": 216220,
+        "didban_ingest_batch_size_count": 25037,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 768.418762700002,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 25037,
+        "didban_db_pool_wait_seconds_sum": 2198.2407072000096,
+        "didban_db_pool_wait_seconds_count": 25037,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611297.215,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611297.187
+      }
+    },
+    "mixed": {
+      "about": "sustained ingestion + 3 connections reading share-view stats (6 reports, 24 ranges)",
+      "http": {
+        "durationS": 60.1,
+        "connections": 20,
+        "requests": 18570,
+        "requestsPerS": 308.9850249584027,
+        "batchesOkPerS": 308.9850249584027,
+        "eventsOkPerS": 1544.9251247920133,
+        "latencyMs": {
+          "p50": 52.8839,
+          "p95": 113.9706,
+          "p99": 313.8532,
+          "max": 3142.7254
+        },
+        "statuses": {
+          "200": 18570
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "stats": {
+        "durationS": 60.11,
+        "connections": 3,
+        "requests": 6457,
+        "requestsPerS": 107.41973049409417,
+        "batchesOkPerS": 107.41973049409417,
+        "eventsOkPerS": 0,
+        "latencyMs": {
+          "p50": 18.5845,
+          "p95": 37.9283,
+          "p99": 431.2174,
+          "max": 1778.2521000000002
+        },
+        "statuses": {
+          "200": 6457
+        },
+        "errorRate": 0,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 44452,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 92950,
+        "visits": 31,
+        "busyMax": 13,
+        "busyAvg": 10,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 236,
+        "samples": 238,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 1166,
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 5,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 18
+        }
+      },
+      "api": {
+        "rssMaxMb": 362.47265625,
+        "cpuAvg": 85.19274497459534
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 43387,
+        "didban_ingest_request_duration_seconds_sum": 6274.3501247,
+        "didban_ingest_request_duration_seconds_count": 43387,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 309170,
+        "didban_ingest_batch_size_sum": 309170,
+        "didban_ingest_batch_size_count": 43627,
+        "didban_stats_request_duration_seconds_sum{endpoint=\"share/stats/:report\",status=\"200\"}": 171.42433109999936,
+        "didban_stats_request_duration_seconds_count{endpoint=\"share/stats/:report\",status=\"200\"}": 6460,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 1294.2681610999985,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 43627,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_only\",outcome=\"commit\"}": 50.37565959999993,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_only\",outcome=\"commit\"}": 98,
+        "didban_db_pool_wait_seconds_sum": 2500.89409740001,
+        "didban_db_pool_wait_seconds_count": 43725,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611357.243,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611357.201
+      }
+    },
+    "abusive": {
+      "about": "abusive: malformed JSON, unknown key, one-IP flood past INGEST_RATE_PER_IP",
+      "http": {
+        "durationS": 20.01,
+        "connections": 50,
+        "requests": 61609,
+        "requestsPerS": 3078.910544727636,
+        "batchesOkPerS": 29.98500749625187,
+        "eventsOkPerS": 149.92503748125935,
+        "latencyMs": {
+          "p50": 13.0471,
+          "p95": 19.9538,
+          "p99": 63.924,
+          "max": 4728.1764
+        },
+        "statuses": {
+          "200": 600,
+          "400": 20537,
+          "401": 20536,
+          "429": 19936
+        },
+        "errorRate": 0.9902611631417487,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 1737,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 3000,
+        "visits": 1,
+        "busyMax": 10,
+        "busyAvg": 3.125,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 28,
+        "samples": 80,
+        "blockedOn": {
+          "advisory: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))": 211
+        }
+      },
+      "api": {
+        "rssMaxMb": 366.6640625,
+        "cpuAvg": 88.35493678421074
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 43987,
+        "didban_ingest_requests_total{status=\"400\",code=\"INVALID_JSON\"}": 20553,
+        "didban_ingest_requests_total{status=\"401\",code=\"INVALID_WRITE_KEY\"}": 20553,
+        "didban_ingest_requests_total{status=\"429\",code=\"RATE_LIMITED\"}": 19953,
+        "didban_ingest_request_duration_seconds_sum": 6494.736373999708,
+        "didban_ingest_request_duration_seconds_count": 105046,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 312170,
+        "didban_ingest_batch_size_sum": 312170,
+        "didban_ingest_batch_size_count": 44227,
+        "didban_rate_limit_rejections_total{bucket=\"ingest_ip\"}": 19953,
+        "didban_stats_request_duration_seconds_sum{endpoint=\"share/stats/:report\",status=\"200\"}": 171.42433109999936,
+        "didban_stats_request_duration_seconds_count{endpoint=\"share/stats/:report\",status=\"200\"}": 6460,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 1358.0369330999965,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 44227,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_only\",outcome=\"commit\"}": 50.37565959999993,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_only\",outcome=\"commit\"}": 98,
+        "didban_db_pool_wait_seconds_sum": 2575.73128240001,
+        "didban_db_pool_wait_seconds_count": 44325,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611357.243,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611357.201
+      }
+    },
+    "oversized": {
+      "about": "oversized: 130 KiB bodies (limit 128 KiB), 20 connections",
+      "http": {
+        "durationS": 20.19,
+        "connections": 20,
+        "requests": 13921,
+        "requestsPerS": 689.4997523526498,
+        "batchesOkPerS": 0,
+        "eventsOkPerS": 0,
+        "latencyMs": {
+          "p50": 5242.7677,
+          "p95": 8392.7934,
+          "p99": 8787.9104,
+          "max": 8955.8443
+        },
+        "statuses": {
+          "413": 13921
+        },
+        "errorRate": 1,
+        "connectionErrors": 14040,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 136,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 0,
+        "visits": 0,
+        "busyMax": 0,
+        "busyAvg": 0,
+        "lockWaitMax": 0,
+        "lockWaitSamples": 0,
+        "samples": 64,
+        "blockedOn": {}
+      },
+      "api": {
+        "rssMaxMb": 392.484375,
+        "cpuAvg": 82.99945362879609
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 43987,
+        "didban_ingest_requests_total{status=\"400\",code=\"INVALID_JSON\"}": 20553,
+        "didban_ingest_requests_total{status=\"401\",code=\"INVALID_WRITE_KEY\"}": 20553,
+        "didban_ingest_requests_total{status=\"429\",code=\"RATE_LIMITED\"}": 19953,
+        "didban_ingest_requests_total{status=\"413\",code=\"PAYLOAD_TOO_LARGE\"}": 14102,
+        "didban_ingest_request_duration_seconds_sum": 6499.061013899684,
+        "didban_ingest_request_duration_seconds_count": 119148,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 312170,
+        "didban_ingest_batch_size_sum": 312170,
+        "didban_ingest_batch_size_count": 44227,
+        "didban_rate_limit_rejections_total{bucket=\"ingest_ip\"}": 19953,
+        "didban_stats_request_duration_seconds_sum{endpoint=\"share/stats/:report\",status=\"200\"}": 171.42433109999936,
+        "didban_stats_request_duration_seconds_count{endpoint=\"share/stats/:report\",status=\"200\"}": 6460,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 1358.0369330999965,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 44227,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_only\",outcome=\"commit\"}": 50.37565959999993,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_only\",outcome=\"commit\"}": 98,
+        "didban_db_pool_wait_seconds_sum": 2575.73128240001,
+        "didban_db_pool_wait_seconds_count": 44325,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611417.157,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611417.151
+      }
+    },
+    "hostile": {
+      "about": "hostile: bad Origin, Googlebot flood from many IPs, + real SDK batches, in turn",
+      "http": {
+        "durationS": 20.03,
+        "connections": 50,
+        "requests": 15500,
+        "requestsPerS": 773.8392411382926,
+        "batchesOkPerS": 515.0773839241137,
+        "eventsOkPerS": 2575.386919620569,
+        "latencyMs": {
+          "p50": 49.5218,
+          "p95": 154.4649,
+          "p99": 243.0184,
+          "max": 2794.0056
+        },
+        "statuses": {
+          "200": 10317,
+          "403": 5183
+        },
+        "errorRate": 0.33438709677419354,
+        "connectionErrors": 0,
+        "timeouts": 0
+      },
+      "db": {
+        "commits": 15248,
+        "rollbacks": 0,
+        "deadlocks": 0,
+        "events": 25915,
+        "visits": 3518,
+        "busyMax": 10,
+        "busyAvg": 9.675,
+        "lockWaitMax": 9,
+        "lockWaitSamples": 79,
+        "samples": 80,
+        "blockedOn": {
+          "transactionid:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 422,
+          "tuple:  INSERT INTO pages_seen (\"hostname\",\"route\",\"first_seen_at\",": 19
+        }
+      },
+      "api": {
+        "rssMaxMb": 388.5234375,
+        "cpuAvg": 91.41741240634833
+      },
+      "metricsSinceApiStart": {
+        "didban_ingest_requests_total{status=\"200\",code=\"\"}": 54305,
+        "didban_ingest_requests_total{status=\"400\",code=\"INVALID_JSON\"}": 20553,
+        "didban_ingest_requests_total{status=\"401\",code=\"INVALID_WRITE_KEY\"}": 20553,
+        "didban_ingest_requests_total{status=\"429\",code=\"RATE_LIMITED\"}": 19953,
+        "didban_ingest_requests_total{status=\"413\",code=\"PAYLOAD_TOO_LARGE\"}": 14102,
+        "didban_ingest_requests_total{status=\"403\",code=\"ORIGIN_NOT_ALLOWED\"}": 5183,
+        "didban_ingest_request_duration_seconds_sum": 7473.486064399702,
+        "didban_ingest_request_duration_seconds_count": 134649,
+        "didban_ingest_events_total{outcome=\"accepted\",code=\"\"}": 364005,
+        "didban_ingest_filtered_total{code=\"BOT_FILTERED\"}": 25920,
+        "didban_ingest_batch_size_sum": 364005,
+        "didban_ingest_batch_size_count": 54594,
+        "didban_rate_limit_rejections_total{bucket=\"ingest_ip\"}": 19953,
+        "didban_stats_request_duration_seconds_sum{endpoint=\"share/stats/:report\",status=\"200\"}": 171.42433109999936,
+        "didban_stats_request_duration_seconds_count{endpoint=\"share/stats/:report\",status=\"200\"}": 6460,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_write\",outcome=\"commit\"}": 1550.8910285999984,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_write\",outcome=\"commit\"}": 49410,
+        "didban_db_transaction_duration_seconds_sum{mode=\"read_only\",outcome=\"commit\"}": 50.37565959999993,
+        "didban_db_transaction_duration_seconds_count{mode=\"read_only\",outcome=\"commit\"}": 98,
+        "didban_db_pool_wait_seconds_sum": 2824.336865100024,
+        "didban_db_pool_wait_seconds_count": 49508,
+        "didban_db_pool_max": 10,
+        "didban_job_last_success_timestamp_seconds{job=\"retention\"}": 1793610128.192,
+        "didban_job_last_success_timestamp_seconds{job=\"data_deletion\"}": 1793611417.157,
+        "didban_job_last_started_timestamp_seconds{job=\"retention\"}": 1793610128.066,
+        "didban_job_last_started_timestamp_seconds{job=\"data_deletion\"}": 1793611417.151
+      }
+    }
+  }
+}
